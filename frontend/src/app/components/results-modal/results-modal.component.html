@@ -1,0 +1,115 @@
+<div class="results-modal-container">
+  <!-- Header -->
+  <div class="modal-header">
+    <div class="header-content">
+      <div class="header-icon">
+        <mat-icon>table_chart</mat-icon>
+      </div>
+      <div class="header-text">
+        <h2>Resultados del Reporte</h2>
+        <p>{{data.reportTitle}}</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button mat-icon-button (click)="onExportExcel()" [disabled]="!hasResults" class="export-button" matTooltip="Exportar a Excel">
+        <mat-icon>download</mat-icon>
+      </button>
+      <button mat-icon-button (click)="onClose()" class="close-button">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="modal-content">
+    <!-- Search and Info Bar -->
+    <div class="results-info-bar" *ngIf="hasResults; else noResultsInfo">
+      <div class="search-section">
+        <div class="search-box">
+          <mat-icon class="search-icon">search</mat-icon>
+          <input
+            class="search-input"
+            [(ngModel)]="searchText"
+            (input)="onQuickFilter()"
+            placeholder="Buscar en resultados" />
+        </div>
+      </div>
+      <div class="results-tools">
+        <div class="results-stats">
+          <mat-chip-set>
+            <mat-chip>{{data.results.length}} registros</mat-chip>
+            <mat-chip>{{data.columnDefs.length}} columnas</mat-chip>
+          </mat-chip-set>
+        </div>
+        <div class="density-controls" aria-label="Densidad de visualización">
+          <span class="density-label">Densidad</span>
+          <button mat-stroked-button class="density-btn" [class.active]="densityMode === 'compact'" (click)="setDensity('compact')">
+            Compacto
+          </button>
+          <button mat-stroked-button class="density-btn" [class.active]="densityMode === 'normal'" (click)="setDensity('normal')">
+            Normal
+          </button>
+          <button mat-stroked-button class="density-btn" [class.active]="densityMode === 'comfortable'" (click)="setDensity('comfortable')">
+            C&oacute;modo
+          </button>
+        </div>
+      </div>
+    </div>
+    <ng-template #noResultsInfo>
+      <div class="results-info-bar empty-info-bar">
+        <div class="results-stats">
+          <mat-chip-set>
+            <mat-chip>0 registros</mat-chip>
+            <mat-chip>{{data.columnDefs.length}} columnas</mat-chip>
+          </mat-chip-set>
+        </div>
+      </div>
+    </ng-template>
+
+    <!-- Results Grid -->
+    <div class="results-grid-container" *ngIf="hasResults; else emptyResultsState">
+      <ag-grid-angular
+        class="ag-theme-material"
+        [ngClass]="densityClass"
+        [gridOptions]="gridOptions"
+        [columnDefs]="data.columnDefs"
+        [rowData]="data.results"
+        (gridReady)="onGridReady($event)"
+        (firstDataRendered)="onFirstDataRendered()"
+        (gridSizeChanged)="onGridSizeChanged()">
+      </ag-grid-angular>
+    </div>
+    <ng-template #emptyResultsState>
+      <div class="empty-results-state">
+        <mat-icon>search_off</mat-icon>
+        <h3>No hay información para mostrar</h3>
+        <p>Con los filtros registrados no existe información.</p>
+        <button mat-raised-button color="primary" class="modify-filters-btn" *ngIf="canModifyFilters" (click)="onModifyFilters()">
+          <mat-icon>tune</mat-icon>
+          Modificar filtros
+        </button>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Footer -->
+  <div class="modal-footer">
+    <div class="footer-info">
+      <mat-icon>info_outline</mat-icon>
+      <span>{{ hasResults ? 'Use los filtros de columna para refinar los resultados' : 'Ajuste los filtros e intente nuevamente' }}</span>
+    </div>
+    <div class="footer-actions">
+      <button mat-stroked-button *ngIf="!hasResults && canModifyFilters" (click)="onModifyFilters()">
+        <mat-icon>tune</mat-icon>
+        Modificar filtros
+      </button>
+      <button mat-raised-button color="primary" (click)="onExportExcel()" [disabled]="!hasResults">
+        <mat-icon>file_download</mat-icon>
+        Exportar Excel
+      </button>
+      <button mat-stroked-button (click)="onClose()">
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>

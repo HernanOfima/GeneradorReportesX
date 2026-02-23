@@ -1,0 +1,130 @@
+<div class="parameter-dialog-container">
+  <!-- Modern Header -->
+  <div class="dialog-header">
+    <div class="header-content">
+      <div class="header-icon">
+        <mat-icon>tune</mat-icon>
+      </div>
+      <div class="header-text">
+        <h2>Filtros del Reporte</h2>
+        <p>{{data.report.titulo}}</p>
+      </div>
+    </div>
+    <button mat-icon-button (click)="onCancel()" class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Content Section -->
+  <div class="dialog-content">
+    <div class="info-banner">
+      <mat-icon>info_outline</mat-icon>
+      <div class="info-text">
+        <strong>Configure los filtros</strong>
+        <span>Complete los campos requeridos para generar el reporte con los datos específicos que necesita.</span>
+      </div>
+    </div>
+
+    <form [formGroup]="parameterForm" class="parameters-form">
+      <div class="parameters-grid">
+        <div *ngFor="let param of data.parameters" class="parameter-item">
+          
+          <!-- Date parameters -->
+          <div *ngIf="isDateParameter(param)" class="field-container">
+            <label class="field-label">
+              <mat-icon class="label-icon">date_range</mat-icon>
+              {{param.displayName}}
+              <span *ngIf="param.isRequired" class="required-indicator">*</span>
+            </label>
+            <mat-form-field appearance="outline" class="modern-field">
+              <input
+                matInput
+                [matDatepicker]="picker"
+                [formControlName]="param.name"
+                [required]="param.isRequired"
+                placeholder="Seleccione una fecha"
+                readonly>
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+              <mat-error *ngIf="parameterForm.get(param.name)?.hasError('required')">
+                Este campo es requerido
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- UniqueIdentifier / Guid parameters -->
+          <div *ngIf="isGuidParameter(param)" class="field-container">
+            <label class="field-label">
+              <mat-icon class="label-icon">fingerprint</mat-icon>
+              {{param.displayName}}
+              <span *ngIf="param.isRequired" class="required-indicator">*</span>
+            </label>
+            <mat-form-field appearance="outline" class="modern-field">
+              <input
+                matInput
+                [formControlName]="param.name"
+                [required]="param.isRequired"
+                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+              <mat-error *ngIf="parameterForm.get(param.name)?.hasError('required')">
+                Este campo es requerido
+              </mat-error>
+            </mat-form-field>
+          </div>
+          
+          <!-- Number parameters -->
+          <div *ngIf="isNumberParameter(param)" class="field-container">
+            <label class="field-label">
+              <mat-icon class="label-icon">tag</mat-icon>
+              {{param.displayName}}
+              <span *ngIf="param.isRequired" class="required-indicator">*</span>
+            </label>
+            <mat-form-field appearance="outline" class="modern-field">
+              <input matInput [formControlName]="param.name" type="number" [required]="param.isRequired">
+              <mat-error *ngIf="parameterForm.get(param.name)?.hasError('required')">
+                Este campo es requerido
+              </mat-error>
+            </mat-form-field>
+          </div>
+          
+          <!-- Boolean parameters -->
+          <div *ngIf="isBooleanParameter(param)" class="field-container checkbox-container">
+            <mat-checkbox [formControlName]="param.name" class="modern-checkbox">
+              <div class="checkbox-content">
+                <mat-icon class="checkbox-icon">check_circle_outline</mat-icon>
+                <span class="checkbox-label">{{param.displayName}}</span>
+              </div>
+            </mat-checkbox>
+          </div>
+          
+          <!-- String parameters -->
+          <div *ngIf="!isDateParameter(param) && !isGuidParameter(param) && !isNumberParameter(param) && !isBooleanParameter(param)" class="field-container">
+            <label class="field-label">
+              <mat-icon class="label-icon">text_fields</mat-icon>
+              {{param.displayName}}
+              <span *ngIf="param.isRequired" class="required-indicator">*</span>
+            </label>
+            <mat-form-field appearance="outline" class="modern-field">
+              <input matInput [formControlName]="param.name" [required]="param.isRequired">
+              <mat-error *ngIf="parameterForm.get(param.name)?.hasError('required')">
+                Este campo es requerido
+              </mat-error>
+            </mat-form-field>
+          </div>
+          
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="dialog-actions">
+    <button mat-stroked-button (click)="onCancel()" class="cancel-button">
+      <mat-icon>cancel</mat-icon>
+      Cancelar
+    </button>
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!parameterForm.valid" class="execute-button">
+      <mat-icon>play_arrow</mat-icon>
+      Generar Reporte
+    </button>
+  </div>
+</div>

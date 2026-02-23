@@ -1,0 +1,114 @@
+<div class="report-viewer-container">
+  <!-- Modern Header -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="header-title">
+        <mat-icon class="header-icon">insert_chart_outlined</mat-icon>
+        <h1>Sistema Generador de Reportes</h1>
+      </div>
+      <div class="header-actions" *ngIf="reportResult">
+        <button mat-raised-button color="accent" (click)="exportToExcel()" [disabled]="loading">
+          <mat-icon>download</mat-icon>
+          Exportar Excel
+        </button>
+        <button mat-raised-button color="primary" (click)="refreshReport()" [disabled]="loading">
+          <mat-icon>refresh</mat-icon>
+          Actualizar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content" [class.loading]="loading">
+    <!-- Modules Section -->
+    <div class="modules-section">
+      <div class="section-header">
+        <h2><mat-icon>folder</mat-icon> Módulos Disponibles</h2>
+        <span class="modules-count">{{modules.length}} módulos con reportes</span>
+      </div>
+      
+      <div class="modules-grid" *ngIf="modules.length > 0; else noModules">
+        <div *ngFor="let module of modules" 
+             class="module-card"
+             [class.selected]="selectedModule?.idModulo === module.idModulo"
+             (click)="onModuleSelect(module)"
+             matRipple>
+          <div class="module-content">
+            <div class="module-icon">
+              <mat-icon>business_center</mat-icon>
+            </div>
+            <div class="module-info">
+              <h3>{{module.nombre}}</h3>
+              <span class="report-count">{{module.reportes ? module.reportes.length : 0}} reportes</span>
+            </div>
+            <mat-icon class="expand-icon">chevron_right</mat-icon>
+          </div>
+        </div>
+      </div>
+      
+      <ng-template #noModules>
+        <div class="empty-state">
+          <mat-icon>folder_open</mat-icon>
+          <h3>No hay módulos disponibles</h3>
+          <p>No se encontraron módulos con reportes configurados</p>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Reports Section -->
+    <div class="reports-section" *ngIf="selectedModule">
+      <div class="section-header">
+        <h2>
+          <mat-icon>description</mat-icon> 
+          Reportes de {{selectedModule.nombre}}
+        </h2>
+        <mat-chip-set>
+          <mat-chip color="primary" selected>{{reports.length}} reportes</mat-chip>
+        </mat-chip-set>
+      </div>
+      
+      <div class="reports-grid" *ngIf="!loading && reports.length > 0; else loadingOrNoReports">
+        <div *ngFor="let report of reports" 
+             class="report-card"
+             [class.selected]="selectedReport?.idReporte === report.idReporte"
+             (click)="onReportSelect(report)"
+             matRipple>
+          <div class="report-content">
+            <div class="report-header">
+              <mat-icon>insert_chart</mat-icon>
+              <h4>{{report.titulo}}</h4>
+            </div>
+            <p class="report-name">{{report.nombre}}</p>
+            <div class="report-actions">
+              <button mat-icon-button color="primary" (click)="$event.stopPropagation(); onReportSelect(report)">
+                <mat-icon>play_arrow</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <ng-template #loadingOrNoReports>
+        <div class="loading-state" *ngIf="loading">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>Cargando reportes...</p>
+        </div>
+        <div class="empty-state" *ngIf="!loading && reports.length === 0">
+          <mat-icon>description</mat-icon>
+          <h3>No se encontraron reportes</h3>
+          <p>Este módulo no tiene reportes disponibles</p>
+        </div>
+      </ng-template>
+    </div>
+
+  </div>
+  
+  <!-- Global Loading Overlay -->
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="loading-content">
+      <mat-spinner diameter="80"></mat-spinner>
+      <p>Procesando...</p>
+    </div>
+  </div>
+</div>

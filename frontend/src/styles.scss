@@ -1,0 +1,92 @@
+/* Global Styles */
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+@import 'ag-grid-community/styles/ag-grid.css';
+@import 'ag-grid-community/styles/ag-theme-material.css';
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: #1a1a1a;
+  color: #ffffff;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Dark Theme Overrides */
+.mat-mdc-card {
+  background-color: #2d2d2d !important;
+  color: #ffffff !important;
+}
+
+.mat-mdc-list-item {
+  color: #ffffff !important;
+}
+
+.mat-mdc-form-field {
+  .mat-mdc-text-field-wrapper {
+    background-color: #3d3d3d !important;
+  }
+  
+  .mdc-text-field--filled .mdc-line-ripple::before {
+    border-bottom-color: #666666 !important;
+  }
+  
+  .mat-mdc-form-field-infix {
+    color: #ffffff !important;
+  }
+}
+
+.mat-mdc-button {
+  color: #ffffff !important;
+}
+
+/* Custom AG-Grid Theme */
+.ag-theme-material {
+  --ag-font-family: Roboto, "Helvetica Neue", sans-serif;
+  --ag-font-size: 14px;
+  --ag-header-height: 48px;
+  --ag-row-height: 40px;
+  --ag-list-item-height: 40px;
+  --ag-background-color: #2d2d2d;
+  --ag-header-background-color: #404040;
+  --ag-odd-row-background-color: #333333;
+  --ag-row-hover-color: #404040;
+  --ag-selected-row-background-color: #4a4a4a;
+  --ag-foreground-color: #ffffff;
+  --ag-secondary-foreground-color: #cccccc;
+  --ag-border-color: #555555;
+  --ag-cell-horizontal-border: #555555;
+  --ag-header-foreground-color: #ffffff;
+}
+
+/* Custom AG Grid Quick Filter Styling */
+.ag-theme-material .ag-root-wrapper {
+  border: 1px solid #555555;
+  border-radius: 8px;
+}
+
+.ag-theme-material .ag-header {
+  border-bottom: 2px solid #555555;
+}
+
+.ag-theme-material .ag-header-cell {
+  border-right: 1px solid #555555;
+}
+
+.ag-theme-material .ag-cell {
+  border-right: 1px solid #555555;
+}
+
+/* Material Snackbar Custom Styles */
+.success-snackbar {
+  background: #4caf50 !important;
+  color: white !important;
+}
+
+.error-snackbar {
+  background: #f44336 !important;
+  color: white !important;
+}
