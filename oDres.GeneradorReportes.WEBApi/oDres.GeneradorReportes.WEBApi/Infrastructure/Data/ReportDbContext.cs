@@ -76,6 +76,9 @@ public class ReportDbContext : DbContext
                 .HasColumnName("SentenciaSQL")
                 .HasColumnType("varchar(MAX)")
                 .IsRequired(false);
+            entity.Property(e => e.TipoReporte)
+                .HasColumnName("TipoReporte")
+                .IsRequired();
             
             entity.HasOne(d => d.Modulo)
                 .WithMany(p => p.Reportes)

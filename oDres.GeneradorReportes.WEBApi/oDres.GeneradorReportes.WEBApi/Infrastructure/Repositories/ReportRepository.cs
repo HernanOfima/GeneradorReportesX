@@ -52,6 +52,7 @@ public class ReportRepository : IReportRepository
         // Debug logging
         Console.WriteLine($"Report ID: {reportId}");
         Console.WriteLine($"Report Name: {report.Nombre}");
+        Console.WriteLine($"Report Type: {report.TipoReporte}");
         Console.WriteLine($"SQL Query: {report.SentenciaSQL}");
         Console.WriteLine($"Parameters received: {string.Join(", ", parameters.Select(p => $"{p.Key}={p.Value}"))}");
 
@@ -60,14 +61,57 @@ public class ReportRepository : IReportRepository
         using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync();
         
-        using var command = new SqlCommand(report.SentenciaSQL, connection);
+        string commandText = report.SentenciaSQL;
+        
+        // For stored procedures, extract only the SP name (before first space or @)
+        if (report.TipoReporte == 2)
+        {
+            // Extract SP name: "Empresa.spReporte_ResumenSaldoInventario @params..." -> "Empresa.spReporte_ResumenSaldoInventario"
+            var spNameMatch = System.Text.RegularExpressions.Regex.Match(report.SentenciaSQL, @"^([^\s@]+)");
+            if (spNameMatch.Success)
+            {
+                commandText = spNameMatch.Groups[1].Value.Trim();
+                Console.WriteLine($"Extracted SP name: {commandText}");
+            }
+        }
+        
+        using var command = new SqlCommand(commandText, connection);
+        
+        // Set command type based on TipoReporte
+        if (report.TipoReporte == 2)
+        {
+            command.CommandType = CommandType.StoredProcedure;
+            Console.WriteLine("Executing as Stored Procedure");
+        }
+        else
+        {
+            command.CommandType = CommandType.Text;
+            Console.WriteLine("Executing as SQL Query");
+        }
         
         // Add parameters to the command
         foreach (var param in parameters)
         {
             var value = ConvertJsonElementToSqlValue(param.Value);
-            command.Parameters.AddWithValue(param.Key, value ?? DBNull.Value);
-            Console.WriteLine($"Added parameter: {param.Key} = {value} (Type: {value?.GetType()})");
+            var parameterName = param.Key;
+            
+            // For stored procedures, ensure parameter name starts with @
+            if (report.TipoReporte == 2 && !parameterName.StartsWith("@"))
+            {
+                parameterName = $"@{parameterName}";
+            }
+            
+            // Handle optional parameters (when value is null or empty for non-required parameters)
+            if (value == null || (value is string str && string.IsNullOrWhiteSpace(str)))
+            {
+                command.Parameters.AddWithValue(parameterName, DBNull.Value);
+                Console.WriteLine($"Added optional parameter: {parameterName} = NULL");
+            }
+            else
+            {
+                command.Parameters.AddWithValue(parameterName, value);
+                Console.WriteLine($"Added parameter: {parameterName} = {value} (Type: {value?.GetType()})");
+            }
         }
 
         Console.WriteLine($"Final SQL Command: {command.CommandText}");
