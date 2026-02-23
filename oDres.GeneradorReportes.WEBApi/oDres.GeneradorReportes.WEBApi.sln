@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35825.156 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "oDres.GeneradorReportes.WEBApi", "oDres.GeneradorReportes.WEBApi\oDres.GeneradorReportes.WEBApi.csproj", "{87B60F72-14FF-4304-B479-0C7AC01945FB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{87B60F72-14FF-4304-B479-0C7AC01945FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87B60F72-14FF-4304-B479-0C7AC01945FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87B60F72-14FF-4304-B479-0C7AC01945FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87B60F72-14FF-4304-B479-0C7AC01945FB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3350FB89-DF42-4C9C-BE1B-1615F5DDB785}
+	EndGlobalSection
+EndGlobal
