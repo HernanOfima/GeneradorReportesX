@@ -32,13 +32,15 @@ import { AppComponent } from './app.component';
 import { ReportViewerComponent } from './components/report-viewer/report-viewer.component';
 import { ParameterInputDialogComponent } from './components/parameter-input-dialog/parameter-input-dialog.component';
 import { ResultsModalComponent } from './components/results-modal/results-modal.component';
+import { NumericCellRendererComponent } from './components/numeric-cell-renderer/numeric-cell-renderer.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     ReportViewerComponent,
     ParameterInputDialogComponent,
-    ResultsModalComponent
+    ResultsModalComponent,
+    NumericCellRendererComponent
   ],
   imports: [
     BrowserModule,

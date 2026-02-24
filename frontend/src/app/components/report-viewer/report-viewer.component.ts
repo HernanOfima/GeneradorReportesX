@@ -8,6 +8,8 @@ import { ReportService } from '../../services/report.service';
 import { Module, Report, ReportResult, ReportParameter, ExecuteReportRequest } from '../../models/report.models';
 import { ParameterInputDialogComponent } from '../parameter-input-dialog/parameter-input-dialog.component';
 import { ResultsModalComponent } from '../results-modal/results-modal.component';
+import { NumericCellRendererComponent } from '../numeric-cell-renderer/numeric-cell-renderer.component';
+import { NumberFormatUtil } from '../../utils/number-format.util';
 
 @Component({
   selector: 'app-report-viewer',
@@ -239,14 +241,29 @@ export class ReportViewerComponent implements OnInit {
   }
 
   private openResultsModal(report: Report, result: ReportResult, parameters: { [key: string]: any }): void {
-    // Setup column definitions
-    const columnDefs = result.columns.map(column => ({
-      field: column,
-      headerName: column,
-      sortable: true,
-      filter: true,
-      resizable: true
-    }));
+    // Setup column definitions with numeric formatting
+    const columnDefs = result.columns.map(column => {
+      const baseColDef = {
+        field: column,
+        headerName: column,
+        sortable: true,
+        filter: true,
+        resizable: true
+      };
+
+      // Check if this is a numeric column that should be formatted
+      const sampleValues = result.data.slice(0, 10).map(row => row[column]);
+      if (NumberFormatUtil.shouldFormatAsNumeric(column, sampleValues)) {
+        return {
+          ...baseColDef,
+          cellRenderer: NumericCellRendererComponent,
+          type: 'numericColumn',
+          cellStyle: { textAlign: 'right' }
+        };
+      }
+
+      return baseColDef;
+    });
 
     const dialogRef = this.dialog.open(ResultsModalComponent, {
       width: '100vw',
