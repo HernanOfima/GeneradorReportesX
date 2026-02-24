@@ -46,7 +46,7 @@ obj/
 .vs/
 
 # Test results
-[TestResult]*/
+TestResult*/
 [Tt]est[Rr]esult*/
 *.VisualState.xml
 *.coverage
