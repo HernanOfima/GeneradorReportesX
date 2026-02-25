@@ -152,7 +152,7 @@ public class ExportRequest
 
 {
 
-    public int ReportId { get; set; }
+    public Guid ReportId { get; set; }
 
     public Dictionary<string, object?> Parameters { get; set; } = new();
 

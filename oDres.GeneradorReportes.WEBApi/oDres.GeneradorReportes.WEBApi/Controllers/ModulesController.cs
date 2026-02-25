@@ -94,7 +94,7 @@ namespace oDres.GeneradorReportes.WEBApi.Controllers
 
         /// <response code="500">Error interno del servidor</response>
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:guid}")]
 
         [SwaggerOperation(Summary = "Obtener módulo por ID", Description = "Retorna la información completa de un módulo específico")]
 
@@ -106,7 +106,7 @@ namespace oDres.GeneradorReportes.WEBApi.Controllers
 
         public async Task<ActionResult<ModuleDto>> GetModuleById(
 
-            [SwaggerParameter("ID único del módulo", Required = true)] int id)
+            [SwaggerParameter("ID único del módulo", Required = true)] Guid id)
 
         {
 

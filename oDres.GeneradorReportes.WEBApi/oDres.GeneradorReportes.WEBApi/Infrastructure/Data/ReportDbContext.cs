@@ -32,6 +32,7 @@ public class ReportDbContext : DbContext
                 .IsRequired(false);
             entity.Property(e => e.Administrador)
                 .HasColumnName("Administrador")
+                .HasColumnType("bit")
                 .IsRequired(false);
             entity.Property(e => e.FechaRegistro)
                 .HasColumnName("FechaRegistro")
@@ -49,6 +50,7 @@ public class ReportDbContext : DbContext
                 .IsRequired(false);
             entity.Property(e => e.Activo)
                 .HasColumnName("Activo")
+                .HasColumnType("bit")
                 .IsRequired(false);
         });
 

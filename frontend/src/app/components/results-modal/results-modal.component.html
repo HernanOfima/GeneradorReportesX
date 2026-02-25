@@ -11,7 +11,12 @@
       </div>
     </div>
     <div class="header-actions">
-      <button mat-icon-button (click)="onExportExcel()" [disabled]="!hasResults" class="export-button" matTooltip="Exportar a Excel">
+      <button
+        mat-icon-button
+        (click)="onExportExcel()"
+        [disabled]="!hasResults || isExporting"
+        class="export-button"
+        [matTooltip]="isExporting ? 'Generando archivo...' : 'Exportar a Excel'">
         <mat-icon>download</mat-icon>
       </button>
       <button mat-icon-button (click)="onClose()" class="close-button">
@@ -36,8 +41,8 @@
       </div>
       <div class="results-tools">
         <div class="results-stats">
-          <mat-chip-set>
-            <mat-chip>{{data.results.length}} registros</mat-chip>
+            <mat-chip-set>
+            <mat-chip>{{displayedRowsCount}} de {{data.results.length}} registros</mat-chip>
             <mat-chip>{{data.columnDefs.length}} columnas</mat-chip>
           </mat-chip-set>
         </div>
@@ -75,8 +80,9 @@
         [columnDefs]="data.columnDefs"
         [rowData]="data.results"
         (gridReady)="onGridReady($event)"
-        (firstDataRendered)="onFirstDataRendered()"
-        (gridSizeChanged)="onGridSizeChanged()">
+        (firstDataRendered)="onFirstDataRendered($event)"
+        (filterChanged)="onFilterChanged()"
+        (gridSizeChanged)="onGridSizeChanged($event)">
       </ag-grid-angular>
     </div>
     <ng-template #emptyResultsState>
@@ -103,9 +109,9 @@
         <mat-icon>tune</mat-icon>
         Modificar filtros
       </button>
-      <button mat-raised-button color="primary" (click)="onExportExcel()" [disabled]="!hasResults">
+      <button mat-raised-button color="primary" (click)="onExportExcel()" [disabled]="!hasResults || isExporting">
         <mat-icon>file_download</mat-icon>
-        Exportar Excel
+        {{ isExporting ? 'Generando...' : 'Exportar Excel' }}
       </button>
       <button mat-stroked-button (click)="onClose()">
         Cerrar

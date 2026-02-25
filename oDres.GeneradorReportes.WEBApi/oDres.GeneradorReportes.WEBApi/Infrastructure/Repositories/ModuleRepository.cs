@@ -46,7 +46,7 @@ public class ModuleRepository : IModuleRepository
 
 
 
-    public async Task<Modulo?> GetModuleByIdAsync(int id)
+    public async Task<Modulo?> GetModuleByIdAsync(Guid id)
 
     {
 
@@ -117,4 +117,5 @@ public class ModuleRepository : IModuleRepository
     }
 
 }
+
 

@@ -3,13 +3,13 @@ namespace oDres.GeneradorReportes.WEBApi.Application.DTOs;
 public class ModuleDto
 {
     public Guid IdModulo { get; set; }
-    public string Nombre { get; set; } = string.Empty;
-    public bool Administrador { get; set; }
-    public DateTime FechaRegistro { get; set; }
-    public DateTime FechaActualizacion { get; set; }
-    public string Usuario { get; set; } = string.Empty;
-    public string Programa { get; set; } = string.Empty;
-    public bool Activo { get; set; }
+    public string? Nombre { get; set; } = string.Empty;
+    public bool? Administrador { get; set; }
+    public DateTime? FechaRegistro { get; set; }
+    public DateTime? FechaActualizacion { get; set; }
+    public string? Usuario { get; set; } = string.Empty;
+    public string? Programa { get; set; } = string.Empty;
+    public bool? Activo { get; set; }
     public List<ReportDto> Reportes { get; set; } = new();
 }
 

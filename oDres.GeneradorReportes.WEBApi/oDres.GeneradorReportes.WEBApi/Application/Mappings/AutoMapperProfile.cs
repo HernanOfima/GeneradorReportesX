@@ -11,12 +11,12 @@ public class AutoMapperProfile : Profile
     {
         CreateMap<Modulo, ModuleDto>()
             .ForMember(dest => dest.Nombre, opt => opt.MapFrom(src => src.Nombre ?? string.Empty))
-            .ForMember(dest => dest.Administrador, opt => opt.MapFrom(src => src.Administrador ?? false))
-            .ForMember(dest => dest.FechaRegistro, opt => opt.MapFrom(src => src.FechaRegistro ?? DateTime.MinValue))
-            .ForMember(dest => dest.FechaActualizacion, opt => opt.MapFrom(src => src.FechaActualizacion ?? DateTime.MinValue))
+            .ForMember(dest => dest.Administrador, opt => opt.MapFrom(src => src.Administrador))
+            .ForMember(dest => dest.FechaRegistro, opt => opt.MapFrom(src => src.FechaRegistro))
+            .ForMember(dest => dest.FechaActualizacion, opt => opt.MapFrom(src => src.FechaActualizacion))
             .ForMember(dest => dest.Usuario, opt => opt.MapFrom(src => src.Usuario ?? string.Empty))
             .ForMember(dest => dest.Programa, opt => opt.MapFrom(src => src.Programa ?? string.Empty))
-            .ForMember(dest => dest.Activo, opt => opt.MapFrom(src => src.Activo ?? false))
+            .ForMember(dest => dest.Activo, opt => opt.MapFrom(src => src.Activo))
             .ReverseMap();
         
         CreateMap<Reporte, ReportDto>()

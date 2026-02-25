@@ -98,7 +98,7 @@ namespace oDres.GeneradorReportes.WEBApi.Controllers
 
         /// <response code="500">Error interno del servidor</response>
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:guid}")]
 
         [SwaggerOperation(Summary = "Obtener reporte por ID", Description = "Retorna la información completa de un reporte específico incluyendo su consulta SQL")]
 
@@ -110,7 +110,7 @@ namespace oDres.GeneradorReportes.WEBApi.Controllers
 
         public async Task<ActionResult<ReportDto>> GetReportById(
 
-            [SwaggerParameter("ID único del reporte", Required = true)] int id)
+            [SwaggerParameter("ID único del reporte", Required = true)] Guid id)
 
         {
 
@@ -144,7 +144,7 @@ namespace oDres.GeneradorReportes.WEBApi.Controllers
 
         /// <response code="500">Error interno del servidor</response>
 
-        [HttpGet("module/{moduleId:int}")]
+        [HttpGet("module/{moduleId:guid}")]
 
         [SwaggerOperation(Summary = "Obtener reportes de un módulo", Description = "Retorna todos los reportes asociados al módulo especificado")]
 
@@ -156,7 +156,7 @@ namespace oDres.GeneradorReportes.WEBApi.Controllers
 
         public async Task<ActionResult<IEnumerable<ReportDto>>> GetReportsByModule(
 
-            [SwaggerParameter("ID del módulo del cual obtener reportes", Required = true)] int moduleId)
+            [SwaggerParameter("ID del módulo del cual obtener reportes", Required = true)] Guid moduleId)
 
         {
 
@@ -290,7 +290,7 @@ namespace oDres.GeneradorReportes.WEBApi.Controllers
 
         /// <response code="500">Error interno del servidor</response>
 
-        [HttpGet("{id:int}/parameters")]
+        [HttpGet("{id:guid}/parameters")]
 
         [SwaggerOperation(Summary = "Obtener parámetros de un reporte", Description = "Analiza un reporte específico y retorna los parámetros que requiere")]
 
@@ -302,7 +302,7 @@ namespace oDres.GeneradorReportes.WEBApi.Controllers
 
         public async Task<ActionResult<List<ReportParameterDto>>> GetReportParameters(
 
-            [SwaggerParameter("ID único del reporte", Required = true)] int id)
+            [SwaggerParameter("ID único del reporte", Required = true)] Guid id)
 
         {
 
@@ -342,7 +342,7 @@ public class ExecuteReportRequest
 
     /// </summary>
 
-    public int ReportId { get; set; }
+    public Guid ReportId { get; set; }
 
     
 
