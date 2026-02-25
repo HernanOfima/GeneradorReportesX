@@ -4,8 +4,7 @@
 export class NumberFormatUtil {
   
   /**
-   * Format number with Spanish locale (thousands separator as dots, no decimals)
-   * Example: 10000.50 -> "10.000"
+   * Format number with comma thousands separator (e.g. 4,444,440)
    */
   static formatSpanishNumber(value: any, decimals: number = 0): string {
     if (value === null || value === undefined || value === '' || isNaN(Number(value))) {
@@ -13,13 +12,16 @@ export class NumberFormatUtil {
     }
 
     const numValue = Number(value);
-    
-    // Format with Spanish locale - round to integer and use thousands separators
-    return new Intl.NumberFormat('es-ES', {
+
+    const normalizedValue = decimals > 0
+      ? Number(numValue.toFixed(decimals))
+      : Math.round(numValue);
+
+    return new Intl.NumberFormat('en-US', {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
       useGrouping: true
-    }).format(Math.round(numValue));
+    }).format(normalizedValue);
   }
 
   /**
