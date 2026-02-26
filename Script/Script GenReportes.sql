@@ -59,9 +59,42 @@ Select * FRom [Empresa].[vReporte_ListadoProyectosCompra]
 
 Select * from catalogo.modulo
 
-Select * FRom Catalogo.Reportes
+Select IdReporte, Modulo.Nombre As Modulo,Reporte.Nombre , Titulo, Reporte.IdModulo, 
+	   SentenciaSQL,TipoReporte 
+	FRom Catalogo.Reportes Reporte
+		Inner Join Catalogo.Modulo Modulo On Reporte.IdModulo = Modulo.IdModulo
+	Order By Modulo.Nombre
+
+SELECT 
+		Empresa.Nombre As NombreEmpresa,
+		Empleado.CodigoEmpleado,
+		Grupo.NombreGrupo,
+		Candidato.Nombres,
+		Candidato.TelefonoCelular,
+		Candidato.CuentaBanco,
+		Candidato.Dir_Ciudad,
+		Area.Valor,
+		Empleado.SDI,
+		Empleado.CuotaDiaria
+		FROM Empresa_Nom.Empleados Empleado 
+				Inner Join Empresa_Nom.V_grupos Grupo On Empleado.IdGrupoNomina = Grupo.IdGrupo
+				Inner Join Empresa_RH.Candidatos Candidato On Empleado.IdCandidato = Candidato.IdCandidato		
+				Inner Join Catalogo_Nom.AreaGeografica Area On Area.IdAreaGeografica = Grupo.IdAreaGeografica
+				Inner Join Registro.Empresa  On Candidato.IdEmpresa = Empresa.IdEmpresa
+		Order By Empresa.Nombre
 
 Execute Empresa.spReporte_DetalleSaldoInventarioProducto 'B62C2D64-D4FB-4010-976A-05166C324413',2024,12,Null
+
+Empresa.SP_BalanceCuentaContable @IdEmpresa ,@Ano, @Periodo, @pNivel=6,@IncluirCuentasSinMovimiento=1,@SoloTotales=0
+
+EXEC [Empresa].[SP_BalanceCuentaContable] 
+	@IdEmpresa = '0FF67BF9-54D7-4E76-83AD-E1D5A69FE951',
+	@Ano = 2025, 
+	@Periodo = 4, 
+	@pNivel = 6, 
+	@IncluirCuentasSinMovimiento = 1, 
+	@SoloTotales= 0
+
 
 Select	NumeroDocumento,TipoTransaccion As TipoDcto,Nombre As TipoTransaccion, Identificador,NombreCliente,
 		SubTotal,Descuento,ValorIVA,RetencionIVA,TotalDocumento 
