@@ -32,6 +32,8 @@ public class AutoMapperProfile : Profile
             .ReverseMap()
             .ForMember(dest => dest.DataType, opt => opt.MapFrom(src => GetTypeFromString(src.DataType)));
 
+        CreateMap<ReportColumn, ReportColumnDto>().ReverseMap();
+
         CreateMap<ReportResult, ReportResultDto>().ReverseMap();
     }
 

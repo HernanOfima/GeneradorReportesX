@@ -33,10 +33,17 @@ public class ReportParameterDto
     public object? DefaultValue { get; set; }
 }
 
+public class ReportColumnDto
+{
+    public string Name { get; set; } = string.Empty;
+    public string DataType { get; set; } = string.Empty;
+}
+
 public class ReportResultDto
 {
     public List<Dictionary<string, object?>> Data { get; set; } = new();
     public List<string> Columns { get; set; } = new();
+    public List<ReportColumnDto> ColumnDataTypes { get; set; } = new();
     public List<ReportParameterDto> Parameters { get; set; } = new();
     public int TotalRecords { get; set; }
 }

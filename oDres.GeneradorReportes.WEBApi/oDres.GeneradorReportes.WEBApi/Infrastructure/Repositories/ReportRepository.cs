@@ -125,7 +125,16 @@ public class ReportRepository : IReportRepository
         {
             foreach (DataRow row in schemaTable.Rows)
             {
-                result.Columns.Add(row["ColumnName"].ToString() ?? "");
+                var columnName = row["ColumnName"].ToString() ?? "";
+                result.Columns.Add(columnName);
+
+                // Extract data type information
+                var dataType = GetSqlDataTypeName(row);
+                result.ColumnDataTypes.Add(new ReportColumn
+                {
+                    Name = columnName,
+                    DataType = dataType
+                });
             }
         }
 
@@ -192,5 +201,47 @@ public class ReportRepository : IReportRepository
 
         // Return the value as-is for other types
         return value;
+    }
+
+    private static string GetSqlDataTypeName(DataRow schemaRow)
+    {
+        try
+        {
+            // Get the .NET type
+            var dataType = (Type?)schemaRow["DataType"];
+            if (dataType == null)
+                return "String";
+
+            // Map .NET types to SQL Server data types
+            var typeMapping = new Dictionary<Type, string>
+            {
+                { typeof(string), "String" },
+                { typeof(int), "Int32" },
+                { typeof(long), "Int64" },
+                { typeof(short), "Int16" },
+                { typeof(byte), "Byte" },
+                { typeof(bool), "Boolean" },
+                { typeof(DateTime), "DateTime" },
+                { typeof(decimal), "Decimal" },
+                { typeof(double), "Double" },
+                { typeof(float), "Single" },
+                { typeof(Guid), "Guid" },
+                { typeof(byte[]), "Binary" },
+                { typeof(TimeSpan), "Time" },
+                { typeof(DateTimeOffset), "DateTimeOffset" }
+            };
+
+            // Handle nullable types
+            if (dataType.IsGenericType && dataType.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                dataType = Nullable.GetUnderlyingType(dataType) ?? dataType;
+            }
+
+            return typeMapping.TryGetValue(dataType, out var mappedType) ? mappedType : dataType.Name;
+        }
+        catch
+        {
+            return "String"; // Default fallback
+        }
     }
 }
