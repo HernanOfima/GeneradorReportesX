@@ -1,10 +1,23 @@
 <div class="report-viewer-container">
-  <!-- Modern Header -->
   <div class="header-section">
     <div class="header-content">
-      <div class="header-title">
-        <mat-icon class="header-icon">insert_chart_outlined</mat-icon>
-        <h1>oDres - Sistema Generador de Reportes</h1>
+      <div class="header-left">
+        <button
+          *ngIf="isMobileView"
+          mat-icon-button
+          class="menu-button"
+          (click)="toggleSidebar()"
+          aria-label="Abrir o cerrar modulos"
+        >
+          <mat-icon>{{ sidebarOpen ? 'close' : 'menu' }}</mat-icon>
+        </button>
+        <div class="header-title">
+          <mat-icon class="header-icon">insert_chart_outlined</mat-icon>
+          <div class="title-copy">
+            <h1>oDres - Sistema Generador de Reportes</h1>
+            <p>Consulta modulos y ejecuta reportes de forma centralizada</p>
+          </div>
+        </div>
       </div>
       <div class="header-actions" *ngIf="reportResult">
         <button mat-raised-button color="accent" (click)="exportToExcel()" [disabled]="loading">
@@ -19,67 +32,79 @@
     </div>
   </div>
 
-  <!-- Main Content -->
   <div class="main-content" [class.loading]="loading">
-    <!-- Modules Section -->
-    <div class="modules-section">
-      <div class="section-header">
-        <h2><mat-icon>folder</mat-icon> Módulos Disponibles</h2>
-        <span class="modules-count">{{modules.length}} módulos con reportes</span>
-      </div>
-      
-      <div class="modules-grid" *ngIf="modules.length > 0; else noModules">
-        <div *ngFor="let module of modules" 
-             class="module-card"
-             [class.selected]="selectedModule?.idModulo === module.idModulo"
-             (click)="onModuleSelect(module)"
-             matRipple>
-          <div class="module-content">
-            <div class="module-icon">
-              <mat-icon>business_center</mat-icon>
-            </div>
-            <div class="module-info">
-              <h3>{{module.nombre}}</h3>
-              <span class="report-count">{{module.reportes ? module.reportes.length : 0}} reportes</span>
-            </div>
-            <mat-icon class="expand-icon">chevron_right</mat-icon>
-          </div>
-        </div>
-      </div>
-      
-      <ng-template #noModules>
-        <div class="empty-state">
+    <div class="sidebar-backdrop" *ngIf="isMobileView && sidebarOpen" (click)="closeSidebar()"></div>
+
+    <aside class="modules-sidebar" [class.mobile-open]="sidebarOpen">
+      <div class="sidebar-header">
+        <div class="sidebar-title">
           <mat-icon>folder_open</mat-icon>
-          <h3>No hay módulos disponibles</h3>
-          <p>No se encontraron módulos con reportes configurados</p>
+          <h2>Modulos</h2>
+        </div>
+        <span>{{ modules.length }} con reportes</span>
+      </div>
+
+      <div class="modules-list" *ngIf="modules.length > 0; else noModules">
+        <button
+          *ngFor="let module of modules; let i = index"
+          type="button"
+          class="module-item"
+          [class.selected]="selectedModule?.idModulo === module.idModulo"
+          [style.animationDelay.ms]="i * 40"
+          (click)="onModuleSelect(module)"
+        >
+          <span class="module-accent" aria-hidden="true"></span>
+          <span class="module-copy">
+            <span class="module-name">{{ module.nombre }}</span>
+            <span class="module-meta">{{ module.reportes ? module.reportes.length : 0 }} reportes</span>
+          </span>
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+
+      <ng-template #noModules>
+        <div class="empty-state empty-sidebar">
+          <mat-icon>folder_open</mat-icon>
+          <h3>No hay modulos disponibles</h3>
+          <p>No se encontraron modulos con reportes configurados</p>
         </div>
       </ng-template>
-    </div>
+    </aside>
 
-    <!-- Reports Section -->
-    <div class="reports-section" *ngIf="selectedModule">
-      <div class="section-header">
-        <h2>
-          <mat-icon>description</mat-icon> 
-          Reportes de {{selectedModule.nombre}}
-        </h2>
+    <div class="reports-section">
+      <div class="section-header" *ngIf="selectedModule; else pickModuleState">
+        <div class="section-title">
+          <mat-icon>description</mat-icon>
+          <h2>Reportes de {{ selectedModule.nombre }}</h2>
+        </div>
         <mat-chip-set>
-          <mat-chip color="primary" selected>{{reports.length}} reportes</mat-chip>
+          <mat-chip color="primary" selected>{{ reports.length }} reportes</mat-chip>
         </mat-chip-set>
       </div>
-      
-      <div class="reports-grid" *ngIf="!loading && reports.length > 0; else loadingOrNoReports">
-        <div *ngFor="let report of reports" 
-             class="report-card"
-             [class.selected]="selectedReport?.idReporte === report.idReporte"
-             (click)="onReportSelect(report)"
-             matRipple>
+
+      <ng-template #pickModuleState>
+        <div class="empty-state">
+          <mat-icon>left_panel_open</mat-icon>
+          <h3>Selecciona un modulo desde el sidebar</h3>
+          <p>Al hacer click en un modulo, aqui apareceran los reportes disponibles.</p>
+        </div>
+      </ng-template>
+
+      <div class="reports-grid" *ngIf="selectedModule && !loading && reports.length > 0">
+        <div
+          *ngFor="let report of reports; let i = index"
+          class="report-card"
+          [class.selected]="selectedReport?.idReporte === report.idReporte"
+          [style.animationDelay.ms]="i * 40"
+          (click)="onReportSelect(report)"
+          matRipple
+        >
           <div class="report-content">
             <div class="report-header">
               <mat-icon>insert_chart</mat-icon>
-              <h4>{{report.titulo}}</h4>
+              <h4>{{ report.titulo }}</h4>
             </div>
-            <p class="report-name">{{report.nombre}}</p>
+            <p class="report-name">{{ report.nombre }}</p>
             <div class="report-actions">
               <button mat-icon-button color="primary" (click)="$event.stopPropagation(); onReportSelect(report)">
                 <mat-icon>play_arrow</mat-icon>
@@ -88,23 +113,20 @@
           </div>
         </div>
       </div>
-      
-      <ng-template #loadingOrNoReports>
-        <div class="loading-state" *ngIf="loading">
-          <mat-spinner diameter="50"></mat-spinner>
-          <p>Cargando reportes...</p>
-        </div>
-        <div class="empty-state" *ngIf="!loading && reports.length === 0">
-          <mat-icon>description</mat-icon>
-          <h3>No se encontraron reportes</h3>
-          <p>Este módulo no tiene reportes disponibles</p>
-        </div>
-      </ng-template>
-    </div>
 
+      <div class="loading-state" *ngIf="selectedModule && loading">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Cargando reportes...</p>
+      </div>
+
+      <div class="empty-state" *ngIf="selectedModule && !loading && reports.length === 0">
+        <mat-icon>description</mat-icon>
+        <h3>No se encontraron reportes</h3>
+        <p>Este modulo no tiene reportes disponibles.</p>
+      </div>
+    </div>
   </div>
-  
-  <!-- Global Loading Overlay -->
+
   <div class="loading-overlay" *ngIf="loading">
     <div class="loading-content">
       <mat-spinner diameter="80"></mat-spinner>

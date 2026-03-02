@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -18,6 +18,7 @@ import { NumberFormatUtil } from '../../utils/number-format.util';
 })
 export class ReportViewerComponent implements OnInit {
   @ViewChild('agGrid') agGrid!: AgGridAngular;
+  private readonly mobileBreakpoint = 1080;
 
   modules: Module[] = [];
   selectedModule: Module | null = null;
@@ -25,6 +26,8 @@ export class ReportViewerComponent implements OnInit {
   selectedReport: Report | null = null;
   reportResult: ReportResult | null = null;
   loading = false;
+  isMobileView = false;
+  sidebarOpen = true;
   searchForm: FormGroup;
   lastUsedParameters: { [key: string]: any } = {};
 
@@ -70,8 +73,14 @@ export class ReportViewerComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.updateViewportMode();
     this.loadModules();
     this.setupGlobalSearch();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.updateViewportMode();
   }
 
   private setupGlobalSearch(): void {
@@ -104,9 +113,35 @@ export class ReportViewerComponent implements OnInit {
     this.selectedReport = null;
     this.reportResult = null;
     this.clearGrid();
+
+    if (this.isMobileView) {
+      this.sidebarOpen = false;
+    }
     
     // First try to get reports from API, fallback to embedded reports
     this.loadReportsForModule(module);
+  }
+
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  closeSidebar(): void {
+    if (this.isMobileView) {
+      this.sidebarOpen = false;
+    }
+  }
+
+  private updateViewportMode(): void {
+    const mobile = window.innerWidth <= this.mobileBreakpoint;
+    this.isMobileView = mobile;
+
+    if (!mobile) {
+      this.sidebarOpen = true;
+      return;
+    }
+
+    this.sidebarOpen = !this.selectedModule;
   }
 
   loadReportsForModule(module: Module): void {
