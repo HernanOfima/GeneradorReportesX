@@ -3,84 +3,73 @@
 @import 'ag-grid-community/styles/ag-grid.css';
 @import 'ag-grid-community/styles/ag-theme-material.css';
 
+:root {
+  --app-bg: #07151e;
+  --app-text: #e4eff8;
+  --app-surface: #10283a;
+  --app-border: #1f425d;
+}
+
 html, body {
   height: 100%;
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-  background-color: #1a1a1a;
-  color: #ffffff;
+  font-family: 'Plus Jakarta Sans', Roboto, 'Helvetica Neue', sans-serif;
+  background-color: var(--app-bg);
+  color: var(--app-text);
+  transition: background-color 220ms ease, color 220ms ease;
+}
+
+body.dark-theme {
+  --app-bg: #07151e;
+  --app-text: #e4eff8;
+  --app-surface: #10283a;
+  --app-border: #1f425d;
+  color-scheme: dark;
+}
+
+body.light-theme {
+  --app-bg: #f4f7fb;
+  --app-text: #1d3347;
+  --app-surface: #ffffff;
+  --app-border: #bfd2e1;
+  color-scheme: light;
 }
 
 .full-width {
   width: 100%;
 }
 
-/* Dark Theme Overrides */
-.mat-mdc-card {
-  background-color: #2d2d2d !important;
-  color: #ffffff !important;
+body.dark-theme .mat-mdc-card {
+  background-color: var(--app-surface) !important;
+  color: var(--app-text) !important;
 }
 
-.mat-mdc-list-item {
-  color: #ffffff !important;
-}
-
-.mat-mdc-form-field {
-  .mat-mdc-text-field-wrapper {
-    background-color: #3d3d3d !important;
-  }
-  
-  .mdc-text-field--filled .mdc-line-ripple::before {
-    border-bottom-color: #666666 !important;
-  }
-  
-  .mat-mdc-form-field-infix {
-    color: #ffffff !important;
-  }
-}
-
-.mat-mdc-button {
-  color: #ffffff !important;
-}
-
-/* Custom AG-Grid Theme */
 .ag-theme-material {
-  --ag-font-family: Roboto, "Helvetica Neue", sans-serif;
+  --ag-font-family: 'Plus Jakarta Sans', Roboto, 'Helvetica Neue', sans-serif;
   --ag-font-size: 14px;
   --ag-header-height: 48px;
   --ag-row-height: 40px;
   --ag-list-item-height: 40px;
-  --ag-background-color: #2d2d2d;
-  --ag-header-background-color: #404040;
-  --ag-odd-row-background-color: #333333;
-  --ag-row-hover-color: #404040;
-  --ag-selected-row-background-color: #4a4a4a;
-  --ag-foreground-color: #ffffff;
-  --ag-secondary-foreground-color: #cccccc;
-  --ag-border-color: #555555;
-  --ag-cell-horizontal-border: #555555;
-  --ag-header-foreground-color: #ffffff;
 }
 
-/* Custom AG Grid Quick Filter Styling */
+body.dark-theme .ag-theme-material {
+  --ag-background-color: #132e43;
+  --ag-header-background-color: #19384f;
+  --ag-odd-row-background-color: #173247;
+  --ag-row-hover-color: #234862;
+  --ag-selected-row-background-color: #295a79;
+  --ag-foreground-color: #e4eff8;
+  --ag-secondary-foreground-color: #b6cad8;
+  --ag-border-color: #2d526d;
+  --ag-cell-horizontal-border: #2d526d;
+  --ag-header-foreground-color: #e4eff8;
+}
+
 .ag-theme-material .ag-root-wrapper {
-  border: 1px solid #555555;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
 }
 
-.ag-theme-material .ag-header {
-  border-bottom: 2px solid #555555;
-}
-
-.ag-theme-material .ag-header-cell {
-  border-right: 1px solid #555555;
-}
-
-.ag-theme-material .ag-cell {
-  border-right: 1px solid #555555;
-}
-
-/* Material Snackbar Custom Styles */
 .success-snackbar {
   background: #4caf50 !important;
   color: white !important;

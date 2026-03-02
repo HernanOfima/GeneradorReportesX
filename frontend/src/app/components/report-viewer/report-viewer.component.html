@@ -1,4 +1,4 @@
-<div class="report-viewer-container">
+<div class="report-viewer-container" [class.light-theme]="themeMode === 'light'" [class.dark-theme]="themeMode === 'dark'">
   <div class="header-section">
     <div class="header-content">
       <div class="header-left">
@@ -19,15 +19,28 @@
           </div>
         </div>
       </div>
-      <div class="header-actions" *ngIf="reportResult">
-        <button mat-raised-button color="accent" (click)="exportToExcel()" [disabled]="loading">
-          <mat-icon>download</mat-icon>
-          Exportar Excel
+      <div class="header-right">
+        <button
+          mat-stroked-button
+          class="theme-toggle-button"
+          type="button"
+          (click)="toggleTheme()"
+          [matTooltip]="'Cambiar a ' + themeToggleLabel"
+          [attr.aria-label]="'Cambiar a ' + themeToggleLabel"
+        >
+          <mat-icon>{{ themeToggleIcon }}</mat-icon>
+          {{ themeToggleLabel }}
         </button>
-        <button mat-raised-button color="primary" (click)="refreshReport()" [disabled]="loading">
-          <mat-icon>refresh</mat-icon>
-          Actualizar
-        </button>
+        <div class="header-actions" *ngIf="reportResult">
+          <button mat-raised-button color="accent" (click)="exportToExcel()" [disabled]="loading">
+            <mat-icon>download</mat-icon>
+            Exportar Excel
+          </button>
+          <button mat-raised-button color="primary" (click)="refreshReport()" [disabled]="loading">
+            <mat-icon>refresh</mat-icon>
+            Actualizar
+          </button>
+        </div>
       </div>
     </div>
   </div>

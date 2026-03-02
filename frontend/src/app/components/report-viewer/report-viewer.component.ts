@@ -19,6 +19,8 @@ import { NumberFormatUtil } from '../../utils/number-format.util';
 export class ReportViewerComponent implements OnInit {
   @ViewChild('agGrid') agGrid!: AgGridAngular;
   private readonly mobileBreakpoint = 1080;
+  private readonly themeStorageKey = 'odres-theme-mode';
+  themeMode: 'dark' | 'light' = 'dark';
 
   modules: Module[] = [];
   selectedModule: Module | null = null;
@@ -73,6 +75,7 @@ export class ReportViewerComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.initializeTheme();
     this.updateViewportMode();
     this.loadModules();
     this.setupGlobalSearch();
@@ -126,10 +129,23 @@ export class ReportViewerComponent implements OnInit {
     this.sidebarOpen = !this.sidebarOpen;
   }
 
+  toggleTheme(): void {
+    const nextTheme = this.themeMode === 'dark' ? 'light' : 'dark';
+    this.applyTheme(nextTheme, true);
+  }
+
   closeSidebar(): void {
     if (this.isMobileView) {
       this.sidebarOpen = false;
     }
+  }
+
+  get themeToggleLabel(): string {
+    return this.themeMode === 'dark' ? 'Modo claro' : 'Modo oscuro';
+  }
+
+  get themeToggleIcon(): string {
+    return this.themeMode === 'dark' ? 'light_mode' : 'dark_mode';
   }
 
   private updateViewportMode(): void {
@@ -142,6 +158,29 @@ export class ReportViewerComponent implements OnInit {
     }
 
     this.sidebarOpen = !this.selectedModule;
+  }
+
+  private initializeTheme(): void {
+    const savedTheme = localStorage.getItem(this.themeStorageKey);
+    const isValidSavedTheme = savedTheme === 'dark' || savedTheme === 'light';
+
+    if (isValidSavedTheme) {
+      this.applyTheme(savedTheme as 'dark' | 'light', false);
+      return;
+    }
+
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    this.applyTheme(prefersDark ? 'dark' : 'light', false);
+  }
+
+  private applyTheme(theme: 'dark' | 'light', persistPreference: boolean): void {
+    this.themeMode = theme;
+    document.body.classList.remove('dark-theme', 'light-theme');
+    document.body.classList.add(`${theme}-theme`);
+
+    if (persistPreference) {
+      localStorage.setItem(this.themeStorageKey, theme);
+    }
   }
 
   loadReportsForModule(module: Module): void {
