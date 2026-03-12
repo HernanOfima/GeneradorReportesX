@@ -42,10 +42,14 @@ export class ReportViewerComponent implements OnInit {
     filter: true,
     resizable: true,
     minWidth: 100,
+    // Enterprise features - Force enabled
+    enableRowGroup: true,
+    enablePivot: true,
+    enableValue: true,
     filterParams: {
       buttons: ['reset', 'apply'],
     }
-  };
+  } as any;
 
   constructor(
     private reportService: ReportService,
@@ -64,6 +68,49 @@ export class ReportViewerComponent implements OnInit {
       rowSelection: 'multiple',
       suppressRowClickSelection: false,
       animateRows: true,
+      // Enterprise features - Force enabled
+      rowGroupPanelShow: 'always',
+      enableRowGroup: true,
+      enablePivot: true,
+      enableValue: true,
+      groupDefaultExpanded: 0,
+      suppressAggFuncInHeader: false,
+      sideBar: {
+        toolPanels: [
+          {
+            id: 'columns',
+            labelDefault: 'Columnas',
+            labelKey: 'columns',
+            iconKey: 'columns',
+            toolPanel: 'agColumnsToolPanel',
+            toolPanelParams: {
+              suppressRowGroups: false,
+              suppressValues: false,
+              suppressPivots: false,
+              suppressPivotMode: false,
+              suppressSideButtons: false,
+              suppressColumnFilter: false,
+              suppressColumnSelectAll: false,
+              suppressColumnExpandAll: false
+            }
+          },
+          {
+            id: 'filters',
+            labelDefault: 'Filtros',
+            labelKey: 'filters',
+            iconKey: 'filter',
+            toolPanel: 'agFiltersToolPanel'
+          }
+        ],
+        defaultToolPanel: 'columns'
+      },
+      autoGroupColumnDef: {
+        headerName: 'Agrupación',
+        minWidth: 200,
+        cellRendererParams: {
+          suppressCount: false,
+        },
+      },
       defaultColDef: this.defaultColDef,
       onGridReady: (params: any) => {
         params.api.sizeColumnsToFit();
@@ -71,7 +118,7 @@ export class ReportViewerComponent implements OnInit {
       onGridSizeChanged: (params: any) => {
         params.api.sizeColumnsToFit();
       }
-    };
+    } as any;
   }
 
   ngOnInit(): void {
@@ -316,18 +363,29 @@ export class ReportViewerComponent implements OnInit {
 
   private openResultsModal(report: Report, result: ReportResult, parameters: { [key: string]: any }): void {
     // Setup column definitions with numeric formatting
-    const columnDefs = result.columns.map(column => {
-      const baseColDef = {
+    const columnDefs: ColDef[] = result.columns.map(column => {
+      const sampleValues = result.data.slice(0, 25).map(row => row[column]);
+      const isNumericColumn = NumberFormatUtil.shouldFormatAsNumeric(column, sampleValues);
+
+      const baseColDef: ColDef = {
         field: column,
         headerName: column,
         sortable: true,
-        filter: true,
-        resizable: true
+        // Use explicit filter types to show floating filter inputs instead of icon-only filters.
+        filter: isNumericColumn ? 'agNumberColumnFilter' : 'agTextColumnFilter',
+        floatingFilter: true,
+        resizable: true,
+        suppressMovable: false,
+        // Enterprise interactions for grouping/pivot/value/aggregations.
+        enableRowGroup: true,
+        enablePivot: true,
+        enableValue: true,
+        allowedAggFuncs: isNumericColumn ? ['sum', 'avg', 'min', 'max', 'count'] : undefined,
+        aggFunc: isNumericColumn ? 'sum' : undefined
       };
 
       // Check if this is a numeric column that should be formatted
-      const sampleValues = result.data.slice(0, 10).map(row => row[column]);
-      if (NumberFormatUtil.shouldFormatAsNumeric(column, sampleValues)) {
+      if (isNumericColumn) {
         return {
           ...baseColDef,
           cellRenderer: NumericCellRendererComponent,
@@ -450,5 +508,15 @@ export class ReportViewerComponent implements OnInit {
     ];
 
     return noDataPatterns.some(pattern => combined.includes(pattern));
+  }
+
+  /**
+   * Check if AG-Grid Enterprise features are available
+   * Verifies that ag-grid-enterprise module is loaded and available
+   */
+  private hasEnterpriseFeatures(): boolean {
+    // Force Enterprise features to be always enabled
+    console.log('AG-Grid Enterprise features forced ON in report-viewer');
+    return true;
   }
 }

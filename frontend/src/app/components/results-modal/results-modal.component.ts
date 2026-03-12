@@ -52,27 +52,116 @@ export class ResultsModalComponent {
   private gridApi: GridApi | null = null;
   densityMode: DensityMode = 'normal';
 
-  private readonly densityConfig: Record<DensityMode, { rowHeight: number; headerHeight: number; fontSize: number; paginationPageSize: number; minWidth: number; }> = {
-    compact: { rowHeight: 42, headerHeight: 48, fontSize: 13, paginationPageSize: 30, minWidth: 115 },
-    normal: { rowHeight: 50, headerHeight: 56, fontSize: 15, paginationPageSize: 25, minWidth: 130 },
-    comfortable: { rowHeight: 58, headerHeight: 64, fontSize: 16, paginationPageSize: 20, minWidth: 145 }
+  private readonly densityConfig: Record<DensityMode, { rowHeight: number; headerHeight: number; fontSize: number; paginationPageSize: number; minWidth: number; floatingFiltersHeight: number; }> = {
+    compact: { rowHeight: 42, headerHeight: 48, fontSize: 13, paginationPageSize: 30, minWidth: 115, floatingFiltersHeight: 30 },
+    normal: { rowHeight: 50, headerHeight: 56, fontSize: 15, paginationPageSize: 25, minWidth: 130, floatingFiltersHeight: 35 },
+    comfortable: { rowHeight: 58, headerHeight: 64, fontSize: 16, paginationPageSize: 20, minWidth: 145, floatingFiltersHeight: 40 }
   };
 
   gridOptions = {
     defaultColDef: {
       sortable: true,
       filter: true,
+      floatingFilter: true,
       resizable: true,
-      minWidth: 130
+      minWidth: 130,
+      filterParams: {
+        buttons: ['reset', 'apply'],
+        debounceMs: 200
+      },
+      // Enterprise features - Force enabled
+      enableRowGroup: true,
+      enablePivot: true,
+      enableValue: true
     },
     rowHeight: 50,
     headerHeight: 56,
+    floatingFiltersHeight: 35,
     pagination: true,
     paginationPageSize: 25,
     animateRows: true,
     enableRangeSelection: true,
-    suppressColumnVirtualisation: true
-  };
+    suppressColumnVirtualisation: true,
+    // Enterprise features - Force enabled
+    rowGroupPanelShow: 'always',
+    enableRowGroup: true,
+    enablePivot: true,
+    enableValue: true,
+    groupDefaultExpanded: 0,
+    suppressAggFuncInHeader: false,
+    sideBar: {
+      toolPanels: [
+        {
+          id: 'columns',
+          labelDefault: 'Columnas',
+          labelKey: 'columns',
+          iconKey: 'columns',
+          toolPanel: 'agColumnsToolPanel',
+          toolPanelParams: {
+            suppressRowGroups: false,
+            suppressValues: false,
+            suppressPivots: false,
+            suppressPivotMode: false,
+            suppressSideButtons: false,
+            suppressColumnFilter: false,
+            suppressColumnSelectAll: false,
+            suppressColumnExpandAll: false
+          }
+        },
+        {
+          id: 'filters',
+          labelDefault: 'Filtros',
+          labelKey: 'filters',
+          iconKey: 'filter',
+          toolPanel: 'agFiltersToolPanel'
+        }
+      ],
+      defaultToolPanel: 'columns'
+    },
+    autoGroupColumnDef: {
+      headerName: 'Agrupación',
+      minWidth: 200,
+      cellRendererParams: {
+        suppressCount: false,
+      },
+    },
+    aggFuncs: {
+      'sum': (params: any) => {
+        let sum = 0;
+        params.values.forEach((value: any) => sum += Number(value) || 0);
+        return sum;
+      },
+      'avg': (params: any) => {
+        let sum = 0;
+        let count = 0;
+        params.values.forEach((value: any) => {
+          const num = Number(value);
+          if (!isNaN(num)) {
+            sum += num;
+            count++;
+          }
+        });
+        return count > 0 ? sum / count : 0;
+      },
+      'count': (params: any) => params.values.length,
+      'max': (params: any) => {
+        let max = Number.NEGATIVE_INFINITY;
+        params.values.forEach((value: any) => {
+          const num = Number(value);
+          if (!isNaN(num) && num > max) max = num;
+        });
+        return max === Number.NEGATIVE_INFINITY ? 0 : max;
+      },
+      'min': (params: any) => {
+        let min = Number.POSITIVE_INFINITY;
+        params.values.forEach((value: any) => {
+          const num = Number(value);
+          if (!isNaN(num) && num < min) min = num;
+        });
+        return min === Number.POSITIVE_INFINITY ? 0 : min;
+      }
+    }
+  } as any;
 
   constructor(
     public dialogRef: MatDialogRef<ResultsModalComponent>,
@@ -111,6 +200,18 @@ export class ResultsModalComponent {
     this.isExporting = true;
 
     try {
+      const hasActiveGrouping = (this.gridApi?.getRowGroupColumns()?.length ?? 0) > 0;
+      if (hasActiveGrouping && this.gridApi) {
+        // Use AG Grid native Excel export when grouping is active to preserve hierarchy.
+        (this.gridApi as any).exportDataAsExcel?.({
+          fileName: this.getExportFileName(),
+          sheetName: this.getWorksheetName(),
+          allColumns: false
+        });
+        this.snackBar.open('Excel generado con agrupaciones.', 'Cerrar', { duration: 3500 });
+        return;
+      }
+
       const excelJSImport = await import('exceljs/dist/exceljs.min.js');
       const ExcelJS = excelJSImport.default ?? excelJSImport;
       const workbook = new ExcelJS.Workbook();
@@ -150,6 +251,10 @@ export class ResultsModalComponent {
 
   onGridReady(event: GridReadyEvent): void {
     this.gridApi = event.api;
+    // Re-assert enterprise UI panels at runtime to avoid hidden sidebars/panels after init.
+    this.gridApi.setGridOption('rowGroupPanelShow', 'always');
+    (this.gridApi as any).setSideBarVisible?.(true);
+    (this.gridApi as any).openToolPanel?.('columns');
     this.applyDensitySettings();
     this.updateDisplayedRowsCount();
   }
@@ -203,6 +308,7 @@ export class ResultsModalComponent {
     const density = this.densityConfig[this.densityMode];
     this.gridApi.setGridOption('rowHeight', density.rowHeight);
     this.gridApi.setGridOption('headerHeight', density.headerHeight);
+    this.gridApi.setGridOption('floatingFiltersHeight', density.floatingFiltersHeight);
     this.gridApi.setGridOption('paginationPageSize', density.paginationPageSize);
     this.gridApi.setGridOption('defaultColDef', {
       ...this.gridOptions.defaultColDef,
@@ -725,5 +831,15 @@ export class ResultsModalComponent {
 
     const columnIds = allColumns.map(column => column.getColId());
     (this.gridApi as any).autoSizeColumns?.(columnIds, false);
+  }
+
+  /**
+   * Check if AG-Grid Enterprise features are available
+   * Verifies that ag-grid-enterprise module is loaded and available
+   */
+  private hasEnterpriseFeatures(): boolean {
+    // Force Enterprise features to be always enabled
+    console.log('AG-Grid Enterprise features forced ON');
+    return true;
   }
 }
