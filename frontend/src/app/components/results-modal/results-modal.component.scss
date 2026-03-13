@@ -286,7 +286,9 @@
   --ag-grid-size: 8px;
   --ag-row-height: 50px;
   --ag-header-height: 56px;
+  --ag-floating-filter-height: 35px;
   --ag-font-size: 15px;
+  --ag-sidebar-panel-width: 250px;
   
   .ag-header {
     background: #f8f9fa;
@@ -297,6 +299,45 @@
     font-weight: 600;
     color: #2c3e50;
     font-size: var(--ag-font-size);
+  }
+  
+  // Floating Filter Styles
+  .ag-floating-filter {
+    background: #ffffff;
+    border-bottom: 1px solid #e1e5e9;
+    font-size: 14px;
+    
+    .ag-floating-filter-input {
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 13px;
+      background: #ffffff;
+      transition: border-color 0.2s ease;
+      
+      &:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+      }
+      
+      &::placeholder {
+        color: #9ca3af;
+        font-style: italic;
+      }
+    }
+    
+    .ag-input-field-input {
+      border: 1px solid #d1d5db !important;
+      border-radius: 4px !important;
+      padding: 4px 8px !important;
+      font-size: 13px !important;
+      
+      &:focus {
+        border-color: #667eea !important;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1) !important;
+      }
+    }
   }
   
   .ag-row {
@@ -324,24 +365,124 @@
     border-top: 1px solid #e9ecef;
     font-size: 14px;
   }
+  
+  // Sidebar and Enterprise Features Styles
+  .ag-side-bar {
+    border-left: 1px solid #e1e5e9;
+    background: #ffffff;
+  }
+  
+  .ag-tool-panel-wrapper {
+    border-right: 1px solid #e1e5e9;
+  }
+  
+  .ag-column-tool-panel {
+    .ag-column-select-header {
+      background: #f8f9fa;
+      border-bottom: 1px solid #e1e5e9;
+      font-weight: 600;
+      padding: 8px 12px;
+    }
+    
+    .ag-column-select-list {
+      .ag-column-select-column {
+        padding: 4px 8px;
+        
+        &:hover {
+          background: #f0f4f8;
+        }
+      }
+    }
+  }
+  
+  // Row Group Panel Styles
+  .ag-row-group-panel {
+    background: #f8f9fa;
+    border-bottom: 2px solid #667eea;
+    padding: 8px 12px;
+    min-height: 40px;
+    
+    .ag-row-group-panel-item {
+      background: #667eea;
+      color: white;
+      border-radius: 4px;
+      padding: 4px 8px;
+      margin: 2px 4px 2px 0;
+      
+      .ag-row-group-panel-item-remove {
+        margin-left: 8px;
+        cursor: pointer;
+        color: rgba(255, 255, 255, 0.8);
+        
+        &:hover {
+          color: white;
+        }
+      }
+    }
+  }
+  
+  .ag-row-group-panel-empty {
+    color: #64748b;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+  }
+  
+  // Group rows styling
+  .ag-row-group {
+    background: #f0f4f8 !important;
+    font-weight: 600;
+    
+    &:hover {
+      background: #e2e8f0 !important;
+    }
+  }
+  
+  .ag-group-expanded,
+  .ag-group-contracted {
+    cursor: pointer;
+  }
 }
 
 .results-modal-container .ag-theme-material.density-compact {
   --ag-row-height: 42px;
   --ag-header-height: 48px;
+  --ag-floating-filter-height: 30px;
   --ag-font-size: 13px;
+  
+  .ag-floating-filter-input,
+  .ag-input-field-input {
+    font-size: 12px !important;
+    padding: 3px 6px !important;
+  }
 }
 
 .results-modal-container .ag-theme-material.density-normal {
   --ag-row-height: 50px;
   --ag-header-height: 56px;
+  --ag-floating-filter-height: 35px;
   --ag-font-size: 15px;
+  
+  .ag-floating-filter-input,
+  .ag-input-field-input {
+    font-size: 13px !important;
+    padding: 4px 8px !important;
+  }
 }
 
 .results-modal-container .ag-theme-material.density-comfortable {
   --ag-row-height: 58px;
   --ag-header-height: 64px;
+  --ag-floating-filter-height: 40px;
   --ag-font-size: 16px;
+  
+  .ag-floating-filter-input,
+  .ag-input-field-input {
+    font-size: 14px !important;
+    padding: 5px 10px !important;
+  }
 }
 
 // Responsive Design

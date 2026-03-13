@@ -25,6 +25,7 @@ import { MatNativeDateModule, MatRippleModule } from '@angular/material/core';
 
 // AG-Grid
 import { AgGridModule } from 'ag-grid-angular';
+import 'ag-grid-enterprise';
 
 // Components
 import { AppRoutingModule } from './app-routing.module';
