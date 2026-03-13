@@ -18,6 +18,7 @@ public class ReportDto
     public Guid IdReporte { get; set; }
     public string Nombre { get; set; } = string.Empty;
     public string Titulo { get; set; } = string.Empty;
+    public int? OrdenMostrar { get; set; }
     public Guid IdModulo { get; set; }
     public string SentenciaSQL { get; set; } = string.Empty;
     public int TipoReporte { get; set; }

@@ -71,6 +71,9 @@ public class ReportDbContext : DbContext
                 .HasColumnName("Titulo")
                 .HasMaxLength(200)
                 .IsRequired(false);
+            entity.Property(e => e.OrdenMostrar)
+                .HasColumnName("OrdenMostrar")
+                .IsRequired(false);
             entity.Property(e => e.IdModulo)
                 .HasColumnName("IdModulo")
                 .IsRequired();

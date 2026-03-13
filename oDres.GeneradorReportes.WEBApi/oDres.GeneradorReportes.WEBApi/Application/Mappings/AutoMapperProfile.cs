@@ -22,6 +22,7 @@ public class AutoMapperProfile : Profile
         CreateMap<Reporte, ReportDto>()
             .ForMember(dest => dest.Nombre, opt => opt.MapFrom(src => src.Nombre ?? string.Empty))
             .ForMember(dest => dest.Titulo, opt => opt.MapFrom(src => src.Titulo ?? string.Empty))
+            .ForMember(dest => dest.OrdenMostrar, opt => opt.MapFrom(src => src.OrdenMostrar))
             .ForMember(dest => dest.SentenciaSQL, opt => opt.MapFrom(src => src.SentenciaSQL ?? string.Empty))
             .ForMember(dest => dest.TipoReporte, opt => opt.MapFrom(src => src.TipoReporte))
             .ForMember(dest => dest.AgrupaPor, opt => opt.MapFrom(src => src.AgrupaPor))

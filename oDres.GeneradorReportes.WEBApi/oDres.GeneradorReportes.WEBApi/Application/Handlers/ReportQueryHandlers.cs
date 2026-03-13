@@ -20,7 +20,14 @@ public class GetAllModulesQueryHandler : IRequestHandler<GetAllModulesQuery, IEn
     public async Task<IEnumerable<ModuleDto>> Handle(GetAllModulesQuery request, CancellationToken cancellationToken)
     {
         var modules = await _moduleRepository.GetAllModulesAsync();
-        return _mapper.Map<IEnumerable<ModuleDto>>(modules);
+        var moduleDtos = _mapper.Map<List<ModuleDto>>(modules);
+
+        foreach (var module in moduleDtos)
+        {
+            module.Reportes = module.Reportes.OrderForDisplay().ToList();
+        }
+
+        return moduleDtos;
     }
 }
 
@@ -38,7 +45,14 @@ public class GetModuleByIdQueryHandler : IRequestHandler<GetModuleByIdQuery, Mod
     public async Task<ModuleDto?> Handle(GetModuleByIdQuery request, CancellationToken cancellationToken)
     {
         var module = await _moduleRepository.GetModuleByIdAsync(request.Id);
-        return module != null ? _mapper.Map<ModuleDto>(module) : null;
+        if (module == null)
+        {
+            return null;
+        }
+
+        var moduleDto = _mapper.Map<ModuleDto>(module);
+        moduleDto.Reportes = moduleDto.Reportes.OrderForDisplay().ToList();
+        return moduleDto;
     }
 }
 
@@ -56,7 +70,8 @@ public class GetReportsByModuleQueryHandler : IRequestHandler<GetReportsByModule
     public async Task<IEnumerable<ReportDto>> Handle(GetReportsByModuleQuery request, CancellationToken cancellationToken)
     {
         var reports = await _reportRepository.GetReportsByModuleAsync(request.ModuleId);
-        return _mapper.Map<IEnumerable<ReportDto>>(reports);
+        var reportDtos = _mapper.Map<List<ReportDto>>(reports);
+        return reportDtos.OrderForDisplay();
     }
 }
 
@@ -111,5 +126,21 @@ public class ExecuteReportQueryHandler : IRequestHandler<ExecuteReportQuery, Rep
     {
         var result = await _reportRepository.ExecuteReportAsync(request.ReportId, request.Parameters);
         return _mapper.Map<ReportResultDto>(result);
+    }
+}
+
+internal static class ReportOrderingExtensions
+{
+    internal static IEnumerable<ReportDto> OrderForDisplay(this IEnumerable<ReportDto> reports)
+    {
+        if (reports == null)
+        {
+            return Enumerable.Empty<ReportDto>();
+        }
+
+        return reports
+            .OrderBy(report => report.OrdenMostrar ?? int.MaxValue)
+            .ThenBy(report => report.Titulo ?? string.Empty)
+            .ThenBy(report => report.Nombre ?? string.Empty);
     }
 }

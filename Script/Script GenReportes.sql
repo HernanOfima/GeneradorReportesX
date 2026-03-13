@@ -54,16 +54,23 @@ Select	NumeroDocumento,TipoTransaccion As TipoDcto,Nombre As TipoTransaccion, Id
 	From dbo.vReporte_DetalladoFacturas
 		Where Fecha BetWeen @pFechaInicial And  @pFechaFinal
 
-
+SELECT     Empresa.Nombre As NombreEmpresa,    Empleado.CodigoEmpleado,    Grupo.NombreGrupo,    Candidato.Nombres,    Candidato.TelefonoCelular,    Candidato.CuentaBanco,    Candidato.Dir_Ciudad,    Area.Valor,    Empleado.SDI,    Empleado.CuotaDiaria    FROM Empresa_Nom.Empleados Empleado       Inner Join Empresa_Nom.V_grupos Grupo On Empleado.IdGrupoNomina = Grupo.IdGrupo      Inner Join Empresa_RH.Candidatos Candidato On Empleado.IdCandidato = Candidato.IdCandidato        Inner Join Catalogo_Nom.AreaGeografica Area On Area.IdAreaGeografica = Grupo.IdAreaGeografica      Inner Join Registro.Empresa  On Candidato.IdEmpresa = Empresa.IdEmpresa    Order By Empresa.Nombre
 Select * FRom [Empresa].[vReporte_ListadoProyectosCompra]
 
 Select * from catalogo.modulo
 
+---------------------------------------------------------------------------------------
+--Listar los reportes
 Select IdReporte, Modulo.Nombre As Modulo,Reporte.Nombre , Titulo, Reporte.IdModulo, 
 	   SentenciaSQL,TipoReporte 
 	FRom Catalogo.Reportes Reporte
 		Inner Join Catalogo.Modulo Modulo On Reporte.IdModulo = Modulo.IdModulo
 	Order By Modulo.Nombre
+---------------------------------------------------------------------------------------
+
+Select *    From Empresa.FN_ExtractoCobranzaPorDias(@FechaActual,@pFechaCorte)     Where IdEmpresa = @pIdEmpresa
+
+Select TipoTransaccion As TipoDcto,Nombre As TipoTransaccion, Identificador,NombreCliente,    SubTotal,Descuento,ValorIVA,RetencionIVA,TotalDocumento    From dbo.vReporte_DetalladoFacturas Facturas    Where Fecha BetWeen @pFechaInicial And  @pFechaFinal
 
 SELECT 
 		Empresa.Nombre As NombreEmpresa,
@@ -110,25 +117,89 @@ Execute Empresa.spReporte_ResumenSaldoInventario
 		@pIdBodega	= Null	, 
 		@pIdLote	= Null
 	
-Select NombreVendedor,Identificador, NombreCliente,NumeroDocumento,TipoTransaccion As TipoDcto,Nombre As TipoTransaccion,     SubTotal,Descuento,ValorIVA,RetencionIVA,TotalDocumento     From dbo.vReporte_DetalladoFacturas   Where Fecha BetWeen @pFechaInicial And  @pFechaFinal   Order By NombreVendedor,Identificador, NombreCliente
+-- Sales by vendor with client details
+Select NombreVendedor,Identificador, NombreCliente,NumeroDocumento,TipoTransaccion As TipoDcto,Nombre As TipoTransaccion,
+		SubTotal,Descuento,ValorIVA,RetencionIVA,TotalDocumento
+	From dbo.vReporte_DetalladoFacturas
+	Where Fecha BetWeen @pFechaInicial And  @pFechaFinal
+	Order By NombreVendedor,Identificador, NombreCliente
+
+-- Sales by vendor summary
 Select	NombreVendedor,NumeroDocumento,TipoTransaccion As TipoDcto,Nombre As TipoTransaccion, 
 		SubTotal,Descuento,ValorIVA,RetencionIVA,TotalDocumento 
 	From dbo.vReporte_DetalladoFacturas
 	Where Fecha BetWeen @pFechaInicial And  @pFechaFinal
 	Order By NombreVendedor
 
+-- Collection related queries
+Execute Timbrado_FEObtenerCobranzaTimbrar
+Select * From [Empresa].[vReporte_DetalladoCobranzaCliente]
+
+-- Collection extract by days
+Select Cliente,NombreCliente,Serie, Folio, deuda, pagado, Saldo
+	From Empresa.FN_ExtractoCobranzaPorDias(@pFechaActualReporte,@pFechaCorteReporte)
+	Where IdEmpresa = @pIdEmpresa
+
+-- Sales by client
+Select 
+		 Identificador 
+		,NombreCliente
+		,Fecha
+		,Nombre
+		,CodigoOrigen
+		,NumeroDocumento
+		,ClaveTipoTransaccion
+		,SubTotal
+		,Descuento
+		,TotalDocumento
+	From vReporte_ListadoFacturas
+	Where --IdEmpresa = @pIdEmpresa And
+		Fecha BetWeen @pFechaInicial And  @pFechaFinal
+	Order By Identificador
+
+-- Product movement details
+Select 
+		 NoIdentificacion
+		,Descripcion
+		,NumeroDocumento
+		,TipoTransaccion
+		,FechaDocumento
+		,ClaveUnidad
+		,UnidadMedida
+		,Cantidad
+		,ValorUnitario
+		,Descuento
+		,SubTotalItem
+	From vReporte_DetalladoMovimientoProducto
+		Where FechaDocumento BetWeen @pFechaInicial And  @pFechaFinal
+	Order By NoIdentificacion
+
+-- Report listings with different variations
 Select IdReporte, Modulo.Nombre As Modulo,Reporte.Nombre , Titulo, Reporte.IdModulo, 
 	   SentenciaSQL,TipoReporte , OrdenMostrar, AgrupaPor
 	FRom Catalogo.Reportes Reporte
 		Inner Join Catalogo.Modulo Modulo On Reporte.IdModulo = Modulo.IdModulo
 	Order By Modulo.Nombre, OrdenMostrar
 
-
 Select Modulo.Nombre As Modulo,Reporte.Nombre , Titulo, AgrupaPor
 	FRom Catalogo.Reportes Reporte
 		Inner Join Catalogo.Modulo Modulo On Reporte.IdModulo = Modulo.IdModulo
 	Order By Modulo.Nombre, OrdenMostrar
 
+Select IdReporte,Reporte.Nombre , Titulo, Reporte.IdModulo, 
+	   SentenciaSQL,TipoReporte 
+	FRom Catalogo.Reportes Reporte
+	Order By Reporte.IdModulo
 
-Select NombreVendedor,Identificador, NombreCliente,NumeroDocumento,TipoTransaccion As TipoDcto,Nombre As TipoTransaccion,     SubTotal,Descuento,ValorIVA,RetencionIVA,TotalDocumento    
-From dbo.vReporte_DetalladoFacturas   Fecha BetWeen @pFechaInicial And  @pFechaFinal   Order By NombreVendedor,Identificador, NombreCliente
+SELECT IdReporte, Nombre, Titulo, IdModulo, OrdenMostrar
+FROM     Catalogo.Reportes
+ORDER BY IdModulo, OrdenMostrar
+
+---------------------------------------------------------------------------------------
+--Listar los reportes
+Select IdReporte, Modulo.Nombre As Modulo,Reporte.Nombre , Titulo, Reporte.IdModulo, 
+	   SentenciaSQL,TipoReporte 
+	FRom Catalogo.Reportes Reporte
+		Inner Join Catalogo.Modulo Modulo On Reporte.IdModulo = Modulo.IdModulo
+	Order By Modulo.Nombre
+---------------------------------------------------------------------------------------

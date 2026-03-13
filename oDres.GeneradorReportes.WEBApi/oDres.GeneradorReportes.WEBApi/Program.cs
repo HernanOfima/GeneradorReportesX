@@ -33,19 +33,19 @@ builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
 // CORS
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAngular", policy =>
-    {
-        policy.WithOrigins(
-                "http://localhost:4200", 
-                "http://localhost:55671",
-                "http://localhost:65216")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
-    });
-});
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowAngular", policy =>
+//    {
+//        policy.WithOrigins(
+//                "http://localhost:4200",
+//                "http://localhost:55671",
+//                "http://localhost:65216")
+//              .AllowAnyHeader()
+//              .AllowAnyMethod()
+//              .AllowCredentials();
+//    });
+//});
 
 // Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -86,7 +86,14 @@ app.UseSwaggerUI(c =>
 
 app.UseHttpsRedirection();
 
-app.UseCors("AllowAngular");
+//app.UseCors("AllowAngular");
+
+app.UseCors(policy =>
+            policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            );
 
 app.UseAuthorization();
 
