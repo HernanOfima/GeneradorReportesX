@@ -81,6 +81,9 @@ public class ReportDbContext : DbContext
             entity.Property(e => e.TipoReporte)
                 .HasColumnName("TipoReporte")
                 .IsRequired();
+            entity.Property(e => e.AgrupaPor)
+                .HasColumnName("AgrupaPor")
+                .IsRequired(false);
             
             entity.HasOne(d => d.Modulo)
                 .WithMany(p => p.Reportes)

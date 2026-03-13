@@ -15,6 +15,7 @@ export interface ResultsModalData {
   reportTitle: string;
   results: any[];
   columnDefs: ColDef[];
+  initialGroupFields?: string[];
   parameters?: { [key: string]: any };
   reportParameters?: ReportParameter[];
 }
@@ -253,6 +254,7 @@ export class ResultsModalComponent {
     this.gridApi = event.api;
     // Re-assert enterprise UI panels at runtime to avoid hidden sidebars/panels after init.
     this.gridApi.setGridOption('rowGroupPanelShow', 'always');
+    this.gridApi.setGridOption('groupDefaultExpanded', this.hasInitialGrouping ? -1 : 0);
     (this.gridApi as any).setSideBarVisible?.(true);
     (this.gridApi as any).openToolPanel?.('columns');
     this.applyDensitySettings();
@@ -260,6 +262,9 @@ export class ResultsModalComponent {
   }
 
   onFirstDataRendered(_: FirstDataRenderedEvent): void {
+    if (this.hasInitialGrouping && this.gridApi) {
+      this.gridApi.expandAll();
+    }
     this.autoSizeColumns();
     this.updateDisplayedRowsCount();
   }
@@ -285,6 +290,10 @@ export class ResultsModalComponent {
 
   get canModifyFilters(): boolean {
     return Array.isArray(this.data.reportParameters) && this.data.reportParameters.length > 0;
+  }
+
+  get hasInitialGrouping(): boolean {
+    return Array.isArray(this.data.initialGroupFields) && this.data.initialGroupFields.length > 0;
   }
 
   setDensity(mode: DensityMode): void {

@@ -110,3 +110,25 @@ Execute Empresa.spReporte_ResumenSaldoInventario
 		@pIdBodega	= Null	, 
 		@pIdLote	= Null
 	
+Select NombreVendedor,Identificador, NombreCliente,NumeroDocumento,TipoTransaccion As TipoDcto,Nombre As TipoTransaccion,     SubTotal,Descuento,ValorIVA,RetencionIVA,TotalDocumento     From dbo.vReporte_DetalladoFacturas   Where Fecha BetWeen @pFechaInicial And  @pFechaFinal   Order By NombreVendedor,Identificador, NombreCliente
+Select	NombreVendedor,NumeroDocumento,TipoTransaccion As TipoDcto,Nombre As TipoTransaccion, 
+		SubTotal,Descuento,ValorIVA,RetencionIVA,TotalDocumento 
+	From dbo.vReporte_DetalladoFacturas
+	Where Fecha BetWeen @pFechaInicial And  @pFechaFinal
+	Order By NombreVendedor
+
+Select IdReporte, Modulo.Nombre As Modulo,Reporte.Nombre , Titulo, Reporte.IdModulo, 
+	   SentenciaSQL,TipoReporte , OrdenMostrar, AgrupaPor
+	FRom Catalogo.Reportes Reporte
+		Inner Join Catalogo.Modulo Modulo On Reporte.IdModulo = Modulo.IdModulo
+	Order By Modulo.Nombre, OrdenMostrar
+
+
+Select Modulo.Nombre As Modulo,Reporte.Nombre , Titulo, AgrupaPor
+	FRom Catalogo.Reportes Reporte
+		Inner Join Catalogo.Modulo Modulo On Reporte.IdModulo = Modulo.IdModulo
+	Order By Modulo.Nombre, OrdenMostrar
+
+
+Select NombreVendedor,Identificador, NombreCliente,NumeroDocumento,TipoTransaccion As TipoDcto,Nombre As TipoTransaccion,     SubTotal,Descuento,ValorIVA,RetencionIVA,TotalDocumento    
+From dbo.vReporte_DetalladoFacturas   Fecha BetWeen @pFechaInicial And  @pFechaFinal   Order By NombreVendedor,Identificador, NombreCliente

@@ -8,6 +8,7 @@ public class Reporte
     public Guid IdModulo { get; set; }
     public string? SentenciaSQL { get; set; }
     public int TipoReporte { get; set; }
+    public string? AgrupaPor { get; set; }
 
     public Modulo? Modulo { get; set; }
 }

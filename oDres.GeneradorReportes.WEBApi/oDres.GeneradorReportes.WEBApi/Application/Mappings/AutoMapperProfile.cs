@@ -24,6 +24,7 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.Titulo, opt => opt.MapFrom(src => src.Titulo ?? string.Empty))
             .ForMember(dest => dest.SentenciaSQL, opt => opt.MapFrom(src => src.SentenciaSQL ?? string.Empty))
             .ForMember(dest => dest.TipoReporte, opt => opt.MapFrom(src => src.TipoReporte))
+            .ForMember(dest => dest.AgrupaPor, opt => opt.MapFrom(src => src.AgrupaPor))
             .ForMember(dest => dest.ModuloNombre, opt => opt.MapFrom(src => src.Modulo != null ? src.Modulo.Nombre ?? string.Empty : string.Empty))
             .ReverseMap();
 

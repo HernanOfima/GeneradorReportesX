@@ -362,10 +362,17 @@ export class ReportViewerComponent implements OnInit {
   }
 
   private openResultsModal(report: Report, result: ReportResult, parameters: { [key: string]: any }): void {
+    const initialGroupFields = this.resolveInitialGroupFields(report.agrupaPor, result.columns);
+    const groupedColumnIndex = new Map(
+      initialGroupFields.map((field, index) => [this.normalizeColumnName(field), index])
+    );
+
     // Setup column definitions with numeric formatting
     const columnDefs: ColDef[] = result.columns.map(column => {
       const sampleValues = result.data.slice(0, 25).map(row => row[column]);
       const isNumericColumn = NumberFormatUtil.shouldFormatAsNumeric(column, sampleValues);
+      const groupIndex = groupedColumnIndex.get(this.normalizeColumnName(column));
+      const isInitialGroupColumn = groupIndex !== undefined;
 
       const baseColDef: ColDef = {
         field: column,
@@ -380,6 +387,9 @@ export class ReportViewerComponent implements OnInit {
         enableRowGroup: true,
         enablePivot: true,
         enableValue: true,
+        rowGroup: isInitialGroupColumn,
+        rowGroupIndex: isInitialGroupColumn ? groupIndex : undefined,
+        hide: isInitialGroupColumn,
         allowedAggFuncs: isNumericColumn ? ['sum', 'avg', 'min', 'max', 'count'] : undefined,
         aggFunc: isNumericColumn ? 'sum' : undefined
       };
@@ -408,6 +418,7 @@ export class ReportViewerComponent implements OnInit {
         reportTitle: report.titulo,
         results: result.data,
         columnDefs: columnDefs,
+        initialGroupFields: initialGroupFields,
         parameters: parameters,
         reportParameters: result.parameters
       }
@@ -418,6 +429,42 @@ export class ReportViewerComponent implements OnInit {
         this.showParameterDialog(report, result.parameters, parameters);
       }
     });
+  }
+
+  private resolveInitialGroupFields(agrupaPor: string | null | undefined, availableColumns: string[]): string[] {
+    if (!agrupaPor || !agrupaPor.trim()) {
+      return [];
+    }
+
+    const availableByNormalized = new Map<string, string>();
+    availableColumns.forEach(column => {
+      availableByNormalized.set(this.normalizeColumnName(column), column);
+    });
+
+    const resolved: string[] = [];
+    const seen = new Set<string>();
+
+    agrupaPor
+      .split(',')
+      .map(field => field.trim())
+      .filter(field => field.length > 0)
+      .forEach(field => {
+        const normalized = this.normalizeColumnName(field);
+        const matchedColumn = availableByNormalized.get(normalized);
+
+        if (!matchedColumn || seen.has(normalized)) {
+          return;
+        }
+
+        seen.add(normalized);
+        resolved.push(matchedColumn);
+      });
+
+    return resolved;
+  }
+
+  private normalizeColumnName(columnName: string): string {
+    return columnName.trim().replace(/\s+/g, '').toLowerCase();
   }
 
   private setupGrid(result: ReportResult): void {

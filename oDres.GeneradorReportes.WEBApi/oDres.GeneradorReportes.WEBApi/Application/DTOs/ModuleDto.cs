@@ -21,6 +21,7 @@ public class ReportDto
     public Guid IdModulo { get; set; }
     public string SentenciaSQL { get; set; } = string.Empty;
     public int TipoReporte { get; set; }
+    public string? AgrupaPor { get; set; }
     public string ModuloNombre { get; set; } = string.Empty; // Computed property from relationship
 }
 

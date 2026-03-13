@@ -17,6 +17,7 @@ export interface Report {
   idModulo: string; // Guid from backend as string
   sentenciaSQL: string;
   tipoReporte: number; // 1 = Query/Vista/Función, 2 = Stored Procedure
+  agrupaPor?: string | null;
   moduloNombre: string;
 }
 
