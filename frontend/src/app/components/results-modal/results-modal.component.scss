@@ -281,172 +281,239 @@
   }
 }
 
-// AG Grid Customization for Modal
-.results-modal-container .ag-theme-material {
+:host ::ng-deep .results-modal-container .ag-theme-material {
   --ag-grid-size: 8px;
   --ag-row-height: 50px;
   --ag-header-height: 56px;
   --ag-floating-filter-height: 35px;
   --ag-font-size: 15px;
   --ag-sidebar-panel-width: 250px;
-  
-  .ag-header {
-    background: #f8f9fa;
-    border-bottom: 2px solid #667eea;
+  --ag-background-color: #10253a;
+  --ag-header-background-color: #2f3848;
+  --ag-odd-row-background-color: #122c43;
+  --ag-row-hover-color: #274969;
+  --ag-selected-row-background-color: #2d5679;
+  --ag-foreground-color: #eaf2fd;
+  --ag-secondary-foreground-color: #9bb0c5;
+  --ag-header-foreground-color: #f4f8ff;
+  --ag-border-color: #3d5168;
+  --ag-cell-horizontal-border: #2b435c;
+  --ag-input-background-color: #1b2a3f;
+  --ag-input-border-color: #49607a;
+  --ag-chip-background-color: #48556b;
+  --ag-chip-border-color: #6d809b;
+  border-radius: 14px;
+  overflow: hidden;
+
+  .ag-root-wrapper {
+    border: 1px solid #324a63;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
   }
-  
-  .ag-header-cell-label {
+
+  .ag-column-drop-horizontal {
+    min-height: 58px;
+    padding: 0 16px;
+    border-bottom: 1px solid #475973;
+    background: linear-gradient(180deg, #354052 0%, #2f3848 100%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ag-column-drop-horizontal-icon {
+    color: #aac0d8;
+    opacity: 0.95;
+  }
+
+  .ag-column-drop-horizontal-empty-message {
+    color: #a8bdd2;
+    font-style: italic;
+    font-size: 13px;
+  }
+
+  .ag-column-drop-horizontal-cell-separator {
+    color: #9fb4ca;
+    font-size: 16px;
+    margin: 0 6px;
+  }
+
+  .ag-column-drop-cell {
+    height: 34px;
+    border-radius: 999px;
+    padding: 0 8px 0 6px;
+    background: linear-gradient(180deg, #556278 0%, #4a566b 100%);
+    border: 1px solid #7285a0;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transition: all 0.18s ease;
+
+    &:hover {
+      background: linear-gradient(180deg, #617089 0%, #52617a 100%);
+      border-color: #8ea5c4;
+    }
+  }
+
+  .ag-column-drop-cell-text {
+    margin: 0 10px 0 8px;
+    color: #f5f9ff;
     font-weight: 600;
-    color: #2c3e50;
+    letter-spacing: 0.01em;
+  }
+
+  .ag-column-drop-cell-drag-handle,
+  .ag-column-drop-cell-button {
+    color: #dbe8f7;
+  }
+
+  .ag-column-drop-cell-button:hover {
+    color: #ffffff;
+  }
+
+  // Fallback styles for older AG Grid class names.
+  .ag-row-group-panel {
+    background: linear-gradient(180deg, #354052 0%, #2f3848 100%);
+    border-bottom: 1px solid #475973;
+    min-height: 58px;
+    padding: 10px 16px;
+  }
+
+  .ag-row-group-panel-item {
+    border-radius: 999px;
+    border: 1px solid #7285a0;
+    background: linear-gradient(180deg, #556278 0%, #4a566b 100%);
+    color: #f5f9ff;
+  }
+
+  .ag-header {
+    background: #2f3848;
+    border-bottom: 1px solid #3f536f;
+  }
+
+  .ag-header-cell,
+  .ag-header-group-cell {
+    border-color: #3a4f68;
+  }
+
+  .ag-header-cell-label {
+    font-weight: 700;
+    color: #f4f8ff;
     font-size: var(--ag-font-size);
   }
-  
-  // Floating Filter Styles
+
   .ag-floating-filter {
-    background: #ffffff;
-    border-bottom: 1px solid #e1e5e9;
-    font-size: 14px;
-    
-    .ag-floating-filter-input {
-      border: 1px solid #d1d5db;
-      border-radius: 4px;
-      padding: 4px 8px;
-      font-size: 13px;
-      background: #ffffff;
-      transition: border-color 0.2s ease;
-      
-      &:focus {
-        outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
-      }
-      
-      &::placeholder {
-        color: #9ca3af;
-        font-style: italic;
-      }
-    }
-    
-    .ag-input-field-input {
-      border: 1px solid #d1d5db !important;
-      border-radius: 4px !important;
-      padding: 4px 8px !important;
-      font-size: 13px !important;
-      
-      &:focus {
-        border-color: #667eea !important;
-        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1) !important;
-      }
+    background: #303b4d;
+    border-bottom: 1px solid #42556f;
+    font-size: 13px;
+  }
+
+  .ag-floating-filter-input,
+  .ag-input-field-input {
+    border: 1px solid #4b607a !important;
+    border-radius: 6px !important;
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+    color: #dce8f7 !important;
+    background: #1b2a3f !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: #8ea5c4 !important;
+      box-shadow: 0 0 0 2px rgba(143, 167, 196, 0.2) !important;
     }
   }
-  
+
   .ag-row {
-    border-bottom: 1px solid #f1f3f4;
-    
+    border-bottom: 1px solid #2a4159;
+
     &:hover {
-      background: #f8f9fa;
+      background: #274969 !important;
     }
-    
+
     &.ag-row-selected {
-      background: rgba(102, 126, 234, 0.1);
+      background: #2d5679 !important;
     }
   }
-  
+
+  .ag-row.ag-row-group {
+    background: #1d3650 !important;
+    font-weight: 700;
+  }
+
+  .ag-row.ag-row-group:hover {
+    background: #274969 !important;
+  }
+
   .ag-cell {
     display: flex;
     align-items: center;
-    padding: 0 12px;
+    padding: 0 14px;
     font-size: var(--ag-font-size);
+    color: #e4eff8;
+    border-color: #2a4159;
   }
-  
-  .ag-paging-panel {
-    padding: 10px 16px;
-    background: #f8f9fa;
-    border-top: 1px solid #e9ecef;
-    font-size: 14px;
+
+  .ag-cell-wrapper.ag-row-group {
+    gap: 8px;
   }
-  
-  // Sidebar and Enterprise Features Styles
-  .ag-side-bar {
-    border-left: 1px solid #e1e5e9;
-    background: #ffffff;
+
+  .ag-group-value {
+    color: #f4f9ff;
+    font-weight: 700;
   }
-  
-  .ag-tool-panel-wrapper {
-    border-right: 1px solid #e1e5e9;
-  }
-  
-  .ag-column-tool-panel {
-    .ag-column-select-header {
-      background: #f8f9fa;
-      border-bottom: 1px solid #e1e5e9;
-      font-weight: 600;
-      padding: 8px 12px;
-    }
-    
-    .ag-column-select-list {
-      .ag-column-select-column {
-        padding: 4px 8px;
-        
-        &:hover {
-          background: #f0f4f8;
-        }
-      }
-    }
-  }
-  
-  // Row Group Panel Styles
-  .ag-row-group-panel {
-    background: #f8f9fa;
-    border-bottom: 2px solid #667eea;
-    padding: 8px 12px;
-    min-height: 40px;
-    
-    .ag-row-group-panel-item {
-      background: #667eea;
-      color: white;
-      border-radius: 4px;
-      padding: 4px 8px;
-      margin: 2px 4px 2px 0;
-      
-      .ag-row-group-panel-item-remove {
-        margin-left: 8px;
-        cursor: pointer;
-        color: rgba(255, 255, 255, 0.8);
-        
-        &:hover {
-          color: white;
-        }
-      }
-    }
-  }
-  
-  .ag-row-group-panel-empty {
-    color: #64748b;
-    font-style: italic;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 40px;
-  }
-  
-  // Group rows styling
-  .ag-row-group {
-    background: #f0f4f8 !important;
+
+  .ag-group-child-count {
+    color: #d2e1f3;
     font-weight: 600;
-    
-    &:hover {
-      background: #e2e8f0 !important;
-    }
   }
-  
+
   .ag-group-expanded,
   .ag-group-contracted {
     cursor: pointer;
+    color: #dbe8f8;
+  }
+
+  .ag-paging-panel {
+    padding: 10px 16px;
+    background: #112c43;
+    border-top: 1px solid #3a4f67;
+    color: #c4d4e7;
+    font-size: 14px;
+  }
+
+  .ag-side-bar {
+    border-left: 1px solid #405772;
+    background: #182e45;
+  }
+
+  .ag-tool-panel-wrapper {
+    border-right: 1px solid #405772;
+    background: #172c42;
+  }
+
+  .ag-column-tool-panel {
+    .ag-column-select-header {
+      background: #20364d;
+      border-bottom: 1px solid #405772;
+      color: #dce8f6;
+      font-weight: 600;
+      padding: 8px 12px;
+    }
+
+    .ag-column-select-list {
+      .ag-column-select-column {
+        padding: 4px 8px;
+
+        &:hover {
+          background: #24425f;
+        }
+      }
+    }
   }
 }
 
-.results-modal-container .ag-theme-material.density-compact {
+:host ::ng-deep .results-modal-container .ag-theme-material.density-compact {
   --ag-row-height: 42px;
   --ag-header-height: 48px;
   --ag-floating-filter-height: 30px;
@@ -459,7 +526,7 @@
   }
 }
 
-.results-modal-container .ag-theme-material.density-normal {
+:host ::ng-deep .results-modal-container .ag-theme-material.density-normal {
   --ag-row-height: 50px;
   --ag-header-height: 56px;
   --ag-floating-filter-height: 35px;
@@ -472,7 +539,7 @@
   }
 }
 
-.results-modal-container .ag-theme-material.density-comfortable {
+:host ::ng-deep .results-modal-container .ag-theme-material.density-comfortable {
   --ag-row-height: 58px;
   --ag-header-height: 64px;
   --ag-floating-filter-height: 40px;
