@@ -1,3 +1,25 @@
 <div class="app-container">
-  <router-outlet></router-outlet>
+  <!-- Header con logout solo si está autenticado y no en login -->
+  <mat-toolbar *ngIf="shouldShowHeader" class="app-header" color="primary">
+    <div class="header-content">
+      <div class="header-left">
+        <mat-icon class="header-icon">assessment</mat-icon>
+        <span class="app-title">{{title}}</span>
+      </div>
+      <div class="header-right" *ngIf="currentUser">
+        <span class="user-info">
+          <mat-icon>person</mat-icon>
+          Bienvenido, {{currentUser.username}}
+        </span>
+        <button mat-icon-button (click)="logout()" matTooltip="Cerrar Sesión" class="logout-btn">
+          <mat-icon>exit_to_app</mat-icon>
+        </button>
+      </div>
+    </div>
+  </mat-toolbar>
+
+  <!-- Contenido principal -->
+  <main class="main-content" [class.with-header]="shouldShowHeader">
+    <router-outlet></router-outlet>
+  </main>
 </div>

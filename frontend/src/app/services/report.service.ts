@@ -3,12 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of, catchError, tap, throwError } from 'rxjs';
 import { Module, Report, ReportResult, ReportParameter, ExecuteReportRequest, ExportRequest } from '../models/report.models';
 import { saveAs } from 'file-saver';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReportService {
-  private readonly apiUrl = 'https://localhost:7000/api';
+  private readonly apiUrl = environment.apiUrl;
   private readonly useMockData = false; // Force API usage for real data
 
   constructor(private http: HttpClient) { }

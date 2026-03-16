@@ -1,9 +1,129 @@
 .app-container {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
-  width: 100%;
-  background-color: var(--app-bg);
+  background: var(--app-bg);
   color: var(--app-text);
   overflow-x: hidden;
   overflow-y: auto;
   transition: background-color 220ms ease, color 220ms ease;
+}
+
+// Header Styling
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .header-icon {
+      font-size: 28px;
+      height: 28px;
+      width: 28px;
+    }
+
+    .app-title {
+      font-size: 20px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      
+      mat-icon {
+        font-size: 18px;
+        height: 18px;
+        width: 18px;
+      }
+      
+      @media (max-width: 600px) {
+        display: none;
+      }
+    }
+
+    .logout-btn {
+      background: rgba(255, 255, 255, 0.1);
+      transition: background-color 0.3s ease;
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+    }
+  }
+}
+
+// Main Content
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  
+  &.with-header {
+    padding-top: 64px; // Height of mat-toolbar
+    
+    @media (max-width: 600px) {
+      padding-top: 56px; // Mobile toolbar height
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .app-header {
+    .header-content {
+      padding: 0 8px;
+    }
+    
+    .header-left {
+      .app-title {
+        font-size: 18px;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .app-header {
+    .header-left {
+      .header-icon {
+        font-size: 24px;
+        height: 24px;
+        width: 24px;
+      }
+      
+      .app-title {
+        font-size: 16px;
+      }
+    }
+  }
 }

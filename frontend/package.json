@@ -7,6 +7,10 @@
     "dev": "ng serve --open",
     "build": "ng build",
     "build:prod": "ng build --configuration production",
+    "build:iis:root": "ng build --configuration production --base-href / --deploy-url /",
+    "build:iis:pruebagx": "ng build --configuration production --base-href /PruebaGX_Web/ --deploy-url /PruebaGX_Web/",
+    "sync:iis-package": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"Copy-Item -Path 'dist/generador-reportes-frontend/*' -Destination 'IIS-Deploy-Package' -Recurse -Force\"",
+    "build:iis:pruebagx:package": "npm run build:iis:pruebagx && npm run sync:iis-package",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint"

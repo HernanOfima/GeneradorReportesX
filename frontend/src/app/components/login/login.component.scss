@@ -1,0 +1,339 @@
+// Variables
+$primary-color: #3f51b5;
+$primary-dark: #303f9f;
+$accent-color: #ff4081;
+$background-gradient: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 50%, #90caf9 100%);
+$card-shadow: 0 24px 38px 3px rgba(0,0,0,0.14), 0 9px 46px 8px rgba(0,0,0,0.12), 0 11px 15px -7px rgba(0,0,0,0.2);
+$border-radius: 16px;
+
+.login-container {
+  min-height: 100vh;
+  background: $background-gradient;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+
+  // Responsive padding
+  padding: 20px;
+
+  @media (max-width: 600px) {
+    padding: 10px;
+  }
+}
+
+.background-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.4) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(63, 81, 181, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(144, 202, 249, 0.2) 0%, transparent 50%);
+  animation: float 20s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-10px) rotate(1deg); }
+  66% { transform: translateY(-5px) rotate(-1deg); }
+}
+
+.login-card-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 440px;
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: $card-shadow;
+  border-radius: $border-radius;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 28px 45px 3px rgba(0,0,0,0.16), 0 12px 55px 10px rgba(0,0,0,0.14), 0 15px 20px -8px rgba(0,0,0,0.22);
+  }
+
+  @media (max-width: 600px) {
+    margin: 10px;
+    border-radius: 12px;
+  }
+}
+
+.login-header {
+  background: linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
+  color: white;
+  padding: 32px 24px 24px;
+  text-align: center;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: $accent-color;
+    border-radius: 2px;
+  }
+
+  @media (max-width: 600px) {
+    padding: 24px 16px 20px;
+  }
+}
+
+.logo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.logo-icon {
+  font-size: 48px;
+  height: 48px;
+  width: 48px;
+  margin-bottom: 12px;
+  color: white;
+  animation: pulse 2s infinite;
+
+  @media (max-width: 600px) {
+    font-size: 40px;
+    height: 40px;
+    width: 40px;
+  }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.app-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+
+  @media (max-width: 600px) {
+    font-size: 20px;
+  }
+}
+
+.login-subtitle {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.9;
+  line-height: 1.4;
+
+  @media (max-width: 600px) {
+    font-size: 13px;
+  }
+}
+
+.login-content {
+  padding: 32px 24px !important;
+
+  @media (max-width: 600px) {
+    padding: 24px 16px !important;
+  }
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  @media (max-width: 600px) {
+    gap: 16px;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+// Custom Material Form Field Styling
+::ng-deep .mat-mdc-form-field {
+  .mat-mdc-text-field-wrapper {
+    border-radius: 8px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+    }
+  }
+
+  .mat-mdc-form-field-focus-overlay {
+    border-radius: 8px;
+  }
+
+  &.mat-focused {
+    .mat-mdc-text-field-wrapper {
+      box-shadow: 0 4px 12px rgba(63, 81, 181, 0.15);
+    }
+  }
+}
+
+// Login Button Styling
+.login-button {
+  height: 48px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  margin-top: 8px;
+  background: linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
+  box-shadow: 0 4px 12px rgba(63, 81, 181, 0.3);
+  transition: all 0.3s ease;
+
+  &:hover:not([disabled]) {
+    background: linear-gradient(135deg, $primary-dark 0%, $primary-color 100%);
+    box-shadow: 0 6px 16px rgba(63, 81, 181, 0.4);
+    transform: translateY(-2px);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  .mat-icon {
+    margin-right: 8px;
+  }
+
+  mat-spinner {
+    margin-right: 8px;
+  }
+
+  @media (max-width: 600px) {
+    height: 44px;
+    font-size: 15px;
+  }
+}
+
+// Footer Section
+.login-footer {
+  padding: 16px 24px !important;
+  background: rgba(0, 0, 0, 0.02);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+
+  @media (max-width: 600px) {
+    padding: 12px 16px !important;
+  }
+}
+
+.info-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.info-icon {
+  color: $primary-color;
+  font-size: 20px;
+  height: 20px;
+  width: 20px;
+}
+
+.info-text {
+  text-align: left;
+  
+  small {
+    color: rgba(0, 0, 0, 0.6);
+    line-height: 1.4;
+    
+    strong {
+      color: $primary-color;
+      font-weight: 600;
+    }
+  }
+}
+
+// App Footer
+.app-footer {
+  position: absolute;
+  bottom: 20px;
+  text-align: center;
+  width: 100%;
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 13px;
+
+  p {
+    margin: 0;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+    font-weight: 500;
+  }
+
+  @media (max-width: 600px) {
+    bottom: 10px;
+    font-size: 12px;
+  }
+}
+
+// Custom Snackbar Styles
+::ng-deep {
+  .success-snackbar {
+    background: #4caf50 !important;
+    color: white !important;
+  }
+
+  .error-snackbar {
+    background: #f44336 !important;
+    color: white !important;
+  }
+}
+
+// Loading Animation for Spinner
+::ng-deep .mat-mdc-progress-spinner circle {
+  stroke: white;
+}
+
+// Responsive Design
+@media (max-width: 480px) {
+  .login-card {
+    border-radius: 0;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .login-container {
+    padding: 0;
+  }
+
+  .app-footer {
+    position: relative;
+    margin-top: 20px;
+    bottom: auto;
+  }
+}
+
+// Accessibility improvements
+@media (prefers-reduced-motion: reduce) {
+  .background-pattern,
+  .logo-icon {
+    animation: none;
+  }
+  
+  .login-card {
+    transition: none;
+  }
+}
