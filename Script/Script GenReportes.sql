@@ -203,3 +203,28 @@ Select IdReporte, Modulo.Nombre As Modulo,Reporte.Nombre , Titulo, Reporte.IdMod
 		Inner Join Catalogo.Modulo Modulo On Reporte.IdModulo = Modulo.IdModulo
 	Order By Modulo.Nombre
 ---------------------------------------------------------------------------------------
+
+Select * from Catalogo.Modulo
+
+
+--Menu de Generador Reportes
+--	Reportes
+--		Generador Reporte reportes/generador-reportes
+--	Contabilidad
+--		reportes/generador-reportes?idModulo=BD7F18B3-34A2-4585-B007-13D135D223B6
+--	Inventario
+--		reportes/generador-reportes?idModulo=A06BEECE-7F64-4BB5-873C-AF9ED6F9B273
+--	Ventas - Ingresos
+--		reportes/generador-reportes?idModulo=D7C2A630-A2AE-40D3-BCC9-EF9ED2E1191A
+--  Cuentas por Cobrar
+--		reportes/generador-reportes?idModulo=B449B6A9-7C27-48F1-93D2-512BF63C5179
+--	Compras - Egresos
+--		reportes/generador-reportes?idModulo=6374EC1E-0573-4F6A-B6BF-B7006A4B1389
+--	Cuentas por Pagar
+--		reportes/generador-reportes?idModulo=100D072B-08FA-4913-B2E7-2DCDE7D12D2F
+--	Bancos
+--		reportes/generador-reportes?idModulo=A1F58ABA-ECA5-4E5F-B829-705A77959103
+--	RH-Nomina
+--		reportes/generador-reportes?idModulo=9632C87F-55A5-4F60-A627-FCAE9891D497
+
+
