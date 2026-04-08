@@ -174,6 +174,12 @@ Select
 		Where FechaDocumento BetWeen @pFechaInicial And  @pFechaFinal
 	Order By NoIdentificacion
 
+	select * from vReporte_DetalladoFacturas
+
+Select TipoTransaccion As TipoDcto,Nombre As TipoTransaccion, Identificador,NombreCliente,    SubTotal,Descuento,ValorIVA,RetencionIVA,TotalDocumento    
+From dbo.vReporte_DetalladoFacturas Facturas    
+Where Fecha BetWeen @pFechaInicial And  @pFechaFinal
+
 -- Report listings with different variations
 Select IdReporte, Modulo.Nombre As Modulo,Reporte.Nombre , Titulo, Reporte.IdModulo, 
 	   SentenciaSQL,TipoReporte , OrdenMostrar, AgrupaPor
@@ -201,7 +207,7 @@ Select IdReporte, Modulo.Nombre As Modulo,Reporte.Nombre , Titulo, Reporte.IdMod
 	   SentenciaSQL,TipoReporte 
 	FRom Catalogo.Reportes Reporte
 		Inner Join Catalogo.Modulo Modulo On Reporte.IdModulo = Modulo.IdModulo
-	Order By Modulo.Nombre
+	Order By Modulo.Nombre, OrdenMostrar
 ---------------------------------------------------------------------------------------
 
 Select * from Catalogo.Modulo
@@ -227,4 +233,28 @@ Select * from Catalogo.Modulo
 --	RH-Nomina
 --		reportes/generador-reportes?idModulo=9632C87F-55A5-4F60-A627-FCAE9891D497
 
+select * from Catalogo.TipoLicencia
 
+Execute Catalogo.ModuloXMenuXLicencia_SELECT
+	@Activo = 1,
+	@esSistema = 0,
+	@IdTipoLicencia = '2AF9003D-220A-4C1C-B806-929F4FFC0802'
+
+Execute Catalogo.ModuloXMenuXLicencia_SELECT
+	@Activo = 1,
+	@esSistema = 0,
+	@IdTipoLicencia = '4B25C65B-2969-4348-B334-4E91529DCED1'
+
+
+
+	Execute Catalogo.ModuloXMenuXLicencia_SELECT
+	@Activo = 1,
+	@esSistema = 0,
+	@IdTipoLicencia = '14D9B476-198A-40EC-A493-ED729A377312'
+
+select * from Catalogo.TipoLicencia
+
+Execute Catalogo.ModuloXMenuXLicencia_SELECT
+	@Activo = 1,
+	@esSistema = 0,
+	@IdTipoLicencia = '2AF9003D-220A-4C1C-B806-929F4FFC0802'
