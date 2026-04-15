@@ -94,6 +94,18 @@ Execute Empresa.spReporte_DetalleSaldoInventarioProducto 'B62C2D64-D4FB-4010-976
 
 Empresa.SP_BalanceCuentaContable @IdEmpresa ,@Ano, @Periodo, @pNivel=6,@IncluirCuentasSinMovimiento=1,@SoloTotales=0
 
+{
+  "reportId": "A616B9B3-D991-46A4-A634-EEBA10F885D2",
+  "parameters": {
+    "@IdEmpresa": "B62C2D64-D4FB-4010-976A-05166C324413",
+    "@Ano": "2026",
+	"@Periodo": "1",
+    "@pNivel": "6",
+	"@IncluirCuentasSinMovimiento": "0",
+	"@SoloTotales": "0"
+  }
+}
+
 EXEC [Empresa].[SP_BalanceCuentaContable] 
 	@IdEmpresa = '0FF67BF9-54D7-4E76-83AD-E1D5A69FE951',
 	@Ano = 2025, 
