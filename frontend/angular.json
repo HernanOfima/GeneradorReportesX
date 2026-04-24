@@ -31,9 +31,21 @@
             ],
             "styles": [
               "@angular/material/prebuilt-themes/indigo-pink.css",
-              "src/styles.scss"
+              "src/styles.scss",
+              "node_modules/jspreadsheet-ce/dist/jspreadsheet.css",
+              "node_modules/jsuites/dist/jsuites.css"
             ],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": [
+              "jspreadsheet-ce",
+              "jsuites",
+              "hyperformula",
+              "tiny-emitter",
+              "regexp-to-ast",
+              "chevrotain",
+              "exceljs",
+              "file-saver"
+            ]
           },
           "configurations": {
             "production": {

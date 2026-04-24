@@ -22,6 +22,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule, MatRippleModule } from '@angular/material/core';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDividerModule } from '@angular/material/divider';
 
 // AG-Grid
 import { AgGridModule } from 'ag-grid-angular';
@@ -35,6 +38,7 @@ import { ParameterInputDialogComponent } from './components/parameter-input-dial
 import { ResultsModalComponent } from './components/results-modal/results-modal.component';
 import { NumericCellRendererComponent } from './components/numeric-cell-renderer/numeric-cell-renderer.component';
 import { LoginComponent } from './components/login/login.component';
+import { AnaliticaSpreadsheetComponent } from './components/analitica-spreadsheet/analitica-spreadsheet.component';
 
 @NgModule({
   declarations: [
@@ -43,7 +47,8 @@ import { LoginComponent } from './components/login/login.component';
     ParameterInputDialogComponent,
     ResultsModalComponent,
     NumericCellRendererComponent,
-    LoginComponent
+    LoginComponent,
+    AnaliticaSpreadsheetComponent
   ],
   imports: [
     BrowserModule,
@@ -72,6 +77,9 @@ import { LoginComponent } from './components/login/login.component';
     MatDatepickerModule,
     MatNativeDateModule,
     MatRippleModule,
+    MatExpansionModule,
+    MatSelectModule,
+    MatDividerModule,
     
     // AG-Grid
     AgGridModule

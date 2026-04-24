@@ -1,0 +1,23 @@
+{
+  "params": { "empresa": "ODRESQA", "anio1": 2023, "anio2": 2023,
+               "mesInicial": 1, "mesFinal": 12, "acumulado": "A", "nivel": 2 },
+  "data": [
+    ["","BALANCE MENSUAL","","","","","","","",""],
+    ["","","","","","","","","",""],
+    ["Código","Descripción","Saldo Inicial","Débito","Crédito","Saldo Final","","","",""],
+    ["1","=NOMBRECTA(\"1\")","=SALDOINICIAL(\"1\")","=DEBITO(\"1\")","=CREDITO(\"1\")","=SALDOFINAL(\"1\")","","","",""],
+    ["11","=NOMBRECTA(\"11\")","=SALDOINICIAL(\"11\")","=DEBITO(\"11\")","=CREDITO(\"11\")","=SALDOFINAL(\"11\")","","","",""],
+    ["13","=NOMBRECTA(\"13\")","=SALDOINICIAL(\"13\")","=DEBITO(\"13\")","=CREDITO(\"13\")","=SALDOFINAL(\"13\")","","","",""],
+    ["14","=NOMBRECTA(\"14\")","=SALDOINICIAL(\"14\")","=DEBITO(\"14\")","=CREDITO(\"14\")","=SALDOFINAL(\"14\")","","","",""],
+    ["15","=NOMBRECTA(\"15\")","=SALDOINICIAL(\"15\")","=DEBITO(\"15\")","=CREDITO(\"15\")","=SALDOFINAL(\"15\")","","","",""],
+    ["2","=NOMBRECTA(\"2\")","=SALDOINICIAL(\"2\")","=DEBITO(\"2\")","=CREDITO(\"2\")","=SALDOFINAL(\"2\")","","","",""],
+    ["22","=NOMBRECTA(\"22\")","=SALDOINICIAL(\"22\")","=DEBITO(\"22\")","=CREDITO(\"22\")","=SALDOFINAL(\"22\")","","","",""],
+    ["23","=NOMBRECTA(\"23\")","=SALDOINICIAL(\"23\")","=DEBITO(\"23\")","=CREDITO(\"23\")","=SALDOFINAL(\"23\")","","","",""],
+    ["3","=NOMBRECTA(\"3\")","=SALDOINICIAL(\"3\")","=DEBITO(\"3\")","=CREDITO(\"3\")","=SALDOFINAL(\"3\")","","","",""],
+    ["4","=NOMBRECTA(\"4\")","=SALDOINICIAL(\"4\")","=DEBITO(\"4\")","=CREDITO(\"4\")","=SALDOFINAL(\"4\")","","","",""],
+    ["5","=NOMBRECTA(\"5\")","=SALDOINICIAL(\"5\")","=DEBITO(\"5\")","=CREDITO(\"5\")","=SALDOFINAL(\"5\")","","","",""],
+    ["6","=NOMBRECTA(\"6\")","=SALDOINICIAL(\"6\")","=DEBITO(\"6\")","=CREDITO(\"6\")","=SALDOFINAL(\"6\")","","","",""],
+    ["","TOTALES","=SUM(C4:C15)","=SUM(D4:D15)","=SUM(E4:E15)","=SUM(F4:F15)","","","",""]
+  ],
+  "timestamp": "2025-01-01T00:00:00.000Z"
+}

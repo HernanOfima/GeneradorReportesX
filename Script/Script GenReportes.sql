@@ -106,10 +106,12 @@ Empresa.SP_BalanceCuentaContable @IdEmpresa ,@Ano, @Periodo, @pNivel=6,@IncluirC
   }
 }
 
+select * from [Registro].[Empresa]
+
 EXEC [Empresa].[SP_BalanceCuentaContable] 
-	@IdEmpresa = '0FF67BF9-54D7-4E76-83AD-E1D5A69FE951',
-	@Ano = 2025, 
-	@Periodo = 4, 
+	@IdEmpresa = '41FCD3E6-4ED6-4EFE-853F-FB26D40F1AAF',
+	@Ano = 2026, 
+	@Periodo = 2, 
 	@pNivel = 6, 
 	@IncluirCuentasSinMovimiento = 1, 
 	@SoloTotales= 0
@@ -192,6 +194,22 @@ Select TipoTransaccion As TipoDcto,Nombre As TipoTransaccion, Identificador,Nomb
 From dbo.vReporte_DetalladoFacturas Facturas    
 Where Fecha BetWeen @pFechaInicial And  @pFechaFinal
 
+Select  NumeroDocumento,TipoTransaccion,Fecha,Identificador,    NombreProveedor,SubTotal,Descuento, ValorIVA,RetencionIVA,    TotalDocumento, NombreEmpresa   From [dbo].[vReporte_DetalladoCompras]    Where IdEmpresa = @pIdEmpresa And    Fecha BetWeen @pFechaInicial And  @pFechaFinal
+
+Select      NoIdentificacion    ,Descripcion    ,NumeroDocumento    ,TipoTransaccion    ,FechaDocumento    ,ClaveUnidad    ,UnidadMedida    ,Cantidad    ,ValorUnitario    ,Descuento    ,SubTotalItem   From vReporte_DetalladoMovimientoProducto    Where IdEmpresa = @pIdEmpresa And FechaDocumento BetWeen @pFechaInicial And  @pFechaFinal   Order By NoIdentificacion
+
+Select * from vReporte_DetalladoMovimientoProducto
+Select      NoIdentificacion    ,Descripcion    ,NumeroDocumento    ,TipoTransaccion    ,FechaDocumento    ,ClaveUnidad    ,UnidadMedida    ,Cantidad    ,ValorUnitario    ,Descuento    ,SubTotalItem   From vReporte_DetalladoMovimientoProducto    Where IdEmpresa = @pIdEmpresa And FechaDocumento BetWeen @pFechaInicial And  @pFechaFinal   Order By NoIdentificacion
+
+
+
+
+Select      NoIdentificacion    ,Descripcion    ,NumeroDocumento    ,TipoTransaccion    ,FechaDocumento    ,ClaveUnidad    ,UnidadMedida    ,Cantidad    ,ValorUnitario    ,Descuento    ,SubTotalItem   
+From vReporte_DetalladoMovimientoProducto   
+Where IdEmpresa = @pIdEmpresa And FechaDocumento BetWeen @pFechaInicial And  @pFechaFinal   Order By NoIdentificacion
+
+
+
 -- Report listings with different variations
 Select IdReporte, Modulo.Nombre As Modulo,Reporte.Nombre , Titulo, Reporte.IdModulo, 
 	   SentenciaSQL,TipoReporte , OrdenMostrar, AgrupaPor
@@ -222,8 +240,10 @@ Select IdReporte, Modulo.Nombre As Modulo,Reporte.Nombre , Titulo, Reporte.IdMod
 	Order By Modulo.Nombre, OrdenMostrar
 ---------------------------------------------------------------------------------------
 
-Select * from Catalogo.Modulo
-
+Select * from Catalogo.reportes
+Empresa.SP_BalanceCuentaContable @IdEmpresa ,@Ano, @Periodo, @pNivel=6,@IncluirCuentasSinMovimiento=1,@SoloTotales=0
+ALTER TABLE Catalogo.Reportes ADD
+	MuestraTotales bit NOT NULL CONSTRAINT DF_Reportes_MuestraTotales DEFAULT 1
 
 --Menu de Generador Reportes
 --	Reportes
@@ -244,6 +264,8 @@ Select * from Catalogo.Modulo
 --		reportes/generador-reportes?idModulo=A1F58ABA-ECA5-4E5F-B829-705A77959103
 --	RH-Nomina
 --		reportes/generador-reportes?idModulo=9632C87F-55A5-4F60-A627-FCAE9891D497
+
+
 
 select * from Catalogo.TipoLicencia
 
@@ -269,4 +291,40 @@ select * from Catalogo.TipoLicencia
 Execute Catalogo.ModuloXMenuXLicencia_SELECT
 	@Activo = 1,
 	@esSistema = 0,
-	@IdTipoLicencia = '2AF9003D-220A-4C1C-B806-929F4FFC0802'
+	@IdTipoLicencia = 'A6FA6E5D-FCF3-4FC8-8283-749AD0992295'
+
+
+	-- Verificar
+SELECT *
+FROM Catalogo.PlantillaAnalitica
+ORDER BY FechaRegistro;
+Select * From [Empresa].[CuentaContable]
+
+        SELECT TOP 1 ISNULL(NombreCuenta, NombreCuenta) AS NombreCuenta
+            FROM [Empresa].[CuentaContable]
+            WHERE CodigoCuenta = @cuenta
+              --AND IdEmpresa = (SELECT IdEmpresa FROM Empresa.Empresa WHERE Codigo = @empresa)
+            ORDER BY CodigoCuenta
+
+
+ SELECT TOP 1 ISNULL(NombreCuenta, NombreCuenta) AS NombreCuenta
+            FROM [Empresa].[CuentaContable]
+            WHERE CodigoCuenta = '1'
+              --AND IdEmpresa = (SELECT IdEmpresa FROM Empresa.Empresa WHERE Codigo = @empresa)
+            ORDER BY Codigo
+
+SELECT * 
+		From   [Empresa].[MovimientoContable]
+
+
+    SELECT ISNULL(SUM(
+        
+            m.Cargo - Abono
+       
+    ), 0)
+    FROM [Empresa].[MovimientoContable] m
+    INNER JOIN Registro.Empresa e ON e.IdEmpresa = m.IdEmpresa
+	Inner Join [Empresa].[CuentaContable] Cuenta On Cuenta.IdCuentaContable = m.IdCuentaContable
+    WHERE Cuenta.CodigoCuenta LIKE @cuenta + '%'
+        AND Year(m.FechaMovimiento) = @año
+        AND Month(m.FechaMovimiento) <= @periodo

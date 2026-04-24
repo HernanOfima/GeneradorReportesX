@@ -19,6 +19,7 @@ builder.Services.AddDbContext<ReportDbContext>(options =>
 // Repositories
 builder.Services.AddScoped<IModuleRepository, ModuleRepository>();
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
+builder.Services.AddScoped<IAnaliticaRepository, AnaliticaRepository>();
 
 // Services
 builder.Services.AddScoped<ExcelExportService>();

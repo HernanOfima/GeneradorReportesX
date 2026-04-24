@@ -1,0 +1,180 @@
+<div class="analitica-container">
+
+  <!-- ══ TOOLBAR ══════════════════════════════════════════════════════ -->
+  <div class="analitica-toolbar">
+    <div class="toolbar-left">
+      <mat-icon class="toolbar-icon">table_chart</mat-icon>
+      <span class="toolbar-title">Análitica — Spreadsheet</span>
+    </div>
+
+    <div class="toolbar-actions">
+      <!-- Plantillas -->
+      <button mat-stroked-button (click)="abrirDialogoPlantillas()" matTooltip="Cargar plantilla guardada">
+        <mat-icon>folder_open</mat-icon> Plantillas
+      </button>
+      <button mat-stroked-button (click)="guardarPlantilla()" matTooltip="Guardar plantilla actual">
+        <mat-icon>save</mat-icon> Guardar
+      </button>
+
+      <mat-divider [vertical]="true" style="height:28px; margin: 0 8px;"></mat-divider>
+
+      <!-- Calcular -->
+      <button mat-raised-button color="primary" (click)="calcular()" [disabled]="calculando">
+        <mat-icon>{{ calculando ? 'hourglass_empty' : 'calculate' }}</mat-icon>
+        {{ calculando ? 'Calculando...' : 'Calcular' }}
+      </button>
+
+      <!-- Exportar -->
+      <button mat-stroked-button (click)="exportarExcel()" matTooltip="Exportar a Excel">
+        <mat-icon>download</mat-icon> Excel
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ PANEL DE PARÁMETROS ══════════════════════════════════════════ -->
+  <mat-expansion-panel class="params-panel" [expanded]="true">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <mat-icon>tune</mat-icon> &nbsp; Parámetros de Consulta
+      </mat-panel-title>
+      <mat-panel-description>Empresa, período y años para evaluar las fórmulas</mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <div class="params-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Empresa</mat-label>
+        <input matInput [(ngModel)]="params.empresa" placeholder="Ej: TODOTERRENO2026">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Año 1</mat-label>
+        <input matInput type="number" [(ngModel)]="params.anio1" min="2000" max="2099">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Año 2</mat-label>
+        <input matInput type="number" [(ngModel)]="params.anio2" min="2000" max="2099">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Mes Inicial</mat-label>
+        <mat-select [(ngModel)]="params.mesInicial">
+          <mat-option *ngFor="let m of meses" [value]="m.value">{{ m.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Mes Final</mat-label>
+        <mat-select [(ngModel)]="params.mesFinal">
+          <mat-option *ngFor="let m of meses" [value]="m.value">{{ m.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Acumulado</mat-label>
+        <mat-select [(ngModel)]="params.acumulado">
+          <mat-option value="A">Acumulado (A)</mat-option>
+          <mat-option value="P">Por período (P)</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Nivel de cuentas</mat-label>
+        <input matInput type="number" [(ngModel)]="params.nivel" min="1" max="8">
+      </mat-form-field>
+    </div>
+  </mat-expansion-panel>
+
+  <!-- ══ REFERENCIA DE FÓRMULAS ═══════════════════════════════════════ -->
+  <mat-expansion-panel class="formulas-ref-panel">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <mat-icon>functions</mat-icon> &nbsp; Referencia de Fórmulas OFIMA
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <div class="formula-chips">
+      <div class="formula-chip" *ngFor="let f of formulasReferencia" (click)="copiarFormula(f.formula)" matTooltip="Clic para copiar">
+        <code class="formula-code">{{ f.formula }}</code>
+        <span class="formula-desc">{{ f.descripcion }}</span>
+      </div>
+    </div>
+  </mat-expansion-panel>
+
+  <!-- ══ ESTADO DE CONTEXTO ═══════════════════════════════════════════ -->
+  <div class="context-status" [ngClass]="{ 'status-ok': contextoOk, 'status-warn': !contextoOk }">
+    <mat-icon>{{ contextoOk ? 'check_circle' : 'warning' }}</mat-icon>
+    <span>{{ contextoOk ? 'Contexto cargado — ' + totalCuentasContexto + ' cuentas' : 'Sin contexto. Configure parámetros y presione Calcular.' }}</span>
+    <span *ngIf="contextoOk" class="context-detail">&nbsp;Empresa: {{ params.empresa }} | Período: {{ params.mesInicial }}-{{ params.mesFinal }} | Años: {{ params.anio1 }}/{{ params.anio2 }}</span>
+  </div>
+
+  <!-- ══ BARRA DE FÓRMULAS ══════════════════════════════════════════ -->
+  <div class="formula-bar">
+    <span class="formula-bar__cell">{{ seleccion || 'A1' }}</span>
+    <span class="formula-bar__fx">ƒx</span>
+    <input
+      #formulaBarInput
+      class="formula-bar__input"
+      [value]="formulaBarValor"
+      (keydown.enter)="commitFormula(formulaBarInput.value)"
+      (keydown.escape)="formulaBarInput.value = formulaBarValor"
+      (blur)="commitFormula(formulaBarInput.value)"
+      placeholder="Ingrese un valor o fórmula…"
+      spellcheck="false"
+      autocomplete="off"
+    />
+  </div>
+
+  <!-- ══ SPREADSHEET ══════════════════════════════════════════════════ -->
+  <div class="spreadsheet-wrapper">
+    <div #spreadsheetContainer id="spreadsheet-container"></div>
+  </div>
+
+</div>
+
+<!-- ══ DIALOGO: GUARDAR PLANTILLA ══════════════════════════════════════ -->
+<ng-template #dialogoGuardar>
+  <h2 mat-dialog-title>Guardar Plantilla</h2>
+  <mat-dialog-content>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nombre</mat-label>
+      <input matInput [(ngModel)]="plantillaNombre">
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Descripción</mat-label>
+      <textarea matInput [(ngModel)]="plantillaDescripcion" rows="3"></textarea>
+    </mat-form-field>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Cancelar</button>
+    <button mat-raised-button color="primary" [mat-dialog-close]="true">Guardar</button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- ══ DIALOGO: CARGAR PLANTILLA ══════════════════════════════════════ -->
+<ng-template #dialogoPlantillas>
+  <h2 mat-dialog-title>Plantillas Guardadas</h2>
+  <mat-dialog-content>
+    <div *ngIf="plantillas.length === 0" class="analitica-no-plantillas">
+      No hay plantillas guardadas aún.
+    </div>
+    <mat-list *ngIf="plantillas.length > 0">
+      <mat-list-item *ngFor="let p of plantillas" class="analitica-plantilla-item">
+        <mat-icon matListItemIcon>description</mat-icon>
+        <div matListItemTitle>{{ p.nombre }}</div>
+        <div matListItemLine>{{ p.descripcion }}</div>
+        <div matListItemMeta class="analitica-plantilla-actions">
+          <button mat-icon-button color="primary" (click)="cargarPlantilla(p)" matTooltip="Cargar">
+            <mat-icon>open_in_browser</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="eliminarPlantilla(p.id)" matTooltip="Eliminar">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </mat-list-item>
+    </mat-list>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Cerrar</button>
+  </mat-dialog-actions>
+</ng-template>

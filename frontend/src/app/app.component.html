@@ -7,9 +7,17 @@
         <span class="app-title">{{title}}</span>
       </div>
       <div class="header-right" *ngIf="currentUser">
+        <nav class="header-nav">
+          <a mat-button routerLink="/reports" routerLinkActive="nav-active">
+            <mat-icon>bar_chart</mat-icon> Reportes
+          </a>
+          <a mat-button routerLink="/analitica" routerLinkActive="nav-active">
+            <mat-icon>table_chart</mat-icon> Analítica
+          </a>
+        </nav>
         <span class="user-info">
           <mat-icon>person</mat-icon>
-          Bienvenido, {{currentUser.username}}
+          {{currentUser.username}}
         </span>
         <button mat-icon-button (click)="logout()" matTooltip="Cerrar Sesión" class="logout-btn">
           <mat-icon>exit_to_app</mat-icon>

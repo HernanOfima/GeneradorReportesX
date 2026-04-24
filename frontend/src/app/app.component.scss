@@ -71,6 +71,35 @@
       }
     }
 
+    .header-nav {
+      display: flex;
+      gap: 4px;
+
+      a {
+        color: rgba(255,255,255,0.85);
+        font-size: 13px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        mat-icon { font-size: 18px; height: 18px; width: 18px; }
+
+        &.nav-active {
+          background: rgba(255,255,255,0.15);
+          color: #fff;
+        }
+
+        &:hover {
+          background: rgba(255,255,255,0.1);
+        }
+      }
+
+      @media (max-width: 600px) {
+        display: none;
+      }
+    }
+
     .logout-btn {
       background: rgba(255, 255, 255, 0.1);
       transition: background-color 0.3s ease;

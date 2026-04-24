@@ -1,0 +1,411 @@
+// ── Variables locales basadas en el tema de la app ───────────────────
+$bg: var(--app-bg, #07151e);
+$surface: var(--app-surface, #10283a);
+$border: var(--app-border, #1f425d);
+$text: var(--app-text, #e4eff8);
+$accent: #5b9bd5;
+$accent-light: #89c0f0;
+$success: #4caf50;
+$warn: #ffc107;
+
+.analitica-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 64px);
+  background: $bg;
+  color: $text;
+  overflow: hidden;
+}
+
+// ── Toolbar ───────────────────────────────────────────────────────────
+.analitica-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 16px;
+  background: $surface;
+  border-bottom: 1px solid $border;
+  min-height: 48px;
+  flex-shrink: 0;
+
+  .toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .toolbar-icon { color: $accent-light; font-size: 22px; }
+
+    .toolbar-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: $text;
+    }
+  }
+
+  .toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    button {
+      height: 34px;
+      font-size: 12px;
+      color: $text !important;
+      border-color: $border !important;
+    }
+
+    button[color="primary"] {
+      color: white !important;
+    }
+  }
+}
+
+// ── Expansion panels ──────────────────────────────────────────────────
+.params-panel,
+.formulas-ref-panel {
+  flex-shrink: 0;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  background: $surface !important;
+  border-bottom: 1px solid $border !important;
+  box-shadow: none !important;
+
+  ::ng-deep {
+    .mat-expansion-panel-header {
+      height: 40px !important;
+      padding: 0 16px;
+      background: $surface !important;
+
+      &:hover { background: rgba(91, 155, 213, 0.08) !important; }
+    }
+
+    .mat-panel-title {
+      font-size: 13px;
+      color: $text;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      mat-icon {
+        font-size: 16px;
+        height: 16px;
+        width: 16px;
+        color: $accent-light;
+      }
+    }
+
+    .mat-panel-description {
+      font-size: 11px;
+      color: rgba(228, 239, 248, 0.45);
+    }
+
+    .mat-expansion-panel-body {
+      padding: 4px 16px 12px;
+      background: $surface !important;
+    }
+
+    .mat-expansion-indicator::after {
+      color: $text !important;
+    }
+  }
+}
+
+// ── Parámetros ────────────────────────────────────────────────────────
+.params-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 8px;
+
+  mat-form-field {
+    flex: 1 1 130px;
+    min-width: 120px;
+    max-width: 190px;
+
+    ::ng-deep {
+      .mat-mdc-form-field-subscript-wrapper { display: none; }
+
+      .mat-mdc-text-field-wrapper {
+        background: rgba(255, 255, 255, 0.05) !important;
+      }
+
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: $border !important;
+      }
+
+      .mat-mdc-floating-label,
+      .mdc-floating-label {
+        color: rgba(228, 239, 248, 0.6) !important;
+      }
+
+      input, .mat-mdc-select-value-text {
+        color: $text !important;
+        font-size: 13px;
+      }
+
+      .mat-mdc-select-arrow { color: $text !important; }
+
+      .mdc-notched-outline--upgraded .mdc-notched-outline__notch {
+        border-color: $accent !important;
+      }
+    }
+  }
+}
+
+// ── Referencia de fórmulas ────────────────────────────────────────────
+.formula-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px 0;
+}
+
+.formula-chip {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 12px;
+  background: rgba(91, 155, 213, 0.08);
+  border: 1px solid $border;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  min-width: 185px;
+
+  &:hover {
+    border-color: $accent-light;
+    background: rgba(91, 155, 213, 0.15);
+  }
+
+  .formula-code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 11px;
+    color: #7ecf8e;
+    margin-bottom: 2px;
+  }
+
+  .formula-desc {
+    font-size: 10px;
+    color: rgba(228, 239, 248, 0.45);
+  }
+}
+
+// ── Barra de estado contexto ──────────────────────────────────────────
+.context-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 16px;
+  font-size: 12px;
+  flex-shrink: 0;
+  border-bottom: 1px solid $border;
+
+  mat-icon { font-size: 16px; height: 16px; width: 16px; }
+
+  &.status-ok {
+    background: rgba(76, 175, 80, 0.1);
+    color: #81c784;
+    mat-icon { color: #81c784; }
+  }
+
+  &.status-warn {
+    background: rgba(255, 193, 7, 0.08);
+    color: #ffd54f;
+    mat-icon { color: #ffd54f; }
+  }
+
+  .context-detail {
+    color: rgba(228, 239, 248, 0.4);
+    margin-left: 4px;
+  }
+}
+
+// ── Barra de fórmulas ─────────────────────────────────────────────────
+.formula-bar {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  flex-shrink: 0;
+  background: $surface;
+  border-bottom: 1px solid $border;
+  padding: 0;
+
+  &__cell {
+    min-width: 72px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: $accent-light;
+    border-right: 1px solid $border;
+    padding: 0 10px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(91, 155, 213, 0.08);
+    font-family: 'Consolas', monospace;
+  }
+
+  &__fx {
+    padding: 0 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(228, 239, 248, 0.45);
+    border-right: 1px solid $border;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    font-style: italic;
+    background: $surface;
+    white-space: nowrap;
+  }
+
+  &__input {
+    flex: 1;
+    height: 100%;
+    border: none;
+    outline: none;
+    background: $bg;
+    color: $text;
+    font-size: 13px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    padding: 0 12px;
+
+    &::placeholder { color: rgba(228, 239, 248, 0.25); }
+
+    &:focus {
+      background: rgba(91, 155, 213, 0.06);
+    }
+  }
+}
+
+// ── jSpreadsheet: toolbar dark override ───────────────────────────────
+.analitica-container ::ng-deep {
+  .jss_toolbar {
+    background: #0d2235 !important;
+    border-bottom: 1px solid $border !important;
+
+    .jss_toolbar_item {
+      color: $text !important;
+
+      &:hover { background: rgba(91, 155, 213, 0.15) !important; }
+    }
+
+    select {
+      background: #0d2235 !important;
+      color: $text !important;
+      border: 1px solid $border !important;
+    }
+
+    i.material-icons { color: $text !important; }
+  }
+}
+
+// ── Spreadsheet ───────────────────────────────────────────────────────
+.spreadsheet-wrapper {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  background: $bg;
+  min-height: 300px;
+
+  #spreadsheet-container {
+    position: absolute;
+    inset: 0;
+    overflow: auto;
+  }
+
+  // jSpreadsheet dark theme overrides
+  ::ng-deep {
+    .jss_container,
+    .jss_content {
+      background: $bg !important;
+      color: $text !important;
+    }
+
+    .jss_spreadsheet,
+    table.jss {
+      background: $bg !important;
+    }
+
+    thead td, thead th,
+    .jss_row_header,
+    .jss_header {
+      background: #0d2235 !important;
+      color: rgba(228, 239, 248, 0.75) !important;
+      border-color: $border !important;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    tbody td {
+      border-color: $border !important;
+      color: $text !important;
+      background: $bg !important;
+      font-size: 12px;
+
+      &.highlight {
+        background: rgba(91, 155, 213, 0.12) !important;
+      }
+
+      &.highlight-left,
+      &.highlight-right,
+      &.highlight-top,
+      &.highlight-bottom {
+        border-color: $accent !important;
+      }
+    }
+
+    .jss_formula_input,
+    .jss_toolbar {
+      background: #0d2235 !important;
+      color: $text !important;
+      border-color: $border !important;
+    }
+
+    .jss_contextmenu {
+      background: #0d2235 !important;
+      border: 1px solid $border !important;
+      color: $text !important;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+
+      li:hover { background: rgba(91, 155, 213, 0.2) !important; }
+    }
+
+    .jss_pagination { background: $surface !important; }
+  }
+}
+
+// ── Status bar inferior ───────────────────────────────────────────────
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 3px 16px;
+  background: $surface;
+  border-top: 1px solid $border;
+  font-size: 12px;
+  flex-shrink: 0;
+
+  .status-cell { color: $accent-light; font-weight: 600; min-width: 60px; }
+
+  .status-formula {
+    color: #7ecf8e;
+    font-family: 'Consolas', monospace;
+  }
+}
+
+// ── Diálogos (scoped a mat-dialog para evitar leaks con ViewEncapsulation.None) ──
+.mat-mdc-dialog-surface .full-width { width: 100%; }
+
+.analitica-no-plantillas {
+  padding: 20px;
+  text-align: center;
+  color: rgba(228, 239, 248, 0.4);
+  font-style: italic;
+}
+
+.analitica-plantilla-item { border-bottom: 1px solid $border; }
+
+.analitica-plantilla-actions { display: flex; gap: 4px; }
