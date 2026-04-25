@@ -109,17 +109,18 @@
   </div>
 
   <!-- ══ BARRA DE FÓRMULAS ══════════════════════════════════════════ -->
-  <div class="formula-bar">
+  <div class="formula-bar" [class.formula-bar--modo-formula]="modoFormula">
     <span class="formula-bar__cell">{{ seleccion || 'A1' }}</span>
-    <span class="formula-bar__fx">ƒx</span>
+    <span class="formula-bar__fx" [class.formula-bar__fx--activo]="modoFormula">ƒx</span>
     <input
       #formulaBarInput
       class="formula-bar__input"
       [value]="formulaBarValor"
-      (keydown.enter)="commitFormula(formulaBarInput.value)"
-      (keydown.escape)="formulaBarInput.value = formulaBarValor"
-      (blur)="commitFormula(formulaBarInput.value)"
-      placeholder="Ingrese un valor o fórmula…"
+      (focus)="onFxFocus()"
+      (blur)="onFxBlur(formulaBarInput.value)"
+      (input)="onFxInput(formulaBarInput.value)"
+      (keydown)="onFxKeydown($event, formulaBarInput.value)"
+      [placeholder]="modoFormula ? 'Haz clic en una celda para insertar referencia…' : 'Ingrese un valor o fórmula…'"
       spellcheck="false"
       autocomplete="off"
     />

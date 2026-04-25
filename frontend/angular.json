@@ -44,7 +44,8 @@
               "regexp-to-ast",
               "chevrotain",
               "exceljs",
-              "file-saver"
+              "file-saver",
+              "buffer"
             ]
           },
           "configurations": {

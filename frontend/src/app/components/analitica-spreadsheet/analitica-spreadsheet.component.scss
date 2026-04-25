@@ -278,6 +278,29 @@ $warn: #ffc107;
       background: rgba(91, 155, 213, 0.06);
     }
   }
+
+  // ── Modo fórmula activo (point mode) ──────────────────────────────
+  &--modo-formula {
+    border-bottom: 2px solid #4a9ede;
+    background: rgba(74, 158, 222, 0.04);
+
+    .formula-bar__cell {
+      background: rgba(74, 158, 222, 0.18);
+      color: #6bbcff;
+    }
+
+    .formula-bar__input {
+      background: rgba(74, 158, 222, 0.07);
+      color: #a8d8ff;
+
+      &::placeholder { color: rgba(107, 188, 255, 0.45); font-style: italic; }
+    }
+  }
+
+  &__fx--activo {
+    color: #4a9ede !important;
+    text-shadow: 0 0 8px rgba(74, 158, 222, 0.7);
+  }
 }
 
 // ── jSpreadsheet: toolbar dark override ───────────────────────────────

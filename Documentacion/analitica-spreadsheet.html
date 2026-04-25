@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Documentación Técnica — Analítica Spreadsheet</title>
+<style>
+:root{--bg:#0d1b2a;--s:#112236;--s2:#162d44;--bd:#1e3a55;--tx:#d8eaf8;--mu:#7fa8c9;--ac:#4a9ede;--ac2:#6bbcff;--gn:#4caf7d;--ye:#f0c040;--re:#e05c5c;--pu:#9b72cf;--cb:#0a1622}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.7;font-size:15px}
+.sidebar{position:fixed;left:0;top:0;width:250px;height:100vh;background:var(--s);border-right:1px solid var(--bd);overflow-y:auto;padding:20px 0;z-index:100}
+.sb-logo{padding:0 18px 16px;border-bottom:1px solid var(--bd);margin-bottom:10px}
+.sb-logo h1{font-size:14px;color:var(--ac2);font-weight:700}
+.sb-logo span{font-size:11px;color:var(--mu);display:block;margin-top:2px}
+.ng{padding:6px 0}.ngt{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--mu);padding:3px 18px 6px}
+a.nl{display:block;padding:5px 18px 5px 26px;color:var(--mu);text-decoration:none;font-size:13px;border-left:2px solid transparent;transition:all .15s}
+a.nl:hover{color:var(--tx);background:rgba(74,158,222,.07);border-left-color:var(--ac)}
+.main{margin-left:250px;padding:44px 52px;max-width:1060px}
+h2{font-size:24px;color:var(--ac2);margin:44px 0 14px;padding-bottom:9px;border-bottom:1px solid var(--bd)}
+h2:first-child{margin-top:0}
+h3{font-size:17px;color:var(--tx);margin:28px 0 10px}
+h4{font-size:13px;color:var(--ac);margin:18px 0 7px;text-transform:uppercase;letter-spacing:.5px}
+p{margin-bottom:12px}
+pre{background:var(--cb);border:1px solid var(--bd);border-radius:7px;padding:18px 22px;overflow-x:auto;font-family:'Consolas',monospace;font-size:13px;line-height:1.6;margin:14px 0 20px}
+code{font-family:'Consolas',monospace;font-size:12px}
+p code,li code,td code{background:var(--cb);border:1px solid var(--bd);padding:1px 5px;border-radius:3px;color:var(--ac2);font-size:12px}
+.kw{color:#c792ea}.cm{color:#546e7a;font-style:italic}.st{color:#c3e88d}.nm{color:#f78c6c}.fn{color:#82aaff}.ty{color:#ffcb6b}.op{color:#89ddff}.at{color:#f07178}
+table{width:100%;border-collapse:collapse;margin:14px 0 24px;font-size:13.5px}
+th{background:var(--s2);color:var(--ac2);text-align:left;padding:9px 13px;border:1px solid var(--bd);font-size:11px;letter-spacing:.4px}
+td{padding:8px 13px;border:1px solid var(--bd);vertical-align:top}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+.badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600;vertical-align:middle}
+.bg{background:rgba(76,175,125,.15);color:var(--gn);border:1px solid rgba(76,175,125,.3)}
+.bp{background:rgba(240,192,64,.12);color:var(--ye);border:1px solid rgba(240,192,64,.3)}
+.bd2{background:rgba(224,92,92,.12);color:var(--re);border:1px solid rgba(224,92,92,.3)}
+.card{background:var(--s);border:1px solid var(--bd);border-radius:9px;padding:18px 22px;margin:14px 0}
+.cl{border-left:3px solid var(--ac);background:rgba(74,158,222,.07);padding:11px 15px;border-radius:0 6px 6px 0;margin:14px 0;font-size:13.5px}
+.cl.w{border-left-color:var(--ye);background:rgba(240,192,64,.07)}
+.cl.g{border-left-color:var(--gn);background:rgba(76,175,125,.07)}
+.flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;margin:18px 0;font-size:12px}
+.fb{background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:9px 13px;text-align:center;min-width:110px}
+.fb .lb{color:var(--mu);font-size:10px;margin-bottom:2px}
+.fb .nm2{color:var(--ac2);font-weight:600;font-size:12px}
+.fa{color:var(--mu);font-size:18px;padding:0 7px}
+.fp{color:var(--pu);font-family:'Consolas',monospace;font-size:12px}
+ul,ol{padding-left:20px;margin-bottom:12px}
+li{margin-bottom:4px}
+section{padding-top:6px}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sb-logo">
+    <h1>📊 Analítica Spreadsheet</h1>
+    <span>Documentación Técnica v2.0 — Abril 2026</span>
+  </div>
+  <div class="ng"><div class="ngt">General</div>
+    <a class="nl" href="#overview">Visión General</a>
+    <a class="nl" href="#stack">Stack Tecnológico</a>
+    <a class="nl" href="#arquitectura">Arquitectura</a>
+  </div>
+  <div class="ng"><div class="ngt">Frontend</div>
+    <a class="nl" href="#componente">Componente Angular</a>
+    <a class="nl" href="#jspreadsheet">jSpreadsheet CE v5</a>
+    <a class="nl" href="#toolbar">Toolbar &amp; Formula Bar</a>
+    <a class="nl" href="#plugin">OfimaFormulasPlugin</a>
+    <a class="nl" href="#formulas">Fórmulas OFIMA</a>
+    <a class="nl" href="#service">Service &amp; Modelos</a>
+  </div>
+  <div class="ng"><div class="ngt">Backend</div>
+    <a class="nl" href="#controller">AnaliticaController</a>
+    <a class="nl" href="#repositorio">AnaliticaRepository</a>
+    <a class="nl" href="#dtos">DTOs C#</a>
+  </div>
+  <div class="ng"><div class="ngt">Plantillas</div>
+    <a class="nl" href="#plantilla-json">Formato JSON v2</a>
+    <a class="nl" href="#guardar">Guardar Formato</a>
+    <a class="nl" href="#cargar">Cargar Formato</a>
+    <a class="nl" href="#db-schema">Esquema BD</a>
+  </div>
+  <div class="ng"><div class="ngt">Referencia</div>
+    <a class="nl" href="#api-endpoints">Endpoints API</a>
+    <a class="nl" href="#flujo">Flujo de Datos</a>
+    <a class="nl" href="#config">Configuración</a>
+    <a class="nl" href="#licencia">Licencia</a>
+  </div>
+</nav>
+
+<main class="main">
+
+<!-- OVERVIEW -->
+<section id="overview">
+<h2>Visión General</h2>
+<p>El módulo <strong>Analítica Spreadsheet</strong> es una hoja de cálculo interactiva integrada en <strong>Generador de Reportes X</strong> que permite construir informes contables analíticos usando fórmulas personalizadas conectadas en tiempo real con la BD del ERP OFIMA.</p>
+<p>Replica en web las funcionalidades del complemento <code>ofima.xla</code> de Excel: el usuario escribe <code>=NOMBRECTA("11")</code>, <code>=SALDOINICIAL("11")</code> o <code>=SALDOFINAL("11")</code> en cualquier celda, exactamente igual que en Excel con el add-in instalado.</p>
+<div class="cl g"><strong>Casos de uso:</strong> Balance Mensual · Estado de Resultados · Balance General Comparativo · Flujo de Caja · cualquier informe contable ad-hoc.</div>
+</section>
+
+<!-- STACK -->
+<section id="stack">
+<h2>Stack Tecnológico</h2>
+<table>
+<tr><th>Capa</th><th>Tecnología</th><th>Versión</th><th>Rol</th></tr>
+<tr><td>Grid de celdas</td><td>jspreadsheet-ce</td><td>5.0.4</td><td>Renderiza la hoja de cálculo editable con toolbar nativa</td></tr>
+<tr><td>Motor de fórmulas</td><td>@jspreadsheet/formula</td><td>2.0.2</td><td>Parser/evaluador de expresiones tipo Excel + registro de fórmulas custom</td></tr>
+<tr><td>Framework UI</td><td>Angular</td><td>16</td><td>SPA, routing, DI, lifecycle hooks, change detection</td></tr>
+<tr><td>Componentes UI</td><td>Angular Material</td><td>16</td><td>Dialogs, Snackbar, ExpansionPanel, MatSelect, MatInput</td></tr>
+<tr><td>Backend API</td><td>ASP.NET Core</td><td>7</td><td>REST API que consulta la BD OFIMA</td></tr>
+<tr><td>Acceso a datos</td><td>ADO.NET SqlConnection</td><td>—</td><td>Queries directos parametrizados sobre SQL Server</td></tr>
+<tr><td>Base de datos</td><td>SQL Server</td><td>2019+</td><td>BD ERP OFIMA (esquemas Empresa, Registro, Catalogo)</td></tr>
+</table>
+</section>
+
+<!-- ARQUITECTURA -->
+<section id="arquitectura">
+<h2>Arquitectura del Sistema</h2>
+<div class="flow">
+  <div class="fb"><div class="lb">Usuario</div><div class="nm2">Navegador</div></div>
+  <span class="fa">→</span>
+  <div class="fb"><div class="lb">Route /analitica</div><div class="nm2">Angular Router</div></div>
+  <span class="fa">→</span>
+  <div class="fb"><div class="lb">Componente</div><div class="nm2">AnaliticaSpreadsheet</div></div>
+  <span class="fa">→</span>
+  <div class="fb"><div class="lb">HTTP Client</div><div class="nm2">AnaliticaService</div></div>
+  <span class="fa">→</span>
+  <div class="fb"><div class="lb">REST API</div><div class="nm2">AnaliticaController</div></div>
+  <span class="fa">→</span>
+  <div class="fb"><div class="lb">Repositorio</div><div class="nm2">AnaliticaRepository</div></div>
+  <span class="fa">→</span>
+  <div class="fb"><div class="lb">BD OFIMA</div><div class="nm2">SQL Server</div></div>
+</div>
+
+<h4>Estructura de archivos</h4>
+<pre><span class="cm">Frontend (Angular)</span>
+frontend/src/app/
+├── components/analitica-spreadsheet/
+│   ├── <span class="st">analitica-spreadsheet.component.ts</span>    <span class="cm">← Lógica principal</span>
+│   ├── <span class="st">analitica-spreadsheet.component.html</span>  <span class="cm">← Template (toolbar, params, formula-bar, grid)</span>
+│   └── <span class="st">analitica-spreadsheet.component.scss</span>  <span class="cm">← Dark theme + toolbar/formula-bar styles</span>
+├── services/ <span class="st">analitica.service.ts</span>              <span class="cm">← 5 métodos HTTP</span>
+├── models/   <span class="st">analitica.models.ts</span>               <span class="cm">← Interfaces TypeScript</span>
+└── utils/    <span class="st">ofima-formulas.plugin.ts</span>           <span class="cm">← 7 fórmulas OFIMA custom</span>
+
+<span class="cm">Backend (ASP.NET Core 7)</span>
+oDres.GeneradorReportes.WEBApi/
+├── Controllers/           <span class="st">AnaliticaController.cs</span>   <span class="cm">← 9 endpoints REST</span>
+├── Application/DTOs/      <span class="st">AnaliticaDto.cs</span>         <span class="cm">← 4 contratos de datos</span>
+├── Domain/Interfaces/     <span class="st">IAnaliticaRepository.cs</span>  <span class="cm">← Contrato del repositorio</span>
+└── Infrastructure/Repos/  <span class="st">AnaliticaRepository.cs</span>   <span class="cm">← Implementación SQL + CRUD plantillas</span></pre>
+</section>
+
+<!-- COMPONENTE -->
+<section id="componente">
+<h2>Componente Angular</h2>
+<p class="fp">frontend/src/app/components/analitica-spreadsheet/analitica-spreadsheet.component.ts</p>
+
+<div class="cl w"><strong>ViewEncapsulation.None</strong> — Necesario para que los estilos SCSS puedan afectar el DOM dinámico generado por jSpreadsheet (elementos fuera del control de Angular).</div>
+
+<h4>Propiedades de estado públicas</h4>
+<table>
+<tr><th>Propiedad</th><th>Tipo</th><th>Descripción</th></tr>
+<tr><td><code>calculando</code></td><td>boolean</td><td>Deshabilita botón Calcular durante llamada HTTP</td></tr>
+<tr><td><code>contextoOk</code></td><td>boolean</td><td>Indica si el contexto de datos está cargado</td></tr>
+<tr><td><code>totalCuentasContexto</code></td><td>number</td><td>N° de cuentas cargadas del backend</td></tr>
+<tr><td><code>formulaBarValor</code></td><td>string</td><td>Valor crudo (fórmula sin evaluar) de la celda activa</td></tr>
+<tr><td><code>seleccion</code></td><td>string</td><td>Referencia de celda activa, ej: <code>B5</code></td></tr>
+<tr><td><code>params</code></td><td>ParametrosSpreadsheet</td><td>Empresa, años, meses, acumulado, nivel</td></tr>
+<tr><td><code>plantillas</code></td><td>PlantillaAnalitica[]</td><td>Lista de plantillas guardadas del backend</td></tr>
+</table>
+
+<h4>Ciclo de vida</h4>
+<table>
+<tr><th>Hook</th><th>Acción</th></tr>
+<tr><td><code>ngOnInit</code></td><td>Llama <code>OfimaFormulasPlugin.registrar()</code> — el guard <code>registrado</code> evita re-registro en hot-reload</td></tr>
+<tr><td><code>ngAfterViewInit</code></td><td><code>setTimeout(300ms)</code> antes de inicializar jSpreadsheet, espera que mat-expansion-panel termine animación y tenga dimensiones reales</td></tr>
+<tr><td><code>ngOnDestroy</code></td><td>Llama <code>jspreadsheet.destroy(el)</code> (método estático v5) y <code>OfimaFormulasPlugin.clearContexto()</code></td></tr>
+</table>
+
+<h4>Métodos públicos</h4>
+<table>
+<tr><th>Método</th><th>Descripción</th></tr>
+<tr><td><code>calcular()</code></td><td>Escanea col A, extrae cuentas, llama POST /CargarContexto, luego fuerza recálculo del grid</td></tr>
+<tr><td><code>commitFormula(value)</code></td><td>Escribe el valor de la barra de fórmulas en la celda activa (selX, selY)</td></tr>
+<tr><td><code>guardarPlantilla()</code></td><td>Abre diálogo, captura datos+formato+metadatos y llama POST /Plantillas</td></tr>
+<tr><td><code>cargarPlantilla(p)</code></td><td>Parsea JSON v2, restaura datos+estilos+merges+anchos via <code>inicializarSpreadsheet()</code></td></tr>
+<tr><td><code>exportarExcel()</code></td><td>Llama <code>hoja.download()</code> de jSpreadsheet (descarga CSV/xlsx)</td></tr>
+<tr><td><code>copiarFormula(f)</code></td><td>Copia una fórmula de ejemplo al portapapeles</td></tr>
+<tr><td><code>eliminarPlantilla(id)</code></td><td>Llama DELETE /Plantillas/{id} y actualiza la lista</td></tr>
+</table>
+</section>
+
+<!-- JSPREADSHEET -->
+<section id="jspreadsheet">
+<h2>Integración jSpreadsheet CE v5</h2>
+
+<div class="cl w"><strong>Cambio de API v4→v5:</strong> <code>jspreadsheet(el, options)</code> retorna <code>WorksheetInstance[]</code>. El destroy es <code>jspreadsheet.destroy(el)</code> (estático). La toolbar debe ir en el objeto raíz (<code>SpreadsheetOptions</code>), no dentro de <code>worksheets[]</code>.</div>
+
+<h4>Inicialización</h4>
+<pre><span class="kw">const</span> hojas = (jspreadsheet <span class="kw">as any</span>)(contenedor, {
+  <span class="at">toolbar</span>: <span class="kw">true</span>,                          <span class="cm">// SpreadsheetOptions — toolbar nativa</span>
+  worksheets: [{
+    data: datos,                             <span class="cm">// any[][] valores + fórmulas crudas</span>
+    columns: <span class="kw">this</span>.<span class="fn">columnasPorDefecto</span>(formato?.colWidths),
+    minDimensions: [<span class="nm">10</span>, <span class="nm">40</span>],
+    tableOverflow: <span class="kw">true</span>,
+    tableWidth:  <span class="st">`${Math.max(wrapperW, window.innerWidth  - 32)}px`</span>,
+    tableHeight: <span class="st">`${Math.max(wrapperH, window.innerHeight - 300)}px`</span>,
+    style:       formato?.style,             <span class="cm">// Record&lt;string,string&gt;</span>
+    mergeCells:  formato?.mergeCells,        <span class="cm">// Record&lt;string,[number,number]&gt;</span>
+    onselection: ..., oneditionstart: ..., oneditionend: ...
+  }]
+});
+<span class="kw">this</span>.spreadsheet = <span class="ty">Array</span>.<span class="fn">isArray</span>(hojas) ? hojas[<span class="nm">0</span>] : <span class="kw">null</span>;</pre>
+
+<h4>Columnas por defecto</h4>
+<table>
+<tr><th>Col</th><th>Título</th><th>Ancho</th><th>Tipo</th><th>Máscara</th></tr>
+<tr><td>A</td><td>Código</td><td>80px</td><td>—</td><td>—</td></tr>
+<tr><td>B</td><td>Descripción</td><td>240px</td><td>—</td><td>—</td></tr>
+<tr><td>C</td><td>Saldo Inicial</td><td>130px</td><td>numeric</td><td>#.##0,00</td></tr>
+<tr><td>D</td><td>Débito</td><td>130px</td><td>numeric</td><td>#.##0,00</td></tr>
+<tr><td>E</td><td>Crédito</td><td>130px</td><td>numeric</td><td>#.##0,00</td></tr>
+<tr><td>F</td><td>Saldo Final</td><td>130px</td><td>numeric</td><td>#.##0,00</td></tr>
+<tr><td>G–J</td><td>Col G…J</td><td>100px</td><td>—</td><td>—</td></tr>
+</table>
+
+<h4>obtenerHojaActiva() — doble fallback</h4>
+<pre><span class="kw">private</span> <span class="fn">obtenerHojaActiva</span>(): <span class="ty">any</span> {
+  <span class="cm">// 1. Instancia almacenada localmente</span>
+  <span class="kw">if</span> (<span class="kw">this</span>.spreadsheet && <span class="kw">typeof</span> <span class="kw">this</span>.spreadsheet.<span class="at">getData</span> === <span class="st">'function'</span>)
+    <span class="kw">return this</span>.spreadsheet;
+  <span class="cm">// 2. Acceso directo al elemento DOM (fallback v5)</span>
+  <span class="kw">const</span> hoja = <span class="kw">this</span>.containerRef?.nativeElement?.spreadsheet?.worksheets?.[<span class="nm">0</span>] ?? <span class="kw">null</span>;
+  <span class="kw">if</span> (hoja && <span class="kw">typeof</span> hoja.<span class="at">getData</span> === <span class="st">'function'</span>) { <span class="kw">this</span>.spreadsheet = hoja; <span class="kw">return</span> hoja; }
+  <span class="kw">return null</span>;
+}</pre>
+</section>
+
+<!-- TOOLBAR & FORMULA BAR -->
+<section id="toolbar">
+<h2>Toolbar Nativa &amp; Barra de Fórmulas</h2>
+
+<h3>Toolbar nativa</h3>
+<p>Activada con <code>toolbar: true</code> a nivel raíz de <code>SpreadsheetOptions</code>. Incluye: negrita, cursiva, tachado, alineación, color de fondo, color de texto, formato numérico, tipo de columna.</p>
+<div class="cl w">El override de estilos dark se hace con <code>.analitica-container ::ng-deep .jss_toolbar { background: #0d2235 !important; ... }</code> en el SCSS del componente.</div>
+
+<h3>Barra de fórmulas personalizada</h3>
+<p>Elemento HTML custom ubicado entre el status de contexto y el grid. Tres zonas: referencia de celda | indicador <em>ƒx</em> | input de fórmula.</p>
+<table>
+<tr><th>Evento jSpreadsheet</th><th>Comportamiento</th></tr>
+<tr><td><code>onselection(el,x1,y1,x2,y2)</code></td><td>Lee <code>getValueFromCoords(x2,y2,<strong>true</strong>)</code> — tercer param <code>true</code> retorna fórmula cruda sin evaluar</td></tr>
+<tr><td><code>oneditionstart(el,td,x,y)</code></td><td>Re-lee fórmula cruda mientras el usuario edita directamente en la celda</td></tr>
+<tr><td><code>oneditionend(el,td,x,y,value)</code></td><td>Actualiza <code>formulaBarValor</code> al confirmar la edición</td></tr>
+<tr><td>Input <code>keydown.enter</code> / <code>blur</code></td><td>Llama <code>commitFormula(value)</code> → <code>setValueFromCoords(selX,selY,value,true)</code></td></tr>
+<tr><td>Input <code>keydown.escape</code></td><td>Restaura el valor anterior sin modificar la celda</td></tr>
+</table>
+</section>
+
+<!-- PLUGIN -->
+<section id="plugin">
+<h2>OfimaFormulasPlugin</h2>
+<p class="fp">frontend/src/app/utils/ofima-formulas.plugin.ts</p>
+<p>Clase estática que registra fórmulas personalizadas en <code>@jspreadsheet/formula</code> via <code>formulaEngine.setFormula({...})</code>. El contexto de datos se almacena estáticamente y es consultado por cada función en tiempo de evaluación.</p>
+
+<h4>Fórmulas registradas</h4>
+<table>
+<tr><th>Nombre en celda</th><th>Equivalente OFIMA XLA</th><th>Fuente de datos en contexto</th></tr>
+<tr><td><code>=NOMBRECTA("11")</code></td><td>NOMBRECTA(cuenta, empresa)</td><td><code>contexto.nombresCuentas["11"]</code></td></tr>
+<tr><td><code>=SALDOINICIAL("11")</code></td><td>SALDOCONTABLECUENTA(..., mesInicial, acumulado, empresa, anio2)</td><td><code>contexto.saldosIniciales["11"]</code></td></tr>
+<tr><td><code>=SALDOFINAL("11")</code></td><td>SALDOCONTABLECUENTA(..., mesFinal, acumulado, empresa, anio1)</td><td><code>contexto.saldosFinales["11"]</code></td></tr>
+<tr><td><code>=DEBITO("11")</code></td><td>SaldoContableCtaDBCR(..., "DB")</td><td><code>contexto.debitos["11"]</code></td></tr>
+<tr><td><code>=CREDITO("11")</code></td><td>SaldoContableCtaDBCR(..., "CR")</td><td><code>contexto.creditos["11"]</code></td></tr>
+<tr><td><code>=SALDOCADENA("1,2,3")</code></td><td>SaldoContableCuentaCadena("1,2,3",...)</td><td>Suma de <code>saldosFinales</code> para cada código</td></tr>
+<tr><td><code>=SALDODBCR("11","4","DB")</code></td><td>—</td><td>DB → <code>debitos</code> / CR → <code>creditos</code></td></tr>
+</table>
+
+<h4>Flujo de evaluación</h4>
+<div class="flow">
+  <div class="fb"><div class="lb">Celda</div><div class="nm2">=SALDOFINAL("11")</div></div>
+  <span class="fa">→</span>
+  <div class="fb"><div class="lb">@jspreadsheet/formula</div><div class="nm2">Parser</div></div>
+  <span class="fa">→</span>
+  <div class="fb"><div class="lb">Plugin registrado</div><div class="nm2">saldoFinal("11")</div></div>
+  <span class="fa">→</span>
+  <div class="fb"><div class="lb">Contexto estático</div><div class="nm2">saldosFinales["11"]</div></div>
+  <span class="fa">→</span>
+  <div class="fb"><div class="lb">Celda muestra</div><div class="nm2">1.611.000,00</div></div>
+</div>
+
+<h4>Carga de contexto (botón Calcular)</h4>
+<ol>
+<li>Escanea columna A con <code>getData()</code>, filtra valores <code>/^\d+$/</code> para obtener lista de cuentas únicas</li>
+<li>Hace POST a <code>/api/Analitica/CargarContexto</code> con empresa, años, meses y lista de cuentas</li>
+<li>Recibe <code>ContextoDatos</code> y llama <code>OfimaFormulasPlugin.setContexto(contexto)</code></li>
+<li>Fuerza recálculo: itera todas las celdas y hace <code>setValueFromCoords</code> en cada celda con fórmula</li>
+</ol>
+</section>
+
+<!-- SERVICE & MODELOS -->
+<section id="service">
+<h2>AnaliticaService &amp; Modelos TypeScript</h2>
+<p class="fp">frontend/src/app/services/analitica.service.ts</p>
+<table>
+<tr><th>Método</th><th>HTTP</th><th>Endpoint</th><th>Request / Response</th></tr>
+<tr><td><code>cargarContexto(req)</code></td><td><span class="badge bp">POST</span></td><td>/api/Analitica/CargarContexto</td><td>CargarContextoRequest → ContextoDatos</td></tr>
+<tr><td><code>getPlantillas()</code></td><td><span class="badge bg">GET</span></td><td>/api/Analitica/Plantillas</td><td>→ PlantillaAnalitica[]</td></tr>
+<tr><td><code>getPlantilla(id)</code></td><td><span class="badge bg">GET</span></td><td>/api/Analitica/Plantillas/{id}</td><td>→ PlantillaAnalitica</td></tr>
+<tr><td><code>guardarPlantilla(req)</code></td><td><span class="badge bp">POST</span></td><td>/api/Analitica/Plantillas</td><td>GuardarPlantillaRequest → PlantillaAnalitica</td></tr>
+<tr><td><code>eliminarPlantilla(id)</code></td><td><span class="badge bd2">DELETE</span></td><td>/api/Analitica/Plantillas/{id}</td><td>→ void</td></tr>
+</table>
+
+<h4>Interfaces TypeScript — analitica.models.ts</h4>
+<pre><span class="kw">interface</span> <span class="ty">CargarContextoRequest</span> {
+  empresa: <span class="ty">string</span>; anio1: <span class="ty">number</span>; anio2: <span class="ty">number</span>;
+  mesInicial: <span class="ty">number</span>; mesFinal: <span class="ty">number</span>;
+  acumulado: <span class="ty">string</span>; cuentas: <span class="ty">string</span>[];
+}
+
+<span class="kw">interface</span> <span class="ty">ContextoDatos</span> {
+  nombresCuentas:    { [cuenta: <span class="ty">string</span>]: <span class="ty">string</span>  };
+  saldosIniciales:   { [cuenta: <span class="ty">string</span>]: <span class="ty">number</span>  };
+  saldosFinales:     { [cuenta: <span class="ty">string</span>]: <span class="ty">number</span>  };
+  debitos:           { [cuenta: <span class="ty">string</span>]: <span class="ty">number</span>  };
+  creditos:          { [cuenta: <span class="ty">string</span>]: <span class="ty">number</span>  };
+}
+
+<span class="kw">interface</span> <span class="ty">PlantillaAnalitica</span> {
+  id: <span class="ty">string</span>; nombre: <span class="ty">string</span>; descripcion: <span class="ty">string</span>;
+  contenido: <span class="ty">string</span>;   <span class="cm">// JSON serializado (versión 2)</span>
+  fechaActualizacion: <span class="ty">Date</span>;
+}</pre>
+</section>
+
+<!-- CONTROLLER -->
+<section id="controller">
+<h2>AnaliticaController (Backend)</h2>
+<p class="fp">oDres.GeneradorReportes.WEBApi/Controllers/AnaliticaController.cs</p>
+<p>Controlador REST con ruta base <code>api/[controller]</code> → <code>/api/Analitica</code>. Inyecta <code>IAnaliticaRepository</code> por DI.</p>
+
+<section id="api-endpoints">
+<h4>Endpoints disponibles</h4>
+<table>
+<tr><th>Método</th><th>Ruta</th><th>Descripción</th><th>Equivalente XLA</th></tr>
+<tr><td><span class="badge bp">POST</span></td><td>/CargarContexto</td><td>Carga en paralelo nombres y saldos de todas las cuentas especificadas</td><td>Batch de todas las funciones</td></tr>
+<tr><td><span class="badge bg">GET</span></td><td>/NombreCuenta?cuenta=&amp;empresa=</td><td>Nombre de una cuenta</td><td>NOMBRECTA()</td></tr>
+<tr><td><span class="badge bg">GET</span></td><td>/SaldoCuenta?cuenta=&amp;periodo=&amp;acumulado=&amp;empresa=&amp;año=</td><td>Saldo contable acumulado o mensual</td><td>SALDOCONTABLECUENTA()</td></tr>
+<tr><td><span class="badge bg">GET</span></td><td>/SaldoDBCR?cuenta=&amp;periodo=&amp;naturaleza=&amp;empresa=&amp;año=</td><td>Saldo Débito o Crédito</td><td>SaldoContableCtaDBCR()</td></tr>
+<tr><td><span class="badge bg">GET</span></td><td>/SaldoCadena?cuentas=&amp;periodo=&amp;...</td><td>Suma de múltiples cuentas</td><td>SaldoContableCuentaCadena()</td></tr>
+<tr><td><span class="badge bg">GET</span></td><td>/Plantillas</td><td>Lista de plantillas guardadas</td><td>—</td></tr>
+<tr><td><span class="badge bg">GET</span></td><td>/Plantillas/{id}</td><td>Plantilla por ID</td><td>—</td></tr>
+<tr><td><span class="badge bp">POST</span></td><td>/Plantillas</td><td>Crear o actualizar plantilla (upsert por Id)</td><td>—</td></tr>
+<tr><td><span class="badge bd2">DELETE</span></td><td>/Plantillas/{id}</td><td>Eliminar plantilla</td><td>—</td></tr>
+</table>
+</section>
+</section>
+
+<!-- REPOSITORIO -->
+<section id="repositorio">
+<h2>AnaliticaRepository (Backend)</h2>
+<p class="fp">oDres.GeneradorReportes.WEBApi/Infrastructure/Repositories/AnaliticaRepository.cs</p>
+
+<h4>CargarContextoAsync — ejecución paralela</h4>
+<p>Por cada cuenta en <code>request.Cuentas</code> lanza simultáneamente 4 queries (nombre, saldo inicial, saldo final, débito, crédito) usando <code>Task.WhenAll</code>:</p>
+<pre><span class="kw">var</span> tareas = request.Cuentas.<span class="fn">Select</span>(<span class="kw">async</span> cuenta => {
+    <span class="kw">var</span> nombre       = <span class="kw">await</span> <span class="fn">NombreCuentaAsync</span>(cuenta, request.Empresa);
+    <span class="kw">var</span> saldoInicial = <span class="kw">await</span> <span class="fn">SaldoCuentaAsync</span>(cuenta, request.MesInicial, request.Acumulado, request.Empresa, request.Anio2);
+    <span class="kw">var</span> saldoFinal   = <span class="kw">await</span> <span class="fn">SaldoCuentaAsync</span>(cuenta, request.MesFinal,   request.Acumulado, request.Empresa, request.Anio1);
+    <span class="kw">var</span> debito       = <span class="kw">await</span> <span class="fn">SaldoDBCRAsync</span>(cuenta, request.MesFinal, <span class="st">"DB"</span>, request.Empresa, request.Anio1);
+    <span class="kw">var</span> credito      = <span class="kw">await</span> <span class="fn">SaldoDBCRAsync</span>(cuenta, request.MesFinal, <span class="st">"CR"</span>, request.Empresa, request.Anio1);
+    <span class="kw">return new</span> { cuenta, nombre, saldoInicial, saldoFinal, debito, credito };
+});
+<span class="kw">var</span> resultados = <span class="kw">await</span> Task.<span class="fn">WhenAll</span>(tareas);</pre>
+
+<h4>SaldoCuentaAsync — acumulado vs período</h4>
+<pre><span class="kw">if</span> (acumulado == <span class="st">"A"</span>)
+    <span class="cm">// Suma desde mes 1 hasta @periodo  → AND Month(FechaMovimiento) &lt;= @periodo</span>
+<span class="kw">else</span>
+    <span class="cm">// Solo el mes exacto              → AND Month(FechaMovimiento) = @periodo</span></pre>
+
+<h4>SaldoDBCRAsync — naturaleza DB/CR</h4>
+<pre>CASE
+  WHEN @naturaleza = <span class="st">'DB'</span> THEN m.Cargo
+  WHEN @naturaleza = <span class="st">'CR'</span> THEN m.Abono
+  ELSE m.Cargo - m.Abono
+END</pre>
+
+<h4>Tablas BD utilizadas</h4>
+<table>
+<tr><th>Tabla</th><th>Uso</th></tr>
+<tr><td><code>Empresa.CuentaContable</code></td><td>Nombre de cuenta por <code>CodigoCuenta</code></td></tr>
+<tr><td><code>Empresa.MovimientoContable</code></td><td>Cargos y Abonos por cuenta, año y mes</td></tr>
+<tr><td><code>Registro.Empresa</code></td><td>Validación de código de empresa (comentada temporalmente)</td></tr>
+<tr><td><code>Catalogo.PlantillaAnalitica</code></td><td>Almacena JSON de plantillas guardadas</td></tr>
+</table>
+</section>
+
+<!-- DTOS -->
+<section id="dtos">
+<h2>DTOs C# — AnaliticaDto.cs</h2>
+<p class="fp">oDres.GeneradorReportes.WEBApi/Application/DTOs/AnaliticaDto.cs</p>
+<pre><span class="kw">public class</span> <span class="ty">CargarContextoRequest</span> {
+    <span class="kw">public</span> <span class="ty">string</span> Empresa { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public int</span> Anio1, Anio2, MesInicial, MesFinal;
+    <span class="kw">public</span> <span class="ty">string</span> Acumulado { <span class="kw">get</span>; <span class="kw">set</span>; }   <span class="cm">// "A" | "P"</span>
+    <span class="kw">public</span> List&lt;<span class="ty">string</span>&gt; Cuentas { <span class="kw">get</span>; <span class="kw">set</span>; }
+}
+
+<span class="kw">public class</span> <span class="ty">ContextoDatosDto</span> {
+    <span class="kw">public</span> Dictionary&lt;<span class="ty">string</span>,<span class="ty">string</span>&gt;  NombresCuentas  { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> Dictionary&lt;<span class="ty">string</span>,<span class="ty">decimal</span>&gt; SaldosIniciales { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> Dictionary&lt;<span class="ty">string</span>,<span class="ty">decimal</span>&gt; SaldosFinales   { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> Dictionary&lt;<span class="ty">string</span>,<span class="ty">decimal</span>&gt; Debitos         { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> Dictionary&lt;<span class="ty">string</span>,<span class="ty">decimal</span>&gt; Creditos        { <span class="kw">get</span>; <span class="kw">set</span>; }
+}
+
+<span class="kw">public class</span> <span class="ty">GuardarPlantillaRequest</span> {
+    <span class="kw">public</span> <span class="ty">string</span>? Id { <span class="kw">get</span>; <span class="kw">set</span>; }   <span class="cm">// null → crear, con valor → actualizar</span>
+    <span class="kw">public</span> <span class="ty">string</span> Nombre, Descripcion, Contenido;
+}
+
+<span class="kw">public class</span> <span class="ty">PlantillaAnaliticaDto</span> {
+    <span class="kw">public</span> <span class="ty">string</span> Id, Nombre, Descripcion, Contenido;
+    <span class="kw">public</span> <span class="ty">DateTime</span> FechaActualizacion;
+}</pre>
+</section>
+
+<!-- FORMATO JSON -->
+<section id="plantilla-json">
+<h2>Formato JSON de Plantilla (versión 2)</h2>
+<p>El campo <code>Contenido</code> de la tabla <code>Catalogo.PlantillaAnalitica</code> almacena el siguiente JSON serializado:</p>
+<pre>{
+  <span class="at">"version"</span>: <span class="nm">2</span>,
+  <span class="at">"data"</span>: [
+    [<span class="st">""</span>, <span class="st">"BALANCE MENSUAL"</span>, <span class="st">""</span>, ...],
+    [<span class="st">"11"</span>, <span class="st">"=NOMBRECTA(\"11\")"</span>, <span class="st">"=SALDOINICIAL(\"11\")"</span>, ...]
+  ],
+  <span class="at">"style"</span>: {
+    <span class="st">"B1"</span>: <span class="st">"font-weight: bold; font-size: 14px;"</span>,
+    <span class="st">"A3"</span>: <span class="st">"background-color: #1a3a5c; color: white; font-weight: bold;"</span>
+  },
+  <span class="at">"mergeCells"</span>: {
+    <span class="st">"A1"</span>: [<span class="nm">3</span>, <span class="nm">1</span>]
+  },
+  <span class="at">"colWidths"</span>: [<span class="nm">80</span>, <span class="nm">240</span>, <span class="nm">130</span>, <span class="nm">130</span>, <span class="nm">130</span>, <span class="nm">130</span>, <span class="nm">100</span>, <span class="nm">100</span>, <span class="nm">100</span>, <span class="nm">100</span>],
+  <span class="at">"rowHeights"</span>: [<span class="st">"28"</span>, <span class="st">"20"</span>, <span class="st">"24"</span>, ...],
+  <span class="at">"params"</span>: {
+    <span class="st">"empresa"</span>: <span class="st">"ODRESQA"</span>, <span class="st">"anio1"</span>: <span class="nm">2023</span>, <span class="st">"anio2"</span>: <span class="nm">2023</span>,
+    <span class="st">"mesInicial"</span>: <span class="nm">1</span>, <span class="st">"mesFinal"</span>: <span class="nm">12</span>, <span class="st">"acumulado"</span>: <span class="st">"A"</span>, <span class="st">"nivel"</span>: <span class="nm">2</span>
+  },
+  <span class="at">"timestamp"</span>: <span class="st">"2026-04-24T18:44:54.998Z"</span>
+}</pre>
+
+<table>
+<tr><th>Campo</th><th>Tipo</th><th>API jSpreadsheet usada</th><th>Restauración</th></tr>
+<tr><td><code>data</code></td><td>any[][]</td><td><code>hoja.getData()</code></td><td><code>WorksheetOptions.data</code></td></tr>
+<tr><td><code>style</code></td><td>Record&lt;string,string&gt;</td><td><code>hoja.getStyle()</code></td><td><code>WorksheetOptions.style</code></td></tr>
+<tr><td><code>mergeCells</code></td><td>Record&lt;string,[n,n]&gt;</td><td><code>hoja.getMerge()</code></td><td><code>WorksheetOptions.mergeCells</code></td></tr>
+<tr><td><code>colWidths</code></td><td>(number|string)[]</td><td><code>hoja.getWidth()</code></td><td><code>columns[i].width</code></td></tr>
+<tr><td><code>rowHeights</code></td><td>string[]</td><td><code>hoja.getHeight()</code></td><td>Reservado (futuro)</td></tr>
+<tr><td><code>params</code></td><td>ParametrosSpreadsheet</td><td>—</td><td>Rellena los campos del panel de parámetros</td></tr>
+</table>
+
+<div class="cl g">Las plantillas versión 1 (sin campos de formato) son compatibles hacia atrás: se cargan con estilos y merges vacíos, mostrando solo los datos y fórmulas.</div>
+</section>
+
+<!-- GUARDAR -->
+<section id="guardar">
+<h2>Guardar Plantilla — Extracción de Formato</h2>
+<pre><span class="kw">const</span> hoja      = <span class="kw">this</span>.<span class="fn">obtenerHojaActiva</span>();
+<span class="kw">const</span> datos     = hoja?.<span class="fn">getData</span>()   ?? [];   <span class="cm">// fórmulas crudas, no evaluadas</span>
+<span class="kw">const</span> estilos   = hoja?.<span class="fn">getStyle</span>()  ?? {};   <span class="cm">// {"A1":"font-weight:bold;..."}</span>
+<span class="kw">const</span> merges    = hoja?.<span class="fn">getMerge</span>()  ?? {};   <span class="cm">// {"A1":[2,1]}</span>
+<span class="kw">const</span> anchos    = hoja?.<span class="fn">getWidth</span>()  ?? [];   <span class="cm">// [80,240,130,...]</span>
+<span class="kw">const</span> altos     = hoja?.<span class="fn">getHeight</span>() ?? [];   <span class="cm">// ["28","20",...]</span>
+
+<span class="cm">// Filtra estilos vacíos para mantener JSON compacto</span>
+<span class="kw">const</span> stylesFiltrados = <span class="ty">Object</span>.<span class="fn">entries</span>(estilos)
+  .<span class="fn">filter</span>(([,v]) => v?.trim())
+  .<span class="fn">reduce</span>((acc,[k,v]) => ({...acc,[k]:v}), {});</pre>
+</section>
+
+<!-- CARGAR -->
+<section id="cargar">
+<h2>Cargar Plantilla — Restauración de Formato</h2>
+<pre>cargarPlantilla(plantilla: <span class="ty">PlantillaAnalitica</span>): <span class="kw">void</span> {
+  <span class="kw">const</span> parsed = <span class="ty">JSON</span>.<span class="fn">parse</span>(plantilla.contenido);
+
+  <span class="cm">// Restaura parámetros del panel de consulta</span>
+  <span class="kw">if</span> (parsed.params) <span class="kw">this</span>.params = { ...<span class="kw">this</span>.params, ...parsed.params };
+
+  <span class="cm">// Re-inicializa jSpreadsheet con datos + formato completo</span>
+  <span class="kw">this</span>.<span class="fn">inicializarSpreadsheet</span>(parsed.data, {
+    style:      parsed.style,       <span class="cm">// pasado a WorksheetOptions.style</span>
+    mergeCells: parsed.mergeCells,  <span class="cm">// pasado a WorksheetOptions.mergeCells</span>
+    colWidths:  parsed.colWidths,   <span class="cm">// aplicado sobre columns[i].width</span>
+    rowHeights: parsed.rowHeights,  <span class="cm">// reservado</span>
+  });
+}</pre>
+</section>
+
+<!-- DB SCHEMA -->
+<section id="db-schema">
+<h2>Esquema BD — Catalogo.PlantillaAnalitica</h2>
+<pre><span class="kw">CREATE TABLE</span> [Catalogo].[PlantillaAnalitica] (
+  [IdPlantilla]        NVARCHAR(<span class="nm">36</span>)   NOT NULL,
+  [Nombre]             NVARCHAR(<span class="nm">200</span>)  NOT NULL,
+  [Descripcion]        NVARCHAR(<span class="nm">500</span>)  NULL,
+  [Contenido]          NVARCHAR(MAX)  NOT NULL,  <span class="cm">-- JSON serializado (versión 2)</span>
+  [Activo]             BIT            NOT NULL DEFAULT <span class="nm">1</span>,
+  [FechaRegistro]      DATETIME       NOT NULL DEFAULT GETDATE(),
+  [FechaActualizacion] DATETIME       NOT NULL DEFAULT GETDATE(),
+  CONSTRAINT PK_PlantillaAnalitica PRIMARY KEY (IdPlantilla)
+);
+CREATE INDEX IX_PlantillaAnalitica_Activo ON [Catalogo].[PlantillaAnalitica](Activo);</pre>
+</section>
+
+<!-- FLUJO -->
+<section id="flujo">
+<h2>Flujo Completo de Datos — Calcular</h2>
+<ol>
+  <li>Usuario configura <strong>Empresa</strong>, <strong>Año 1/2</strong>, <strong>Mes Inicial/Final</strong>, <strong>Acumulado</strong> en el panel de parámetros.</li>
+  <li>Usuario hace clic en <strong>Calcular</strong>.</li>
+  <li>El componente escanea la columna A del grid con <code>getData()</code> y extrae códigos numéricos únicos.</li>
+  <li>POST <code>/api/Analitica/CargarContexto</code> envía la lista de cuentas al backend.</li>
+  <li>El repositorio lanza queries SQL en paralelo (<code>Task.WhenAll</code>) por cada cuenta.</li>
+  <li>El backend retorna <code>ContextoDatosDto</code> con diccionarios de nombres, saldos, débitos y créditos.</li>
+  <li>El componente llama <code>OfimaFormulasPlugin.setContexto(contexto)</code>.</li>
+  <li>Fuerza recálculo del grid: itera todas las celdas y re-escribe las fórmulas con <code>setValueFromCoords()</code>.</li>
+  <li>jSpreadsheet re-evalúa cada fórmula → el plugin retorna el valor del contexto → la celda muestra el resultado.</li>
+</ol>
+</section>
+
+<!-- CONFIG -->
+<section id="config">
+<h2>Configuración</h2>
+
+<h4>angular.json — estilos globales jSpreadsheet</h4>
+<pre><span class="st">"styles"</span>: [
+  <span class="st">"node_modules/jspreadsheet-ce/dist/jspreadsheet.css"</span>,
+  <span class="st">"node_modules/jsuites/dist/jsuites.css"</span>,
+  <span class="st">"src/styles.scss"</span>
+]</pre>
+
+<h4>tsconfig.json — compatibilidad de imports</h4>
+<pre>{
+  <span class="st">"allowSyntheticDefaultImports"</span>: <span class="kw">true</span>,
+  <span class="st">"esModuleInterop"</span>: <span class="kw">true</span>
+}</pre>
+
+<h4>Program.cs — registro del repositorio</h4>
+<pre>builder.Services.<span class="fn">AddScoped</span>&lt;<span class="ty">IAnaliticaRepository</span>, <span class="ty">AnaliticaRepository</span>&gt;();</pre>
+
+<h4>appsettings.json — cadena de conexión</h4>
+<pre>{
+  <span class="st">"ConnectionStrings"</span>: {
+    <span class="st">"DefaultConnection"</span>: <span class="st">"Server=...;Database=OFIMA_BD;User Id=...;Password=..."</span>
+  }
+}</pre>
+
+<div class="cl w">
+  <strong>Nota sobre el filtro de empresa:</strong> Las queries en <code>AnaliticaRepository.cs</code> tienen comentado el filtro
+  <code>--AND e.Codigo = @empresa</code>. Activarlo requiere que la tabla <code>Registro.Empresa</code> contenga el campo
+  <code>Codigo</code> y que la empresa exista registrada.
+</div>
+
+<h4>Packages npm relevantes</h4>
+<table>
+<tr><th>Paquete</th><th>Versión</th><th>Función</th></tr>
+<tr><td>jspreadsheet-ce</td><td>5.0.4</td><td>Grid de celdas editable</td></tr>
+<tr><td>@jspreadsheet/formula</td><td>2.0.2</td><td>Motor de fórmulas (incluye +300 funciones Excel)</td></tr>
+<tr><td>jsuites</td><td>—</td><td>Dependencia de jSpreadsheet (dropdowns, color pickers, toolbar)</td></tr>
+</table>
+</section>
+
+<!-- LICENCIA -->
+<section id="licencia">
+<h2>Licencia — jSpreadsheet CE</h2>
+
+<div class="cl g">
+  <strong>jspreadsheet-ce v5.0.4</strong> usa la licencia <strong>MIT</strong> — completamente libre y gratuita para uso comercial, sin regalías ni restricciones.
+</div>
+
+<table>
+<tr><th>Campo</th><th>Valor</th></tr>
+<tr><td>Paquete</td><td><code>jspreadsheet-ce</code> (Community Edition)</td></tr>
+<tr><td>Versión en uso</td><td><strong>5.0.4</strong></td></tr>
+<tr><td>Licencia</td><td><strong>MIT License</strong></td></tr>
+<tr><td>Titular de copyright</td><td>Jspreadsheet Ltd — Copyright © 2024</td></tr>
+<tr><td>Repositorio</td><td><code>github.com/jspreadsheet/ce</code></td></tr>
+<tr><td><code>@jspreadsheet/formula</code></td><td>v2.0.2 — MIT (motor de fórmulas custom)</td></tr>
+</table>
+
+<h4>Texto completo de la licencia MIT incluida en el paquete</h4>
+<pre>MIT License
+
+Copyright (c) 2024 Jspreadsheet Ltd
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.</pre>
+
+<h4>¿Qué permite la licencia MIT?</h4>
+<table>
+<tr><th>Permiso</th><th>Descripción</th></tr>
+<tr><td>✅ Uso comercial</td><td>Se puede usar en productos comerciales y sistemas internos de empresas sin restricción</td></tr>
+<tr><td>✅ Modificación</td><td>Se puede modificar el código fuente de la librería</td></tr>
+<tr><td>✅ Distribución</td><td>Se puede distribuir como parte del producto final</td></tr>
+<tr><td>✅ Sublicenciar</td><td>Se puede incluir en productos con otras licencias</td></tr>
+<tr><td>✅ Uso privado</td><td>Válido para aplicaciones internas sin distribución pública</td></tr>
+<tr><td>⚠️ Aviso de copyright</td><td>Si se redistribuye el código fuente de la librería en sí, se debe incluir el aviso de copyright MIT</td></tr>
+<tr><td>❌ Sin garantía</td><td>La librería se provee tal cual, sin garantía de ningún tipo</td></tr>
+</table>
+
+<h4>CE vs Pro — Comparativa completa de funcionalidades</h4>
+<p style="font-size:12px;color:var(--mu);margin-bottom:10px">Fuente: documentación oficial <code>jspreadsheet.com/docs/v8/comparison</code> y <code>bossanova.uk/jspreadsheet/docs/comparison</code> — Abril 2026</p>
+
+<style>
+.comp-ok{color:var(--gn);font-weight:700}
+.comp-no{color:var(--re)}
+.comp-par{color:var(--ye)}
+.comp-ce{background:rgba(76,175,125,.06)}
+.comp-pro{background:rgba(74,158,222,.06)}
+.sec-header td{background:var(--s2);color:var(--ac);font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:7px 13px}
+</style>
+
+<table>
+<tr>
+  <th style="width:42%">Característica</th>
+  <th style="width:29%" class="comp-ce">🟢 CE — Community (MIT · Gratis)</th>
+  <th style="width:29%" class="comp-pro">🔵 Pro — Commercial (Pago)</th>
+</tr>
+
+<!-- LICENCIA -->
+<tr><td colspan="3" class="sec-header">LICENCIA Y COSTO</td></tr>
+<tr>
+  <td>Licencia</td>
+  <td><span class="comp-ok">MIT</span> — uso libre, sin restricciones</td>
+  <td><span class="comp-par">Comercial</span> — suscripción anual</td>
+</tr>
+<tr>
+  <td>Uso comercial sin pago</td>
+  <td><span class="comp-ok">✅ Sí</span> — cualquier proyecto</td>
+  <td><span class="comp-no">❌</span> — requiere licencia activa</td>
+</tr>
+<tr>
+  <td>Repositorio</td>
+  <td><code>github.com/jspreadsheet/ce</code> (público)</td>
+  <td>Paquete privado npm (<code>jspreadsheet</code>)</td>
+</tr>
+
+<!-- GRID BÁSICO -->
+<tr><td colspan="3" class="sec-header">FUNCIONALIDADES BÁSICAS DEL GRID</td></tr>
+<tr>
+  <td>Grid editable de celdas</td>
+  <td><span class="comp-ok">✅</span></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+<tr>
+  <td>Tipos de columna (texto, numérico, dropdown, fecha, checkbox, color, imagen…)</td>
+  <td><span class="comp-ok">✅</span> — tipos estándar</td>
+  <td><span class="comp-ok">✅</span> — tipos ampliados</td>
+</tr>
+<tr>
+  <td>Redimensionar columnas y filas (drag)</td>
+  <td><span class="comp-ok">✅</span></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+<tr>
+  <td>Arrastrar columnas para reordenar</td>
+  <td><span class="comp-ok">✅</span></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+<tr>
+  <td>Combinar celdas (merge)</td>
+  <td><span class="comp-ok">✅</span></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+<tr>
+  <td>Copiar / Pegar (teclado y contexto)</td>
+  <td><span class="comp-ok">✅</span></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+<tr>
+  <td>Undo / Redo</td>
+  <td><span class="comp-ok">✅</span></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+<tr>
+  <td>Insertar / eliminar filas y columnas</td>
+  <td><span class="comp-ok">✅</span></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+<tr>
+  <td>Ordenar (sort) por columna</td>
+  <td><span class="comp-ok">✅</span></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+<tr>
+  <td>Búsqueda básica</td>
+  <td><span class="comp-ok">✅</span></td>
+  <td><span class="comp-ok">✅</span> — extensión avanzada</td>
+</tr>
+<tr>
+  <td>Paginación básica</td>
+  <td><span class="comp-ok">✅</span></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+<tr>
+  <td>Menú contextual (clic derecho)</td>
+  <td><span class="comp-ok">✅</span> — básico</td>
+  <td><span class="comp-ok">✅</span> — configurable por hoja</td>
+</tr>
+<tr>
+  <td>Exportar a CSV</td>
+  <td><span class="comp-ok">✅</span> — <code>hoja.download()</code></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+
+<!-- HOJAS -->
+<tr><td colspan="3" class="sec-header">GESTIÓN DE HOJAS DE CÁLCULO (WORKSHEETS)</td></tr>
+<tr>
+  <td>Múltiples hojas (tabs)</td>
+  <td><span class="comp-ok">✅</span> desde v5</td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+<tr>
+  <td>Arrastrar tabs para reordenar hojas</td>
+  <td><span class="comp-no">❌</span></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+<tr>
+  <td>Renombrar / eliminar hojas desde la UI</td>
+  <td><span class="comp-no">❌</span></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+<tr>
+  <td>Botón "+" para agregar nueva hoja</td>
+  <td><span class="comp-no">❌</span></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+<tr>
+  <td>Menú contextual sobre tabs de hojas</td>
+  <td><span class="comp-no">❌</span></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+
+<!-- FÓRMULAS -->
+<tr><td colspan="3" class="sec-header">FÓRMULAS Y CÁLCULOS</td></tr>
+<tr>
+  <td>Motor de fórmulas (+300 funciones Excel)</td>
+  <td><span class="comp-ok">✅</span> vía <code>@jspreadsheet/formula</code></td>
+  <td><span class="comp-ok">✅</span> integrado</td>
+</tr>
+<tr>
+  <td>Registrar fórmulas personalizadas</td>
+  <td><span class="comp-ok">✅</span> <code>formulaEngine.setFormula()</code></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+<tr>
+  <td>Referencias entre hojas (<code>=Sheet2!A1</code>)</td>
+  <td><span class="comp-par">⚠️</span> limitado</td>
+  <td><span class="comp-ok">✅</span> completo</td>
+</tr>
+<tr>
+  <td>Extension "Formulas Pro" (avanzada)</td>
+  <td><span class="comp-no">❌</span></td>
+  <td><span class="comp-ok">✅</span> extensión premium</td>
+</tr>
+
+<!-- APARIENCIA -->
+<tr><td colspan="3" class="sec-header">APARIENCIA Y FORMATO</td></tr>
+<tr>
+  <td>Toolbar nativa (negrita, colores, alineación…)</td>
+  <td><span class="comp-ok">✅</span></td>
+  <td><span class="comp-ok">✅</span> más opciones</td>
+</tr>
+<tr>
+  <td>Estilos CSS por celda (<code>getStyle / setStyle</code>)</td>
+  <td><span class="comp-ok">✅</span></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+<tr>
+  <td>Definiciones por columna (tipo, máscara, formato)</td>
+  <td><span class="comp-ok">✅</span></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+<tr>
+  <td><strong>Definiciones a nivel de CELDA individual</strong> (tipo, máscara, formato)</td>
+  <td><span class="comp-no">❌</span> — solo por columna</td>
+  <td><span class="comp-ok">✅</span> — por celda específica</td>
+</tr>
+<tr>
+  <td>Edition Bar (barra de fórmulas nativa Pro)</td>
+  <td><span class="comp-no">❌</span> — implementada manualmente en este proyecto</td>
+  <td><span class="comp-ok">✅</span> extensión premium</td>
+</tr>
+
+<!-- RENDIMIENTO -->
+<tr><td colspan="3" class="sec-header">RENDIMIENTO Y DOM</td></tr>
+<tr>
+  <td>Lazy loading básico de filas</td>
+  <td><span class="comp-ok">✅</span></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+<tr>
+  <td>Virtual DOM avanzado por viewport (filas Y columnas)</td>
+  <td><span class="comp-no">❌</span></td>
+  <td><span class="comp-ok">✅</span> desde v8</td>
+</tr>
+<tr>
+  <td>Grandes volúmenes (&gt;100k filas)</td>
+  <td><span class="comp-par">⚠️</span> limitado</td>
+  <td><span class="comp-ok">✅</span> optimizado</td>
+</tr>
+
+<!-- PERSISTENCIA -->
+<tr><td colspan="3" class="sec-header">PERSISTENCIA Y SINCRONIZACIÓN</td></tr>
+<tr>
+  <td>Row ID interno (tracking de filas)</td>
+  <td><span class="comp-no">❌</span></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+<tr>
+  <td>Secuencias internas (auto-increment)</td>
+  <td><span class="comp-no">❌</span></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+<tr>
+  <td>Plugin de persistencia (sync automático con backend)</td>
+  <td><span class="comp-no">❌</span></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+<tr>
+  <td>Server-side processing</td>
+  <td><span class="comp-no">❌</span></td>
+  <td><span class="comp-ok">✅</span> extensión premium</td>
+</tr>
+
+<!-- EXTENSIONES PREMIUM -->
+<tr><td colspan="3" class="sec-header">EXTENSIONES PREMIUM (Solo Pro)</td></tr>
+<tr>
+  <td>Importar desde XLSX (Excel real)</td>
+  <td><span class="comp-no">❌</span></td>
+  <td><span class="comp-ok">✅</span> extensión</td>
+</tr>
+<tr>
+  <td>Exportar a XLSX (Excel real)</td>
+  <td><span class="comp-no">❌</span> — solo CSV</td>
+  <td><span class="comp-ok">✅</span> extensión</td>
+</tr>
+<tr>
+  <td>Exportar a PDF</td>
+  <td><span class="comp-no">❌</span></td>
+  <td><span class="comp-ok">✅</span> extensión</td>
+</tr>
+<tr>
+  <td>Gráficas / Charts embebidos</td>
+  <td><span class="comp-no">❌</span></td>
+  <td><span class="comp-ok">✅</span> extensión</td>
+</tr>
+<tr>
+  <td>Comentarios en celdas</td>
+  <td><span class="comp-no">❌</span></td>
+  <td><span class="comp-ok">✅</span> extensión</td>
+</tr>
+<tr>
+  <td>Validaciones de datos</td>
+  <td><span class="comp-no">❌</span></td>
+  <td><span class="comp-ok">✅</span> extensión</td>
+</tr>
+<tr>
+  <td>Importar desde Google Sheets</td>
+  <td><span class="comp-no">❌</span></td>
+  <td><span class="comp-ok">✅</span> extensión</td>
+</tr>
+<tr>
+  <td>Formas / Shapes (diagramas en celdas)</td>
+  <td><span class="comp-no">❌</span></td>
+  <td><span class="comp-ok">✅</span> extensión</td>
+</tr>
+<tr>
+  <td>Formularios integrados</td>
+  <td><span class="comp-no">❌</span></td>
+  <td><span class="comp-ok">✅</span> extensión</td>
+</tr>
+<tr>
+  <td>Importar CSV avanzado</td>
+  <td><span class="comp-no">❌</span></td>
+  <td><span class="comp-ok">✅</span> extensión</td>
+</tr>
+
+<!-- SOPORTE -->
+<tr><td colspan="3" class="sec-header">SOPORTE Y COMUNIDAD</td></tr>
+<tr>
+  <td>Soporte oficial del fabricante</td>
+  <td><span class="comp-no">❌</span></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+<tr>
+  <td>Issues / comunidad GitHub</td>
+  <td><span class="comp-ok">✅</span></td>
+  <td><span class="comp-ok">✅</span></td>
+</tr>
+<tr>
+  <td>Documentación oficial completa</td>
+  <td><span class="comp-par">⚠️</span> limitada</td>
+  <td><span class="comp-ok">✅</span> completa con ejemplos</td>
+</tr>
+</table>
+
+<h4>Conclusión para este proyecto</h4>
+<div class="cl g">
+  <strong>jspreadsheet-ce v5 (MIT)</strong> cubre el 100% de los requerimientos del módulo Analítica Spreadsheet:
+  grid editable, toolbar nativa, múltiples hojas (v5), estilos por celda, merges, fórmulas custom OFIMA,
+  exportar CSV, plantillas con formato completo — todo <strong>sin costo de licencia</strong>.<br><br>
+  La única funcionalidad ausente relevante para una mejora futura sería <strong>Exportar a XLSX real</strong>
+  (actualmente solo CSV) y <strong>Importar desde Excel</strong>, ambas disponibles como extensiones Pro.
+</div>
+
+</section>
+
+</main>
+</body>
+</html>

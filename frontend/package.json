@@ -30,6 +30,7 @@
     "ag-grid-angular": "32.3.9",
     "ag-grid-community": "32.3.9",
     "ag-grid-enterprise": "32.3.9",
+    "buffer": "^6.0.3",
     "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
     "hyperformula": "^3.2.0",
