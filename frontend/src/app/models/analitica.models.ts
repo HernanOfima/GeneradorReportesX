@@ -1,10 +1,10 @@
 export interface CargarContextoRequest {
-  empresa: string;
-  anio1: number;
-  anio2: number;
-  mesInicial: number;
-  mesFinal: number;
-  acumulado: string;
+  idEmpresa?: string;
+  anio1?: number;
+  anio2?: number;       // opcional — si ausente el backend usa anio1
+  mesInicial?: number;
+  mesFinal?: number;    // opcional — si ausente el backend usa mesInicial
+  acumulado?: string;
   cuentas: string[];
 }
 
@@ -34,13 +34,13 @@ export interface GuardarPlantillaRequest {
 }
 
 export interface ParametrosSpreadsheet {
-  empresa: string;
-  anio1: number;
-  anio2: number;
-  mesInicial: number;
-  mesFinal: number;
-  acumulado: string;
-  nivel: number;
+  idEmpresa?: string;
+  anio1?: number;
+  anio2?: number;       // opcional
+  mesInicial?: number;
+  mesFinal?: number;    // opcional
+  acumulado?: string;
+  nivel?: number;
 }
 
 export const MESES = [

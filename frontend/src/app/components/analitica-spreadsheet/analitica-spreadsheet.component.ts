@@ -1,4 +1,4 @@
-import {
+﻿import {
   Component, OnInit, OnDestroy, AfterViewInit,
   ViewChild, ElementRef, TemplateRef, ViewEncapsulation, NgZone
 } from '@angular/core';
@@ -11,7 +11,7 @@ import { saveAs } from 'file-saver';
 import { AnaliticaService } from '../../services/analitica.service';
 import { OfimaFormulasPlugin } from '../../utils/ofima-formulas.plugin';
 import {
-  ContextoDatos, ParametrosSpreadsheet,
+  CargarContextoRequest, ContextoDatos, ParametrosSpreadsheet,
   PlantillaAnalitica, MESES
 } from '../../models/analitica.models';
 
@@ -28,7 +28,7 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
   @ViewChild('dialogoGuardar') dialogoGuardarTpl!: TemplateRef<any>;
   @ViewChild('dialogoPlantillas') dialogoPlantillasTpl!: TemplateRef<any>;
 
-  // ── Estado ──────────────────────────────────────────────────────────
+  // â”€â”€ Estado â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   calculando = false;
   contextoOk = false;
   totalCuentasContexto = 0;
@@ -37,19 +37,27 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
   formulaBarValor = '';
   private selX = 0;
   private selY = 0;
-  // ── Barra de fórmulas ─────────────────────────────────────────────
-  modoFormula       = false; // punto de inserción activo (fórmula empieza con =)
+  // â”€â”€ Barra de fÃ³rmulas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  modoFormula       = false; // punto de inserciÃ³n activo (fÃ³rmula empieza con =)
   private fxFocused  = false; // el input de la barra tiene foco
-  private fxEditX    = -1;   // celda home del lado derecho (donde vive la fórmula)
+  private fxEditX    = -1;   // celda home del lado derecho (donde vive la fÃ³rmula)
   private fxEditY    = -1;
   plantillaNombre = '';
   plantillaDescripcion = '';
+  plantillaSeleccionadaNombre = '';
   plantillaIdActual: string | undefined;
   plantillas: PlantillaAnalitica[] = [];
   meses = MESES;
 
-  params: ParametrosSpreadsheet = {
-    empresa: '',
+  private readonly allParamKeys: (keyof ParametrosSpreadsheet)[] = [
+    'idEmpresa', 'anio1', 'anio2', 'mesInicial', 'mesFinal', 'acumulado', 'nivel'
+  ];
+
+  private readonly defaultParams: Required<Pick<
+    ParametrosSpreadsheet,
+    'idEmpresa' | 'anio1' | 'anio2' | 'mesInicial' | 'mesFinal' | 'acumulado' | 'nivel'
+  >> = {
+    idEmpresa: '',
     anio1: new Date().getFullYear(),
     anio2: new Date().getFullYear(),
     mesInicial: 1,
@@ -57,17 +65,20 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     acumulado: 'A',
     nivel: 2
   };
+  params: ParametrosSpreadsheet = { ...this.defaultParams };
+  // Campos visibles en el panel de parÃ¡metros (dinÃ¡mico segÃºn la plantilla)
+  paramsCampos = new Set<keyof ParametrosSpreadsheet>(this.allParamKeys);
 
   formulasReferencia = [
     { formula: '=NOMBRECTA("11")', descripcion: 'Nombre de la cuenta 11' },
-    { formula: '=SALDOINICIAL("11")', descripcion: 'Saldo inicial del período' },
-    { formula: '=SALDOFINAL("11")', descripcion: 'Saldo final del período' },
-    { formula: '=DEBITO("11")', descripcion: 'Total débitos del período' },
-    { formula: '=CREDITO("11")', descripcion: 'Total créditos del período' },
+    { formula: '=SALDOINICIAL("11")', descripcion: 'Saldo inicial del perÃ­odo' },
+    { formula: '=SALDOFINAL("11")', descripcion: 'Saldo final del perÃ­odo' },
+    { formula: '=DEBITO("11")', descripcion: 'Total dÃ©bitos del perÃ­odo' },
+    { formula: '=CREDITO("11")', descripcion: 'Total crÃ©ditos del perÃ­odo' },
     { formula: '=SALDOCADENA("1,2,3","4","A","EMP",2023)', descripcion: 'Suma saldos de varias cuentas' },
   ];
 
-  // ── Internos ─────────────────────────────────────────────────────────
+  // â”€â”€ Internos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   private spreadsheet: any = null;
   private dialogRef: MatDialogRef<any> | null = null;
 
@@ -93,12 +104,57 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     OfimaFormulasPlugin.clearContexto();
   }
 
-  // ── Registro de formulas OFIMA en jSpreadsheet ─────────────────────
+  mostrarCampo(campo: keyof ParametrosSpreadsheet): boolean {
+    return this.paramsCampos.has(campo);
+  }
+
+  get tienePlantillaSeleccionada(): boolean {
+    return !!this.plantillaSeleccionadaNombre?.trim();
+  }
+
+  get plantillaActivaTexto(): string {
+    return this.tienePlantillaSeleccionada
+      ? this.plantillaSeleccionadaNombre
+      : 'Sin plantilla seleccionada';
+  }
+
+  get contextoDetalle(): string {
+    const partes: string[] = [];
+
+    if (this.mostrarCampo('idEmpresa') && this.params.idEmpresa) {
+      partes.push(`Empresa: ${this.params.idEmpresa.slice(0, 8)}...`);
+    }
+
+    if (this.mostrarCampo('mesInicial')) {
+      const mesInicial = this.obtenerNombreMes(this.params.mesInicial);
+      const mesFinal = this.mostrarCampo('mesFinal')
+        ? this.obtenerNombreMes(this.params.mesFinal)
+        : mesInicial;
+      partes.push(`Periodo: ${mesInicial}-${mesFinal}`);
+    }
+
+    if (this.mostrarCampo('anio1')) {
+      const anio1 = this.params.anio1 ?? this.defaultParams.anio1;
+      const anio2 = this.mostrarCampo('anio2')
+        ? (this.params.anio2 ?? anio1)
+        : anio1;
+      partes.push(`Anios: ${anio1}/${anio2}`);
+    }
+
+    return partes.join(' | ');
+  }
+
+  private obtenerNombreMes(mes?: number): string {
+    const encontrado = this.meses.find(m => m.value === mes);
+    return encontrado?.label ?? String(mes ?? '');
+  }
+
+  // â”€â”€ Registro de formulas OFIMA en jSpreadsheet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   private registrarPlugin(): void {
     OfimaFormulasPlugin.registrar();
   }
 
-  // ── Inicializar jSpreadsheet ──────────────────────────────────────
+  // â”€â”€ Inicializar jSpreadsheet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   private inicializarSpreadsheet(datosIniciales?: any[][], formato?: {
     style?: Record<string, string>;
     mergeCells?: Record<string, [number, number]>;
@@ -231,14 +287,14 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     setTimeout(() => this.inicializarBarraFormulaDesdeSeleccion(intentos - 1), 50);
   }
 
-  // ── Layout de columnas por defecto ────────────────────────────────
+  // â”€â”€ Layout de columnas por defecto â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   private columnasPorDefecto(colWidths?: (number | string)[]) {
     const base = [
-      { title: 'Código',       width: 80,  align: 'center' },
-      { title: 'Descripción',  width: 240 },
+      { title: 'Codigo',       width: 80,  align: 'center' },
+      { title: 'Descripcion',  width: 240 },
       { title: 'Saldo Inicial',width: 130, align: 'right', type: 'numeric', mask: '#.##0,00', decimal: ',' },
-      { title: 'Débito',       width: 130, align: 'right', type: 'numeric', mask: '#.##0,00', decimal: ',' },
-      { title: 'Crédito',      width: 130, align: 'right', type: 'numeric', mask: '#.##0,00', decimal: ',' },
+      { title: 'Debito',       width: 130, align: 'right', type: 'numeric', mask: '#.##0,00', decimal: ',' },
+      { title: 'Credito',      width: 130, align: 'right', type: 'numeric', mask: '#.##0,00', decimal: ',' },
       { title: 'Saldo Final',  width: 130, align: 'right', type: 'numeric', mask: '#.##0,00', decimal: ',' },
       { title: 'Col G', width: 100 },
       { title: 'Col H', width: 100 },
@@ -251,18 +307,18 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     return base;
   }
 
-  // ── Plantilla inicial con ejemplo de Balance Mensual ─────────────
+  // â”€â”€ Plantilla inicial con ejemplo de Balance Mensual â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   private plantillaVacia(): any[][] {
     const rows: any[][] = [];
 
-    // Fila de título
+    // Fila de tÃ­tulo
     rows.push(['', 'BALANCE MENSUAL', '', '', '', '', '', '', '', '']);
     rows.push(['', '', '', '', '', '', '', '', '', '']);
 
     // Encabezados
-    rows.push(['Código', 'Descripción', 'Saldo Inicial', 'Débito', 'Crédito', 'Saldo Final', '', '', '', '']);
+    rows.push(['Codigo', 'Descripcion', 'Saldo Inicial', 'Debito', 'Credito', 'Saldo Final', '', '', '', '']);
 
-    // Filas de cuentas — el usuario escribe los códigos en col A y las fórmulas en col B-F
+    // Filas de cuentas â€” el usuario escribe los cÃ³digos en col A y las fÃ³rmulas en col B-F
     const cuentasEjemplo = ['1', '11', '13', '14', '2', '22', '3', '4', '5', '6'];
     cuentasEjemplo.forEach(cuenta => {
       rows.push([
@@ -279,7 +335,7 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     // Fila de totales
     rows.push(['', 'TOTALES', '=SUM(C4:C13)', '=SUM(D4:D13)', '=SUM(E4:E13)', '=SUM(F4:F13)', '', '', '', '']);
 
-    // Filas vacías adicionales
+    // Filas vacÃ­as adicionales
     for (let i = 0; i < 20; i++) {
       rows.push(['', '', '', '', '', '', '', '', '', '']);
     }
@@ -287,33 +343,26 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     return rows;
   }
 
-  // ── CALCULAR: carga contexto y recalcula ──────────────────────────
+  // â”€â”€ CALCULAR: carga contexto y recalcula â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   calcular(): void {
-    if (!this.params.empresa) {
-      this.snackBar.open('Ingrese el código de empresa primero.', 'OK', { duration: 3000 });
+    const errorValidacion = this.validarParametrosActivos();
+    if (errorValidacion) {
+      this.snackBar.open(errorValidacion, 'OK', { duration: 3000 });
       return;
     }
 
-    // Extraer cuentas únicas de la columna A del spreadsheet
+    // Extraer cuentas unicas de la columna A del spreadsheet
     const cuentas = this.extraerCuentasDelSpreadsheet();
 
     if (cuentas.length === 0) {
-      this.snackBar.open('No se encontraron códigos de cuenta en la columna A.', 'OK', { duration: 3000 });
+      this.snackBar.open('No se encontraron codigos de cuenta en la columna A.', 'OK', { duration: 3000 });
       return;
     }
 
     this.calculando = true;
     this.contextoOk = false;
 
-    const request = {
-      empresa: this.params.empresa,
-      anio1: this.params.anio1,
-      anio2: this.params.anio2,
-      mesInicial: this.params.mesInicial,
-      mesFinal: this.params.mesFinal,
-      acumulado: this.params.acumulado,
-      cuentas
-    };
+    const request = this.construirRequestContexto(cuentas);
 
     this.analiticaService.cargarContexto(request).subscribe({
       next: (contexto: ContextoDatos) => {
@@ -321,11 +370,11 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
         this.contextoOk = true;
         this.totalCuentasContexto = Object.keys(contexto.nombresCuentas).length;
 
-        // Forzar recálculo: modificar una celda vacía y restaurar
+        // Forzar recalculo: modificar una celda vacia y restaurar
         this.forzarRecalculo();
 
         this.calculando = false;
-        this.snackBar.open(`✓ Contexto cargado: ${this.totalCuentasContexto} cuentas`, '', { duration: 2500 });
+        this.snackBar.open('Contexto cargado: ' + this.totalCuentasContexto + ' cuentas', '', { duration: 2500 });
       },
       error: (err: any) => {
         this.calculando = false;
@@ -335,7 +384,205 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     });
   }
 
-  // ── Extrae códigos de cuenta de la columna A (índice 0) ───────────
+  private validarParametrosActivos(): string | null {
+    if (this.mostrarCampo('idEmpresa') && !this.params.idEmpresa?.trim()) {
+      return 'Ingrese el ID de empresa (GUID) primero.';
+    }
+
+    if (this.mostrarCampo('anio1') && !this.esNumeroValido(this.params.anio1)) {
+      return 'El valor de Anio 1 no es valido.';
+    }
+
+    if (this.mostrarCampo('anio2') && !this.esNumeroValido(this.params.anio2)) {
+      return 'El valor de Anio 2 no es valido.';
+    }
+
+    if (this.mostrarCampo('mesInicial') && !this.esNumeroValido(this.params.mesInicial)) {
+      return 'El valor de Mes Inicial no es valido.';
+    }
+
+    if (this.mostrarCampo('mesFinal') && !this.esNumeroValido(this.params.mesFinal)) {
+      return 'El valor de Mes Final no es valido.';
+    }
+
+    if (this.mostrarCampo('acumulado') && !this.params.acumulado?.trim()) {
+      return 'El valor de Acumulado no es valido.';
+    }
+
+    if (this.mostrarCampo('nivel') && !this.esNumeroValido(this.params.nivel)) {
+      return 'El valor de Nivel de cuentas no es valido.';
+    }
+
+    return null;
+  }
+
+  private construirRequestContexto(cuentas: string[]): CargarContextoRequest {
+    const request: CargarContextoRequest = { cuentas };
+
+    if (this.mostrarCampo('idEmpresa') && this.params.idEmpresa != null) {
+      request.idEmpresa = this.params.idEmpresa.trim();
+    }
+    if (this.mostrarCampo('anio1') && this.params.anio1 != null) {
+      request.anio1 = this.params.anio1;
+    }
+    if (this.mostrarCampo('anio2') && this.params.anio2 != null) {
+      request.anio2 = this.params.anio2;
+    }
+    if (this.mostrarCampo('mesInicial') && this.params.mesInicial != null) {
+      request.mesInicial = this.params.mesInicial;
+    }
+    if (this.mostrarCampo('mesFinal') && this.params.mesFinal != null) {
+      request.mesFinal = this.params.mesFinal;
+    }
+    if (this.mostrarCampo('acumulado') && this.params.acumulado != null) {
+      request.acumulado = this.params.acumulado;
+    }
+
+    return request;
+  }
+
+  private esNumeroValido(valor: number | undefined): boolean {
+    return typeof valor === 'number' && Number.isFinite(valor);
+  }
+
+  private leerNumero(valor: unknown, fallback: number): number {
+    const n = Number(valor);
+    return Number.isFinite(n) ? n : fallback;
+  }
+
+  private normalizarClaveParam(clave: string): keyof ParametrosSpreadsheet | null {
+    const k = clave.trim().toLowerCase();
+    switch (k) {
+      case 'idempresa':
+      case 'empresa':
+        return 'idEmpresa';
+      case 'anio1':
+        return 'anio1';
+      case 'anio2':
+        return 'anio2';
+      case 'mesinicial':
+        return 'mesInicial';
+      case 'mesfinal':
+        return 'mesFinal';
+      case 'acumulado':
+        return 'acumulado';
+      case 'nivel':
+        return 'nivel';
+      default:
+        return null;
+    }
+  }
+
+  private ordenarCamposActivos(campos: Set<keyof ParametrosSpreadsheet>): Set<keyof ParametrosSpreadsheet> {
+    const ordenados: (keyof ParametrosSpreadsheet)[] = [];
+    this.allParamKeys.forEach(k => {
+      if (campos.has(k)) ordenados.push(k);
+    });
+    return new Set<keyof ParametrosSpreadsheet>(ordenados);
+  }
+
+  private construirParamsDesdeJson(raw: Record<string, unknown>): ParametrosSpreadsheet {
+    const next: ParametrosSpreadsheet = {};
+
+    if (this.mostrarCampo('idEmpresa')) {
+      const val = raw['idEmpresa'] ?? raw['IdEmpresa'] ?? raw['empresa'] ?? this.defaultParams.idEmpresa;
+      next.idEmpresa = String(val ?? '');
+    }
+    if (this.mostrarCampo('anio1')) {
+      next.anio1 = this.leerNumero(raw['anio1'], this.defaultParams.anio1);
+    }
+    if (this.mostrarCampo('anio2')) {
+      next.anio2 = this.leerNumero(raw['anio2'], this.defaultParams.anio2);
+    }
+    if (this.mostrarCampo('mesInicial')) {
+      next.mesInicial = this.leerNumero(raw['mesInicial'], this.defaultParams.mesInicial);
+    }
+    if (this.mostrarCampo('mesFinal')) {
+      next.mesFinal = this.leerNumero(raw['mesFinal'], this.defaultParams.mesFinal);
+    }
+    if (this.mostrarCampo('acumulado')) {
+      next.acumulado = String(raw['acumulado'] ?? this.defaultParams.acumulado);
+    }
+    if (this.mostrarCampo('nivel')) {
+      next.nivel = this.leerNumero(raw['nivel'], this.defaultParams.nivel);
+    }
+
+    return next;
+  }
+
+  private aplicarParametrosPlantilla(raw: Record<string, unknown>): void {
+    const campos = new Set<keyof ParametrosSpreadsheet>();
+    Object.keys(raw).forEach(key => {
+      const normalizada = this.normalizarClaveParam(key);
+      if (normalizada) {
+        campos.add(normalizada);
+      }
+    });
+
+    if (campos.size === 0) {
+      this.paramsCampos = new Set<keyof ParametrosSpreadsheet>(this.allParamKeys);
+      this.params = { ...this.defaultParams };
+      return;
+    }
+
+    this.paramsCampos = this.ordenarCamposActivos(campos);
+    this.params = this.construirParamsDesdeJson(raw);
+  }
+
+  private obtenerParamsActivosParaGuardar(): Record<string, unknown> {
+    const payload: Record<string, unknown> = {};
+
+    if (this.mostrarCampo('idEmpresa') && this.params.idEmpresa != null) {
+      payload['IdEmpresa'] = this.params.idEmpresa.trim();
+    }
+    if (this.mostrarCampo('anio1') && this.params.anio1 != null) {
+      payload['anio1'] = this.params.anio1;
+    }
+    if (this.mostrarCampo('anio2') && this.params.anio2 != null) {
+      payload['anio2'] = this.params.anio2;
+    }
+    if (this.mostrarCampo('mesInicial') && this.params.mesInicial != null) {
+      payload['mesInicial'] = this.params.mesInicial;
+    }
+    if (this.mostrarCampo('mesFinal') && this.params.mesFinal != null) {
+      payload['mesFinal'] = this.params.mesFinal;
+    }
+    if (this.mostrarCampo('acumulado') && this.params.acumulado != null) {
+      payload['acumulado'] = this.params.acumulado;
+    }
+    if (this.mostrarCampo('nivel') && this.params.nivel != null) {
+      payload['nivel'] = this.params.nivel;
+    }
+
+    return payload;
+  }
+
+  private parsearObjetoJson(valor: unknown): Record<string, unknown> | null {
+    if (valor == null) {
+      return null;
+    }
+
+    if (typeof valor === 'string') {
+      const txt = valor.trim();
+      if (!txt) {
+        return null;
+      }
+      try {
+        const parsed = JSON.parse(txt) as unknown;
+        return this.parsearObjetoJson(parsed);
+      } catch {
+        return null;
+      }
+    }
+
+    if (typeof valor === 'object' && !Array.isArray(valor)) {
+      return valor as Record<string, unknown>;
+    }
+
+    return null;
+  }
+
+  // â”€â”€ Extrae cÃ³digos de cuenta de la columna A (Ã­ndice 0) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   private extraerCuentasDelSpreadsheet(): string[] {
     const hoja = this.obtenerHojaActiva();
     if (!hoja) return [];
@@ -353,14 +600,14 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     return Array.from(cuentasSet);
   }
 
-  // ── Forzar recálculo en jSpreadsheet ─────────────────────────────
+  // â”€â”€ Forzar recÃ¡lculo en jSpreadsheet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   private forzarRecalculo(): void {
     const hoja = this.obtenerHojaActiva();
     if (!hoja) return;
 
     const datos: any[][] = hoja.getData();
 
-    // Re-set todas las celdas con fórmulas para disparar recálculo
+    // Re-set todas las celdas con fÃ³rmulas para disparar recÃ¡lculo
     datos.forEach((fila: any[], rowIdx: number) => {
       fila.forEach((valor: any, colIdx: number) => {
         if (typeof valor === 'string' && valor.startsWith('=')) {
@@ -370,7 +617,7 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     });
   }
 
-  // ── Commit desde la barra de fórmulas (Enter / blur fuera de la hoja) ──
+  // â”€â”€ Commit desde la barra de fÃ³rmulas (Enter / blur fuera de la hoja) â”€â”€
   private obtenerCoordenadasObjetivoFormula(): { x: number; y: number } {
     return {
       x: this.fxEditX >= 0 ? this.fxEditX : this.selX,
@@ -393,10 +640,10 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     this.fxEditY         = -1;
   }
 
-  // ── Handlers del <input> de la barra de fórmulas ────────────────────
+  // â”€â”€ Handlers del <input> de la barra de fÃ³rmulas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   onFxFocus(): void {
     this.fxFocused = true;
-    // Si el valor ya empieza con = al recibir foco, activar modo fórmula
+    // Si el valor ya empieza con = al recibir foco, activar modo fÃ³rmula
     if (this.formulaBarValor.startsWith('=') && this.fxEditX < 0) {
       this.modoFormula = true;
       this.fxEditX     = this.selX;
@@ -423,7 +670,7 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     setTimeout(() => {
       if (!this.fxFocused) {
         // El foco no volvio a la barra (el usuario no hizo clic en una celda para
-        // insertar referencia) → commitear y salir del modo fórmula
+        // insertar referencia) â†’ commitear y salir del modo fÃ³rmula
         this.commitFormula(this.formulaBarValor);
       }
     }, 120);
@@ -453,7 +700,7 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     }
   }
 
-  // ── Insertar referencia de celda en la posición del cursor del input ──
+  // â”€â”€ Insertar referencia de celda en la posiciÃ³n del cursor del input â”€â”€
   private insertarReferencia(ref: string): void {
     const input = this.formulaBarInputRef?.nativeElement;
     if (input) {
@@ -475,14 +722,14 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     }
   }
 
-  // ── Copiar fórmula al portapapeles ───────────────────────────────
+  // â”€â”€ Copiar fÃ³rmula al portapapeles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   copiarFormula(formula: string): void {
     navigator.clipboard.writeText(formula).then(() => {
       this.snackBar.open(`Copiado: ${formula}`, '', { duration: 1500 });
     });
   }
 
-  // ── Exportar a Excel (.xlsx con estilos, merges y anchos) ──────────
+  // â”€â”€ Exportar a Excel (.xlsx con estilos, merges y anchos) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async exportarExcel(): Promise<void> {
     const hoja = this.obtenerHojaActiva();
     if (!hoja) return;
@@ -950,7 +1197,7 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     return col.toUpperCase().split('').reduce((acc, c) => acc * 26 + c.charCodeAt(0) - 64, 0);
   }
 
-  // ── Índice base 1 → letra(s) de columna (1→"A", 27→"AA") ─────────
+  // â”€â”€ Ãndice base 1 â†’ letra(s) de columna (1â†’"A", 27â†’"AA") â”€â”€â”€â”€â”€â”€â”€â”€â”€
   private colIndexToLetter(index: number): string {
     let result = '';
     while (index > 0) {
@@ -960,53 +1207,77 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     return result;
   }
 
-  // ── Guardar plantilla ────────────────────────────────────────────
+
+  // -- Nueva plantilla -------------------------------------------------
+  nuevaPlantilla(): void {
+    this.plantillaIdActual       = undefined;
+    this.plantillaNombre         = '';
+    this.plantillaDescripcion    = '';
+    this.plantillaSeleccionadaNombre = '';
+    this.paramsCampos = new Set<keyof ParametrosSpreadsheet>(this.allParamKeys);
+    this.params       = { ...this.defaultParams };
+    this.contextoOk   = false;
+    this.totalCuentasContexto = 0;
+    OfimaFormulasPlugin.clearContexto();
+    this.inicializarSpreadsheet();
+  }
+
+  // -- Guardar plantilla ------------------------------------------------
   guardarPlantilla(): void {
-    this.dialogRef = this.dialog.open(this.dialogoGuardarTpl, { width: '420px' });
-
-    this.dialogRef.afterClosed().subscribe((confirmar: boolean) => {
-      if (!confirmar || !this.plantillaNombre) return;
-
-      const hoja = this.obtenerHojaActiva();
-      const datos   = hoja?.getData()    ?? [];
-      const estilos  = hoja?.getStyle()   ?? {};
-      const merges   = hoja?.getMerge()   ?? {};
-      const anchos   = hoja?.getWidth()   ?? [];
-      const altos    = hoja?.getHeight()  ?? [];
-
-      // Filtrar estilos vacíos para mantener el JSON compacto
-      const stylesFiltrados: Record<string, string> = {};
-      Object.entries(estilos as Record<string, string>).forEach(([k, v]) => {
-        if (v && v.trim()) stylesFiltrados[k] = v;
+    if (this.plantillaIdActual && this.plantillaNombre) {
+      this.ejecutarGuardado();
+    } else {
+      this.dialogRef = this.dialog.open(this.dialogoGuardarTpl, { width: '420px' });
+      this.dialogRef.afterClosed().subscribe((confirmar: boolean) => {
+        if (!confirmar || !this.plantillaNombre) return;
+        this.ejecutarGuardado();
       });
+    }
+  }
 
-      const contenido = JSON.stringify({
-        version: 2,
-        data: datos,
-        style: stylesFiltrados,
-        mergeCells: merges,
-        colWidths: anchos,
-        rowHeights: altos,
-        params: this.params,
-        timestamp: new Date().toISOString()
-      });
+  private ejecutarGuardado(): void {
+    const hoja = this.obtenerHojaActiva();
+    const datos    = hoja?.getData()   ?? [];
+    const estilos  = hoja?.getStyle()  ?? {};
+    const merges   = hoja?.getMerge()  ?? {};
+    const anchos   = hoja?.getWidth()  ?? [];
+    const altos    = hoja?.getHeight() ?? [];
 
-      this.analiticaService.guardarPlantilla({
-        id: this.plantillaIdActual,
-        nombre: this.plantillaNombre,
-        descripcion: this.plantillaDescripcion,
-        contenido
-      }).subscribe({
-        next: (p: PlantillaAnalitica) => {
-          this.plantillaIdActual = p.id;
-          this.snackBar.open(`✓ Plantilla "${p.nombre}" guardada`, '', { duration: 3000 });
-        },
-        error: () => this.snackBar.open('Error al guardar la plantilla', 'OK', { duration: 3000 })
-      });
+    const stylesFiltrados: Record<string, string> = {};
+    Object.entries(estilos as Record<string, string>).forEach(([k, v]) => {
+      if (v && v.trim()) stylesFiltrados[k] = v;
+    });
+
+    const contenido = JSON.stringify({
+      version: 2,
+      data: datos,
+      style: stylesFiltrados,
+      mergeCells: merges,
+      colWidths: anchos,
+      rowHeights: altos,
+      params: this.obtenerParamsActivosParaGuardar(),
+      timestamp: new Date().toISOString()
+    });
+
+    this.analiticaService.guardarPlantilla({
+      id: this.plantillaIdActual,
+      nombre: this.plantillaNombre,
+      descripcion: this.plantillaDescripcion,
+      contenido
+    }).subscribe({
+      next: (p: PlantillaAnalitica) => {
+        this.plantillaIdActual = p.id;
+        this.plantillaNombre = p.nombre;
+        this.plantillaDescripcion = p.descripcion;
+        this.plantillaSeleccionadaNombre = p.nombre;
+        this.snackBar.open(`\u2713 Plantilla "${p.nombre}" guardada`, '', { duration: 3000 });
+      },
+      error: () => this.snackBar.open('Error al guardar la plantilla', 'OK', { duration: 3000 })
     });
   }
 
-  // ── Abrir diálogo de plantillas ───────────────────────────────────
+
+  // â”€â”€ Abrir diÃ¡logo de plantillas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   abrirDialogoPlantillas(): void {
     this.analiticaService.getPlantillas().subscribe((lista: PlantillaAnalitica[]) => {
       this.plantillas = lista;
@@ -1014,36 +1285,49 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     });
   }
 
-  // ── Cargar plantilla ─────────────────────────────────────────────
+  // â”€â”€ Cargar plantilla â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   cargarPlantilla(plantilla: PlantillaAnalitica): void {
     this.dialogRef?.close();
+    this.aplicarContenidoPlantilla(plantilla);
+  }
 
+  private aplicarContenidoPlantilla(plantilla: PlantillaAnalitica): void {
     try {
-      const parsed = JSON.parse(plantilla.contenido);
+      const parsed = this.parsearObjetoJson(plantilla.contenido);
+      if (!parsed) {
+        throw new Error('Contenido de plantilla invalido.');
+      }
+
       this.plantillaIdActual = plantilla.id;
       this.plantillaNombre = plantilla.nombre;
       this.plantillaDescripcion = plantilla.descripcion;
+      this.plantillaSeleccionadaNombre = plantilla.nombre;
 
-      if (parsed.params) {
-        this.params = { ...this.params, ...parsed.params };
+      const paramsTemplate = this.parsearObjetoJson(parsed['params']);
+      if (paramsTemplate) {
+        this.aplicarParametrosPlantilla(paramsTemplate);
+      } else {
+        this.paramsCampos = new Set<keyof ParametrosSpreadsheet>(this.allParamKeys);
+        this.params = { ...this.defaultParams };
       }
 
-      if (parsed.data && Array.isArray(parsed.data)) {
-        this.inicializarSpreadsheet(parsed.data, {
-          style:      parsed.style      ?? undefined,
-          mergeCells: parsed.mergeCells ?? undefined,
-          colWidths:  parsed.colWidths  ?? undefined,
-          rowHeights: parsed.rowHeights ?? undefined,
+      const data = parsed['data'];
+      if (Array.isArray(data)) {
+        this.inicializarSpreadsheet(data, {
+          style:      parsed['style']      as Record<string, string> | undefined,
+          mergeCells: parsed['mergeCells'] as Record<string, [number, number]> | undefined,
+          colWidths:  parsed['colWidths']  as (number | string)[] | undefined,
+          rowHeights: parsed['rowHeights'] as string[] | undefined,
         });
       }
 
-      this.snackBar.open(`✓ Plantilla "${plantilla.nombre}" cargada`, '', { duration: 2500 });
+      this.snackBar.open(`âœ“ Plantilla "${plantilla.nombre}" cargada`, '', { duration: 2500 });
     } catch {
       this.snackBar.open('Error al cargar la plantilla', 'OK', { duration: 3000 });
     }
   }
 
-  // ── Eliminar plantilla ───────────────────────────────────────────
+  // â”€â”€ Eliminar plantilla â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   eliminarPlantilla(id: string): void {
     this.analiticaService.eliminarPlantilla(id).subscribe({
       next: () => {

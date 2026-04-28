@@ -22,8 +22,13 @@ public class AnaliticaController : ControllerBase
     [HttpPost("CargarContexto")]
     public async Task<ActionResult<ContextoDatosDto>> CargarContexto([FromBody] CargarContextoRequest request)
     {
-        if (string.IsNullOrEmpty(request.Empresa))
-            return BadRequest("El campo Empresa es requerido.");
+        request.IdEmpresa = request.IdEmpresa?.Trim();
+
+        if (string.IsNullOrWhiteSpace(request.IdEmpresa))
+            return BadRequest("El campo IdEmpresa es requerido.");
+
+        if (!Guid.TryParse(request.IdEmpresa, out _))
+            return BadRequest("El campo IdEmpresa debe ser un GUID valido.");
 
         if (!request.Cuentas.Any())
             return BadRequest("Debe especificar al menos una cuenta.");

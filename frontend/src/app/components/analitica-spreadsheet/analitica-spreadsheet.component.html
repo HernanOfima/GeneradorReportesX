@@ -5,15 +5,24 @@
     <div class="toolbar-left">
       <mat-icon class="toolbar-icon">table_chart</mat-icon>
       <span class="toolbar-title">Análitica — Spreadsheet</span>
+      <span class="toolbar-template" [class.toolbar-template--empty]="!tienePlantillaSeleccionada">
+        <mat-icon>{{ tienePlantillaSeleccionada ? 'description' : 'info' }}</mat-icon>
+        <span class="toolbar-template__label">Plantilla:</span>
+        <strong class="toolbar-template__name">{{ plantillaActivaTexto }}</strong>
+      </span>
     </div>
 
     <div class="toolbar-actions">
       <!-- Plantillas -->
+      <button mat-stroked-button (click)="nuevaPlantilla()" matTooltip="Iniciar plantilla nueva en blanco">
+        <mat-icon>add_circle_outline</mat-icon> Nueva
+      </button>
       <button mat-stroked-button (click)="abrirDialogoPlantillas()" matTooltip="Cargar plantilla guardada">
         <mat-icon>folder_open</mat-icon> Plantillas
       </button>
-      <button mat-stroked-button (click)="guardarPlantilla()" matTooltip="Guardar plantilla actual">
-        <mat-icon>save</mat-icon> Guardar
+      <button mat-stroked-button (click)="guardarPlantilla()" matTooltip="Guardar plantilla">
+        <mat-icon>{{ plantillaIdActual ? 'save' : 'save_as' }}</mat-icon>
+        {{ plantillaIdActual ? 'Guardar' : 'Guardar como...' }}
       </button>
 
       <mat-divider [vertical]="true" style="height:28px; margin: 0 8px;"></mat-divider>
@@ -41,36 +50,39 @@
     </mat-expansion-panel-header>
 
     <div class="params-grid">
-      <mat-form-field appearance="outline">
-        <mat-label>Empresa</mat-label>
-        <input matInput [(ngModel)]="params.empresa" placeholder="Ej: TODOTERRENO2026">
+      <mat-form-field *ngIf="mostrarCampo('idEmpresa')" appearance="outline">
+        <mat-label>Empresa (ID)</mat-label>
+        <input matInput [(ngModel)]="params.idEmpresa"
+               placeholder="GUID de empresa"
+               [title]="params.idEmpresa">
+        <mat-hint *ngIf="params.idEmpresa">{{ params.idEmpresa | slice:0:8 }}…</mat-hint>
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <mat-form-field *ngIf="mostrarCampo('anio1')" appearance="outline">
         <mat-label>Año 1</mat-label>
         <input matInput type="number" [(ngModel)]="params.anio1" min="2000" max="2099">
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <mat-form-field *ngIf="mostrarCampo('anio2')" appearance="outline">
         <mat-label>Año 2</mat-label>
         <input matInput type="number" [(ngModel)]="params.anio2" min="2000" max="2099">
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <mat-form-field *ngIf="mostrarCampo('mesInicial')" appearance="outline">
         <mat-label>Mes Inicial</mat-label>
         <mat-select [(ngModel)]="params.mesInicial">
           <mat-option *ngFor="let m of meses" [value]="m.value">{{ m.label }}</mat-option>
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <mat-form-field *ngIf="mostrarCampo('mesFinal')" appearance="outline">
         <mat-label>Mes Final</mat-label>
         <mat-select [(ngModel)]="params.mesFinal">
           <mat-option *ngFor="let m of meses" [value]="m.value">{{ m.label }}</mat-option>
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <mat-form-field *ngIf="mostrarCampo('acumulado')" appearance="outline">
         <mat-label>Acumulado</mat-label>
         <mat-select [(ngModel)]="params.acumulado">
           <mat-option value="A">Acumulado (A)</mat-option>
@@ -78,7 +90,7 @@
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <mat-form-field *ngIf="mostrarCampo('nivel')" appearance="outline">
         <mat-label>Nivel de cuentas</mat-label>
         <input matInput type="number" [(ngModel)]="params.nivel" min="1" max="8">
       </mat-form-field>
@@ -105,7 +117,7 @@
   <div class="context-status" [ngClass]="{ 'status-ok': contextoOk, 'status-warn': !contextoOk }">
     <mat-icon>{{ contextoOk ? 'check_circle' : 'warning' }}</mat-icon>
     <span>{{ contextoOk ? 'Contexto cargado — ' + totalCuentasContexto + ' cuentas' : 'Sin contexto. Configure parámetros y presione Calcular.' }}</span>
-    <span *ngIf="contextoOk" class="context-detail">&nbsp;Empresa: {{ params.empresa }} | Período: {{ params.mesInicial }}-{{ params.mesFinal }} | Años: {{ params.anio1 }}/{{ params.anio2 }}</span>
+    <span *ngIf="contextoOk && contextoDetalle" class="context-detail">&nbsp;{{ contextoDetalle }}</span>
   </div>
 
   <!-- ══ BARRA DE FÓRMULAS ══════════════════════════════════════════ -->

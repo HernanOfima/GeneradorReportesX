@@ -27,13 +27,25 @@ public class AnaliticaRepository : IAnaliticaRepository
         if (!request.Cuentas.Any())
             return resultado;
 
+        var idEmpresa = request.IdEmpresa ?? string.Empty;
+        var anio1Efectivo = request.Anio1 ?? DateTime.UtcNow.Year;
+        var mesInicialEfectivo = request.MesInicial ?? 1;
+        var anio2Efectivo = request.Anio2 ?? anio1Efectivo;
+        var mesFinalEfect = request.MesFinal ?? mesInicialEfectivo;
+        var acumuladoEfectivo = string.IsNullOrWhiteSpace(request.Acumulado)
+            ? "A"
+            : request.Acumulado.Trim().ToUpperInvariant();
+
+        mesInicialEfectivo = Math.Clamp(mesInicialEfectivo, 1, 12);
+        mesFinalEfect = Math.Clamp(mesFinalEfect, 1, 12);
+
         var tareas = request.Cuentas.Select(async cuenta =>
         {
-            var nombre = await NombreCuentaAsync(cuenta, request.Empresa);
-            var saldoInicial = await SaldoCuentaAsync(cuenta, request.MesInicial, request.Acumulado, request.Empresa, request.Anio2);
-            var saldoFinal = await SaldoCuentaAsync(cuenta, request.MesFinal, request.Acumulado, request.Empresa, request.Anio1);
-            var debito = await SaldoDBCRAsync(cuenta, request.MesFinal, "DB", request.Empresa, request.Anio1);
-            var credito = await SaldoDBCRAsync(cuenta, request.MesFinal, "CR", request.Empresa, request.Anio1);
+            var nombre = await NombreCuentaAsync(cuenta, idEmpresa);
+            var saldoInicial = await SaldoCuentaAsync(cuenta, mesInicialEfectivo, acumuladoEfectivo, idEmpresa, anio2Efectivo);
+            var saldoFinal = await SaldoCuentaAsync(cuenta, mesFinalEfect, acumuladoEfectivo, idEmpresa, anio1Efectivo);
+            var debito = await SaldoDBCRAsync(cuenta, mesFinalEfect, "DB", idEmpresa, anio1Efectivo);
+            var credito = await SaldoDBCRAsync(cuenta, mesFinalEfect, "CR", idEmpresa, anio1Efectivo);
 
             return new { cuenta, nombre, saldoInicial, saldoFinal, debito, credito };
         });
@@ -56,19 +68,20 @@ public class AnaliticaRepository : IAnaliticaRepository
     // NOMBRECTA - retorna el nombre de la cuenta contable
     // Equivalente a: ofima.xla!NOMBRECTA(cuenta, empresa)
     // ─────────────────────────────────────────────────────────────────
-    public async Task<string> NombreCuentaAsync(string cuenta, string empresa)
+    public async Task<string> NombreCuentaAsync(string cuenta, string idEmpresa)
     {
         const string sql = @"
         SELECT TOP 1 ISNULL(NombreCuenta, NombreCuenta) AS NombreCuenta
             FROM [Empresa].[CuentaContable]
             WHERE CodigoCuenta = @cuenta
-              --AND IdEmpresa = (SELECT IdEmpresa FROM Empresa.Empresa WHERE Codigo = @empresa)
+              AND (@idEmpresa IS NULL OR IdEmpresa = @idEmpresa)
             ORDER BY CodigoCuenta";
 
         return await ExecuteScalarAsync<string>(sql, cmd =>
         {
             cmd.Parameters.AddWithValue("@cuenta", cuenta);
-            cmd.Parameters.AddWithValue("@empresa", empresa);
+            var p = cmd.Parameters.Add("@idEmpresa", System.Data.SqlDbType.UniqueIdentifier);
+            p.Value = string.IsNullOrWhiteSpace(idEmpresa) ? DBNull.Value : Guid.Parse(idEmpresa);
         }) ?? cuenta;
     }
 
@@ -76,7 +89,7 @@ public class AnaliticaRepository : IAnaliticaRepository
     // SALDOCONTABLECUENTA - retorna el saldo acumulado de una cuenta
     // Equivalente a: ofima.xla!SALDOCONTABLECUENTA(cuenta, periodo, acumulado, empresa, año)
     // ─────────────────────────────────────────────────────────────────
-    public async Task<decimal> SaldoCuentaAsync(string cuenta, int periodo, string acumulado, string empresa, int año)
+    public async Task<decimal> SaldoCuentaAsync(string cuenta, int periodo, string acumulado, string idEmpresa, int año)
     {
         string sql;
 
@@ -84,16 +97,12 @@ public class AnaliticaRepository : IAnaliticaRepository
         {
             // Saldo acumulado: suma de todos los movimientos desde el mes 1 hasta el período
             sql = @"
-                    SELECT ISNULL(SUM(
-                        
-                            m.Cargo - Abono
-                    
-                    ), 0)
+                    SELECT ISNULL(SUM(m.Cargo - m.Abono), 0)
                     FROM [Empresa].[MovimientoContable] m
                     INNER JOIN Registro.Empresa e ON e.IdEmpresa = m.IdEmpresa
-                    Inner Join [Empresa].[CuentaContable] Cuenta On Cuenta.IdCuentaContable = m.IdCuentaContable
+                    INNER JOIN [Empresa].[CuentaContable] Cuenta ON Cuenta.IdCuentaContable = m.IdCuentaContable
                     WHERE Cuenta.CodigoCuenta LIKE @cuenta + '%'
-                        --AND e.Codigo = @empresa
+                        AND (@idEmpresa IS NULL OR e.IdEmpresa = @idEmpresa)
                         AND Year(m.FechaMovimiento) = @año
                         AND Month(m.FechaMovimiento) <= @periodo";
         }
@@ -101,16 +110,12 @@ public class AnaliticaRepository : IAnaliticaRepository
         {
             // Saldo del período específico
             sql = @"
-                    SELECT ISNULL(SUM(
-                        
-                            m.Cargo - Abono
-                    
-                    ), 0)
+                    SELECT ISNULL(SUM(m.Cargo - m.Abono), 0)
                     FROM [Empresa].[MovimientoContable] m
                     INNER JOIN Registro.Empresa e ON e.IdEmpresa = m.IdEmpresa
-                    Inner Join [Empresa].[CuentaContable] Cuenta On Cuenta.IdCuentaContable = m.IdCuentaContable
+                    INNER JOIN [Empresa].[CuentaContable] Cuenta ON Cuenta.IdCuentaContable = m.IdCuentaContable
                     WHERE Cuenta.CodigoCuenta LIKE @cuenta + '%'
-                        --AND e.Codigo = @empresa
+                        AND (@idEmpresa IS NULL OR e.IdEmpresa = @idEmpresa)
                         AND Year(m.FechaMovimiento) = @año
                         AND Month(m.FechaMovimiento) = @periodo";
         }
@@ -118,7 +123,8 @@ public class AnaliticaRepository : IAnaliticaRepository
         return await ExecuteScalarAsync<decimal>(sql, cmd =>
         {
             cmd.Parameters.AddWithValue("@cuenta", cuenta);
-            cmd.Parameters.AddWithValue("@empresa", empresa);
+            var p = cmd.Parameters.Add("@idEmpresa", System.Data.SqlDbType.UniqueIdentifier);
+            p.Value = string.IsNullOrWhiteSpace(idEmpresa) ? DBNull.Value : Guid.Parse(idEmpresa);
             cmd.Parameters.AddWithValue("@año", año);
             cmd.Parameters.AddWithValue("@periodo", periodo);
         });
@@ -128,7 +134,7 @@ public class AnaliticaRepository : IAnaliticaRepository
     // SALDOCONTABLECTADBCR - retorna saldo según naturaleza DB o CR
     // Equivalente a: ofima.xla!SaldoContableCtaDBCR(cuenta, periodo, naturaleza, empresa, año)
     // ─────────────────────────────────────────────────────────────────
-    public async Task<decimal> SaldoDBCRAsync(string cuenta, int periodo, string naturaleza, string empresa, int año)
+    public async Task<decimal> SaldoDBCRAsync(string cuenta, int periodo, string naturaleza, string idEmpresa, int año)
     {
         const string sql = @"
                             SELECT ISNULL(SUM(
@@ -140,16 +146,17 @@ public class AnaliticaRepository : IAnaliticaRepository
                             ), 0)
                             FROM [Empresa].[MovimientoContable] m
                             INNER JOIN Registro.Empresa e ON e.IdEmpresa = m.IdEmpresa
-                            Inner Join [Empresa].[CuentaContable] Cuenta On Cuenta.IdCuentaContable = m.IdCuentaContable
+                            INNER JOIN [Empresa].[CuentaContable] Cuenta ON Cuenta.IdCuentaContable = m.IdCuentaContable
                             WHERE Cuenta.CodigoCuenta LIKE @cuenta + '%'
-                                --AND e.Codigo = @empresa
+                                AND (@idEmpresa IS NULL OR e.IdEmpresa = @idEmpresa)
                                 AND Year(m.FechaMovimiento) = @año
                                 AND Month(m.FechaMovimiento) <= @periodo";
 
         return await ExecuteScalarAsync<decimal>(sql, cmd =>
         {
             cmd.Parameters.AddWithValue("@cuenta", cuenta);
-            cmd.Parameters.AddWithValue("@empresa", empresa);
+            var p = cmd.Parameters.Add("@idEmpresa", System.Data.SqlDbType.UniqueIdentifier);
+            p.Value = string.IsNullOrWhiteSpace(idEmpresa) ? DBNull.Value : Guid.Parse(idEmpresa);
             cmd.Parameters.AddWithValue("@año", año);
             cmd.Parameters.AddWithValue("@periodo", periodo);
             cmd.Parameters.AddWithValue("@naturaleza", naturaleza);
@@ -160,14 +167,14 @@ public class AnaliticaRepository : IAnaliticaRepository
     // SALDOCONTABLECUENTACADENA - totales de múltiples cuentas
     // Equivalente a: ofima.xla!SaldoContableCuentaCadena("1,2,3", ...)
     // ─────────────────────────────────────────────────────────────────
-    public async Task<decimal> SaldoCuentaCadenaAsync(string cuentas, int periodo, string acumulado, string empresa, int año)
+    public async Task<decimal> SaldoCuentaCadenaAsync(string cuentas, int periodo, string acumulado, string idEmpresa, int año)
     {
         var listaCuentas = cuentas.Split(',').Select(c => c.Trim()).ToList();
         var total = 0m;
 
         foreach (var cuenta in listaCuentas)
         {
-            total += await SaldoCuentaAsync(cuenta, periodo, acumulado, empresa, año);
+            total += await SaldoCuentaAsync(cuenta, periodo, acumulado, idEmpresa, año);
         }
 
         return total;

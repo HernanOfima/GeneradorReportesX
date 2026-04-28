@@ -2,12 +2,12 @@ namespace oDres.GeneradorReportes.WEBApi.Application.DTOs;
 
 public class CargarContextoRequest
 {
-    public string Empresa { get; set; } = string.Empty;
-    public int Anio1 { get; set; }
-    public int Anio2 { get; set; }
-    public int MesInicial { get; set; }
-    public int MesFinal { get; set; }
-    public string Acumulado { get; set; } = "A";
+    public string? IdEmpresa { get; set; }
+    public int? Anio1 { get; set; }
+    public int? Anio2 { get; set; }       // opcional — si null se usa Anio1
+    public int? MesInicial { get; set; }
+    public int? MesFinal { get; set; }    // opcional — si null se usa MesInicial
+    public string? Acumulado { get; set; }
     public List<string> Cuentas { get; set; } = new();
 }
 
@@ -38,4 +38,3 @@ public class PlantillaAnaliticaDto
     public string Contenido { get; set; } = string.Empty;
     public DateTime FechaActualizacion { get; set; }
 }
-

@@ -109,7 +109,7 @@ Empresa.SP_BalanceCuentaContable @IdEmpresa ,@Ano, @Periodo, @pNivel=6,@IncluirC
 select * from [Registro].[Empresa]
 
 EXEC [Empresa].[SP_BalanceCuentaContable] 
-	@IdEmpresa = '41FCD3E6-4ED6-4EFE-853F-FB26D40F1AAF',
+	@IdEmpresa = 'B62C2D64-D4FB-4010-976A-05166C324413',
 	@Ano = 2026, 
 	@Periodo = 2, 
 	@pNivel = 6, 
@@ -328,3 +328,54 @@ SELECT *
     WHERE Cuenta.CodigoCuenta LIKE @cuenta + '%'
         AND Year(m.FechaMovimiento) = @año
         AND Month(m.FechaMovimiento) <= @periodo
+
+
+select * From registro.empresa
+
+SELECT *
+FROM Catalogo.PlantillaAnalitica
+
+Select  idempresa, CodigoCuenta,NombreCuenta FROM [Empresa].[CuentaContable] 
+where idempresa = 'B62C2D64-D4FB-4010-976A-05166C324413' order by CodigoCuenta
+
+
+    SELECT ISNULL(SUM(m.Cargo - m.Abono), 0)
+    FROM [Empresa].[MovimientoContable] m
+    INNER JOIN Registro.Empresa e ON e.IdEmpresa = m.IdEmpresa
+    INNER JOIN [Empresa].[CuentaContable] Cuenta ON Cuenta.IdCuentaContable = m.IdCuentaContable
+    WHERE Cuenta.CodigoCuenta LIKE '1%'
+        AND ('B62C2D64-D4FB-4010-976A-05166C324413' IS NULL OR e.IdEmpresa = 'B62C2D64-D4FB-4010-976A-05166C324413')
+        AND Year(m.FechaMovimiento) = 2026
+        AND Month(m.FechaMovimiento) <= 1
+
+    SELECT m.Cargo - m.Abono, M.*
+    FROM [Empresa].[MovimientoContable] m
+    INNER JOIN Registro.Empresa e ON e.IdEmpresa = m.IdEmpresa
+    INNER JOIN [Empresa].[CuentaContable] Cuenta ON Cuenta.IdCuentaContable = m.IdCuentaContable
+    WHERE Cuenta.CodigoCuenta LIKE '1%'
+        AND ('B62C2D64-D4FB-4010-976A-05166C324413' IS NULL OR e.IdEmpresa = 'B62C2D64-D4FB-4010-976A-05166C324413')
+
+     SELECT TOP 1 ISNULL(NombreCuenta, NombreCuenta) AS NombreCuenta
+            FROM [Empresa].[CuentaContable]
+            WHERE CodigoCuenta = '1'
+              AND ('B2995E4B-5CBF-4F74-8E4E-5AC3981ECBB3' IS NULL OR IdEmpresa = 'B2995E4B-5CBF-4F74-8E4E-5AC3981ECBB3')
+            ORDER BY CodigoCuenta
+
+EXEC [Empresa].[SP_BalanceCuentaContable] 
+	@IdEmpresa = 'B2995E4B-5CBF-4F74-8E4E-5AC3981ECBB3',
+	@Ano = 2026, 
+	@Periodo = 3, 
+	@pNivel = 6, 
+	@IncluirCuentasSinMovimiento = 1, 
+	@SoloTotales= 0
+
+    SELECT 
+        SC.CodigoCuenta,
+        SC.NombreCuenta,
+        SC.SaldoInicial,
+        SC.Debe,
+        SC.Haber,
+        SC.SaldoFinal,
+        SC.MovimientoDiario
+    FROM [Empresa].[FN_BalanceCuentaContable_V2]('B2995E4B-5CBF-4F74-8E4E-5AC3981ECBB3',2026, 3, 6) SC
+		Where SC.CodigoCuenta = '1101020101'

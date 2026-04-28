@@ -32,6 +32,7 @@ $warn: #ffc107;
     display: flex;
     align-items: center;
     gap: 10px;
+    min-width: 0;
 
     .toolbar-icon { color: $accent-light; font-size: 22px; }
 
@@ -39,6 +40,57 @@ $warn: #ffc107;
       font-size: 15px;
       font-weight: 600;
       color: $text;
+    }
+
+    .toolbar-template {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 4px;
+      min-width: 0;
+      padding: 4px 12px;
+      border-radius: 999px;
+      border: 1px solid #60a5fa;
+      background: #ffffff;
+      box-shadow: 0 1px 4px rgba(2, 6, 23, 0.12);
+      color: #0f172a;
+      max-width: min(45vw, 520px);
+
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        color: #1d4ed8;
+      }
+
+      .toolbar-template__label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #1e40af;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+      }
+
+      .toolbar-template__name {
+        font-size: 13px;
+        font-weight: 700;
+        color: #0f172a;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      &--empty {
+        border-color: #f59e0b;
+        background: #fff7ed;
+
+        mat-icon { color: #d97706; }
+
+        .toolbar-template__label { color: #b45309; }
+
+        .toolbar-template__name { color: #7c2d12; }
+      }
     }
   }
 
