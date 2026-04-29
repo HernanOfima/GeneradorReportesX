@@ -33,6 +33,7 @@
               "@angular/material/prebuilt-themes/indigo-pink.css",
               "src/styles.scss",
               "node_modules/jspreadsheet-ce/dist/jspreadsheet.css",
+              "node_modules/jspreadsheet-ce/dist/jspreadsheet.themes.css",
               "node_modules/jsuites/dist/jsuites.css"
             ],
             "scripts": [],

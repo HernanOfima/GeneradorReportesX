@@ -15,6 +15,22 @@ import {
   PlantillaAnalitica, MESES
 } from '../../models/analitica.models';
 
+type FormulaCalcState = 'idle' | 'editing' | 'calculating' | 'ready' | 'error';
+
+interface FormulaBarToken {
+  text: string;
+  color?: string;
+}
+
+interface FormulaReference {
+  key: string;
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
+  color: string;
+}
+
 @Component({
   selector: 'app-analitica-spreadsheet',
   templateUrl: './analitica-spreadsheet.component.html',
@@ -35,6 +51,10 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
   seleccion = '';
   formulaActiva = '';
   formulaBarValor = '';
+  formulaBarTokens: FormulaBarToken[] = [];
+  calcState: FormulaCalcState = 'idle';
+  calcStateDetalle = 'Listo';
+  calcChainLength = 0;
   private selX = 0;
   private selY = 0;
   // â”€â”€ Barra de fÃ³rmulas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -81,6 +101,9 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
   // â”€â”€ Internos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   private spreadsheet: any = null;
   private dialogRef: MatDialogRef<any> | null = null;
+  private readonly formulaRefPalette: string[] = ['#2f7df6', '#e25555', '#8b5cf6', '#2ba84a', '#f59e0b', '#06b6d4'];
+  private formulaRefs: FormulaReference[] = [];
+  private highlightedFormulaCells: HTMLElement[] = [];
 
   constructor(
     private analiticaService: AnaliticaService,
@@ -101,6 +124,7 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     if (this.containerRef?.nativeElement) {
       try { (jspreadsheet as any).destroy(this.containerRef.nativeElement); } catch { /* ignore */ }
     }
+    this.clearFormulaHighlights();
     OfimaFormulasPlugin.clearContexto();
   }
 
@@ -116,6 +140,37 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     return this.tienePlantillaSeleccionada
       ? this.plantillaSeleccionadaNombre
       : 'Sin plantilla seleccionada';
+  }
+
+  get esModoOscuro(): boolean {
+    return this.estaModoOscuro();
+  }
+
+  get mostrarFormulaPreview(): boolean {
+    return this.modoFormula && this.formulaBarValor.startsWith('=');
+  }
+
+  get formulaBarCeldaActiva(): string {
+    if (this.fxEditX >= 0 && this.fxEditY >= 0) {
+      return `${this.colIndexToLetter(this.fxEditX + 1)}${this.fxEditY + 1}`;
+    }
+    return this.seleccion || 'A1';
+  }
+
+  get calcStateTexto(): string {
+    const chainInfo = this.calcChainLength > 0 ? ` (${this.calcChainLength})` : '';
+    switch (this.calcState) {
+      case 'editing':
+        return 'Editando formula';
+      case 'calculating':
+        return 'Calculando' + chainInfo;
+      case 'ready':
+        return 'Listo' + chainInfo;
+      case 'error':
+        return 'Error';
+      default:
+        return 'En espera';
+    }
   }
 
   get contextoDetalle(): string {
@@ -174,63 +229,104 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     const h = `${Math.max(wrapperH, window.innerHeight - 300)}px`;
     const w = `${Math.max(wrapperW, window.innerWidth - 32)}px`;
 
-    // En v5: toolbar en SpreadsheetOptions (top-level), datos en worksheets[]
-    const hojas = (jspreadsheet as any)(contenedor, {
-      toolbar: true,
-      worksheets: [{
-        data: datos,
-        columns: this.columnasPorDefecto(formato?.colWidths),
-        minDimensions: [10, 40],
-        tableOverflow: true,
-        tableWidth: w,
-        tableHeight: h,
-        defaultColWidth: 120,
-        allowInsertRow: true,
-        allowInsertColumn: true,
-        allowDeleteRow: true,
-        allowDeleteColumn: true,
-        wordWrap: false,
-        style: formato?.style
-          ? (this.estaModoOscuro() ? this.normalizarEstilosOscuros(formato.style) : formato.style)
-          : undefined,
-        mergeCells: formato?.mergeCells ?? undefined,
-        onselection: (instance: any, _x1: any, _y1: any, x2: any, y2: any) => {
-          this.spreadsheet = instance ?? this.spreadsheet;
-          this.runInAngular(() => {
-            this.syncSelectionFromCoords(x2, y2, instance);
-            if (this.modoFormula && this.fxEditX >= 0) {
-              this.insertarReferencia(this.seleccion);
-            }
-          });
-        },
-        oneditionstart: (instance: any, _td: any, x: any, y: any) => {
-          this.spreadsheet = instance ?? this.spreadsheet;
-          this.runInAngular(() => {
-            this.syncSelectionFromCoords(x, y, instance);
-            if (this.formulaBarValor.startsWith('=')) {
-              this.modoFormula = true;
-              this.fxEditX = x;
-              this.fxEditY = y;
-            }
-          });
-        },
-        oneditionend: (instance: any, _td: any, _x: any, _y: any, value: any) => {
-          this.spreadsheet = instance ?? this.spreadsheet;
-          this.runInAngular(() => {
-            this.formulaBarValor = value != null ? String(value) : '';
-            this.formulaActiva = this.formulaBarValor.startsWith('=') ? this.formulaBarValor : '';
-            if (this.formulaBarInputRef?.nativeElement) {
-              this.formulaBarInputRef.nativeElement.value = this.formulaBarValor;
-            }
-            this.modoFormula = false;
-            this.fxEditX = -1;
-            this.fxEditY = -1;
-          });
-        }
-      }]
-    });
+    // En CE v5: toolbar en SpreadsheetOptions (top-level), datos en worksheets[].
+    // Nota: jspreadsheet.calculations(...) es de versiones mas nuevas (v10+),
+    // aqui se mantiene como no-op seguro por compatibilidad futura.
+    const jssAny = jspreadsheet as any;
+    try {
+      jssAny.calculations?.(false);
+      this.setCalcState('calculating', 'Inicializando formulas');
+    } catch { /* ignore */ }
+
+    let hojas: any;
+    try {
+      hojas = jssAny(contenedor, {
+        toolbar: true,
+        worksheets: [{
+          data: datos,
+          columns: this.columnasPorDefecto(formato?.colWidths),
+          minDimensions: [10, 40],
+          tableOverflow: true,
+          tableWidth: w,
+          tableHeight: h,
+          defaultColWidth: 120,
+          allowInsertRow: true,
+          allowInsertColumn: true,
+          allowDeleteRow: true,
+          allowDeleteColumn: true,
+          wordWrap: false,
+          secureFormulas: true,
+          parseFormulas: true,
+          debugFormulas: true,
+          autoIncrement: true,
+          style: formato?.style
+            ? (this.estaModoOscuro() ? this.normalizarEstilosOscuros(formato.style) : formato.style)
+            : undefined,
+          mergeCells: formato?.mergeCells ?? undefined,
+          onbeforeformula: (_ws: any, expression: string, _x: number, _y: number) => {
+            this.runInAngular(() => this.setCalcState('calculating', expression || 'Formula'));
+            return expression;
+          },
+          onbeforechange: (_ws: any, _cell: HTMLElement, _x: number, _y: number, value: any) => value,
+          onchange: (instance: any, _cell: HTMLElement, x: number, y: number, newValue: any) => {
+            this.spreadsheet = instance ?? this.spreadsheet;
+            this.runInAngular(() => {
+              this.syncSelectionFromCoords(x, y, instance);
+              this.formulaBarValor = newValue != null ? String(newValue) : '';
+              this.actualizarFormulaDecoracion();
+            });
+          },
+          onafterchanges: (_ws: any, _records: any[], _origin: string) => {
+            this.runInAngular(() => this.setCalcState('ready', 'Cambios aplicados'));
+          },
+          onselection: (instance: any, _x1: any, _y1: any, x2: any, y2: any) => {
+            this.spreadsheet = instance ?? this.spreadsheet;
+            this.runInAngular(() => {
+              this.syncSelectionFromCoords(x2, y2, instance);
+              if (this.modoFormula && this.fxEditX >= 0) {
+                this.insertarReferencia(this.seleccion);
+              }
+            });
+          },
+          oneditionstart: (instance: any, _td: any, x: any, y: any) => {
+            this.spreadsheet = instance ?? this.spreadsheet;
+            this.runInAngular(() => {
+              this.syncSelectionFromCoords(x, y, instance);
+              if (this.formulaBarValor.startsWith('=')) {
+                this.modoFormula = true;
+                this.fxEditX = x;
+                this.fxEditY = y;
+                this.setCalcState('editing', 'Editando formula');
+                this.actualizarFormulaDecoracion();
+              }
+            });
+          },
+          oneditionend: (instance: any, _td: any, _x: any, _y: any, value: any) => {
+            this.spreadsheet = instance ?? this.spreadsheet;
+            this.runInAngular(() => {
+              this.formulaBarValor = value != null ? String(value) : '';
+              this.formulaActiva = this.formulaBarValor.startsWith('=') ? this.formulaBarValor : '';
+              if (this.formulaBarInputRef?.nativeElement) {
+                this.formulaBarInputRef.nativeElement.value = this.formulaBarValor;
+              }
+              this.modoFormula = false;
+              this.fxEditX = -1;
+              this.fxEditY = -1;
+              this.actualizarFormulaDecoracion();
+              this.setCalcState('ready', 'Edicion finalizada');
+            });
+          }
+        }]
+      });
+    } finally {
+      try {
+        jssAny.calculations?.(true);
+      } catch { /* ignore */ }
+    }
 
     this.spreadsheet = Array.isArray(hojas) ? (hojas[0] ?? null) : null;
+    this.setCalcState('ready', 'Motor listo');
+    this.actualizarFormulaDecoracion();
     this.inicializarBarraFormulaDesdeSeleccion();
   }
 
@@ -273,6 +369,7 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     if (this.formulaBarInputRef?.nativeElement) {
       this.formulaBarInputRef.nativeElement.value = this.formulaBarValor;
     }
+    this.actualizarFormulaDecoracion();
   }
 
   private inicializarBarraFormulaDesdeSeleccion(intentos: number = 12): void {
@@ -586,7 +683,7 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
   }
 
   private estaModoOscuro(): boolean {
-    return document.body.classList.contains('dark-theme');
+    return !document.body.classList.contains('light-theme');
   }
 
   private parsearObjetoJson(valor: unknown): Record<string, unknown> | null {
@@ -661,6 +758,9 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     const hoja = this.obtenerHojaActiva();
     if (!hoja) return;
     const { x: tx, y: ty } = this.obtenerCoordenadasObjetivoFormula();
+    if (value.startsWith('=')) {
+      this.tryExecuteFormulaPreview(value, tx, ty);
+    }
     const prev = hoja.getValueFromCoords(tx, ty, true);
     if (String(prev ?? '') !== value) {
       hoja.setValueFromCoords(tx, ty, value, true);
@@ -670,6 +770,23 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     this.modoFormula     = false;
     this.fxEditX         = -1;
     this.fxEditY         = -1;
+    this.actualizarFormulaDecoracion();
+    this.setCalcState('ready', 'Formula aplicada');
+  }
+
+  private tryExecuteFormulaPreview(expression: string, x: number, y: number): void {
+    try {
+      const hoja = this.obtenerHojaActiva();
+      const fn = hoja?.executeFormula;
+      if (typeof fn !== 'function') {
+        return;
+      }
+      this.setCalcState('calculating', expression);
+      fn.call(hoja, expression, x, y, false, true);
+      this.setCalcState('ready', 'Formula validada');
+    } catch {
+      this.setCalcState('error', 'Formula invalida');
+    }
   }
 
   // â”€â”€ Handlers del <input> de la barra de fÃ³rmulas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -681,6 +798,8 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
       this.fxEditX     = this.selX;
       this.fxEditY     = this.selY;
     }
+    this.setCalcState('editing', 'Editando formula');
+    this.actualizarFormulaDecoracion();
   }
 
   onFxInput(value: string): void {
@@ -688,11 +807,14 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     if (value.startsWith('=')) {
       this.modoFormula = true;
       if (this.fxEditX < 0) { this.fxEditX = this.selX; this.fxEditY = this.selY; }
+      this.setCalcState('editing', 'Editando formula');
     } else {
       this.modoFormula = false;
       this.fxEditX = -1;
       this.fxEditY = -1;
+      this.setCalcState('ready', 'Valor en edicion');
     }
+    this.actualizarFormulaDecoracion();
   }
 
   onFxBlur(value: string): void {
@@ -729,6 +851,8 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
         this.formulaBarInputRef.nativeElement.value = this.formulaBarValor;
         this.formulaBarInputRef.nativeElement.blur();
       }
+      this.actualizarFormulaDecoracion();
+      this.setCalcState('ready', 'Edicion cancelada');
     }
   }
 
@@ -743,6 +867,7 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
         ref +
         this.formulaBarValor.substring(end);
       input.value = this.formulaBarValor;
+      this.actualizarFormulaDecoracion();
       // Refocalizar el input y posicionar el cursor tras la referencia insertada
       setTimeout(() => {
         input.focus();
@@ -751,7 +876,139 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
       }, 10);
     } else {
       this.formulaBarValor += ref;
+      this.actualizarFormulaDecoracion();
     }
+  }
+
+  private setCalcState(state: FormulaCalcState, detalle: string): void {
+    this.calcState = state;
+    this.calcStateDetalle = detalle;
+  }
+
+  private actualizarFormulaDecoracion(): void {
+    const formula = this.formulaBarValor || '';
+    if (!this.modoFormula || !formula.startsWith('=')) {
+      this.formulaBarTokens = [{ text: formula }];
+      this.formulaRefs = [];
+      this.clearFormulaHighlights();
+      return;
+    }
+
+    const parsed = this.parseFormulaReferences(formula);
+    this.formulaBarTokens = parsed.tokens;
+    this.formulaRefs = parsed.refs;
+    this.paintFormulaHighlights(parsed.refs);
+  }
+
+  private parseFormulaReferences(formula: string): { tokens: FormulaBarToken[]; refs: FormulaReference[] } {
+    const tokens: FormulaBarToken[] = [];
+    const refs: FormulaReference[] = [];
+    const colorByKey = new Map<string, string>();
+    const refRegex = /(\$?[A-Z]{1,3}\$?\d+)(:\$?[A-Z]{1,3}\$?\d+)?/g;
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+    let colorIndex = 0;
+
+    while ((match = refRegex.exec(formula)) !== null) {
+      const whole = match[0];
+      const startRef = match[1];
+      const endRef = match[2] ? match[2].slice(1) : '';
+      const start = match.index;
+      const end = start + whole.length;
+      const prev = start > 0 ? formula[start - 1] : '';
+      const next = end < formula.length ? formula[end] : '';
+
+      if ((prev && /[A-Z0-9_]/i.test(prev)) || (next && /[A-Z0-9_]/i.test(next)) || next === '(') {
+        continue;
+      }
+
+      if (start > lastIndex) {
+        tokens.push({ text: formula.slice(lastIndex, start) });
+      }
+
+      const key = `${startRef}:${endRef || startRef}`;
+      if (!colorByKey.has(key)) {
+        colorByKey.set(key, this.formulaRefPalette[colorIndex % this.formulaRefPalette.length]);
+        colorIndex++;
+      }
+      const color = colorByKey.get(key) as string;
+
+      tokens.push({ text: whole, color });
+      lastIndex = end;
+
+      const parsedStart = this.parseRefToCoords(startRef);
+      const parsedEnd = this.parseRefToCoords(endRef || startRef);
+      if (parsedStart && parsedEnd) {
+        refs.push({
+          key,
+          startX: Math.min(parsedStart.x, parsedEnd.x),
+          startY: Math.min(parsedStart.y, parsedEnd.y),
+          endX: Math.max(parsedStart.x, parsedEnd.x),
+          endY: Math.max(parsedStart.y, parsedEnd.y),
+          color
+        });
+      }
+    }
+
+    if (lastIndex < formula.length) {
+      tokens.push({ text: formula.slice(lastIndex) });
+    }
+
+    return { tokens: tokens.length ? tokens : [{ text: formula }], refs };
+  }
+
+  private parseRefToCoords(ref: string): { x: number; y: number } | null {
+    const cleaned = (ref || '').replace(/\$/g, '').toUpperCase();
+    const m = cleaned.match(/^([A-Z]{1,3})(\d+)$/);
+    if (!m) {
+      return null;
+    }
+    const col = m[1];
+    const row = Number(m[2]);
+    if (!Number.isFinite(row) || row <= 0) {
+      return null;
+    }
+    return { x: this.colLetterToIndex(col) - 1, y: row - 1 };
+  }
+
+  private paintFormulaHighlights(refs: FormulaReference[]): void {
+    this.clearFormulaHighlights();
+    const hoja = this.obtenerHojaActiva();
+    if (!hoja || refs.length === 0) {
+      return;
+    }
+
+    const maxCellsToPaint = 600;
+    let painted = 0;
+
+    refs.forEach((ref, refIdx) => {
+      for (let y = ref.startY; y <= ref.endY; y++) {
+        for (let x = ref.startX; x <= ref.endX; x++) {
+          if (painted >= maxCellsToPaint) {
+            return;
+          }
+          const cell = typeof hoja.getCellFromCoords === 'function'
+            ? (hoja.getCellFromCoords(x, y) as HTMLElement | undefined)
+            : undefined;
+          if (!cell) {
+            continue;
+          }
+          cell.classList.add('formula-ref-highlight', `formula-ref-highlight--${refIdx % this.formulaRefPalette.length}`);
+          cell.style.setProperty('--formula-ref-color', ref.color);
+          this.highlightedFormulaCells.push(cell);
+          painted++;
+        }
+      }
+    });
+  }
+
+  private clearFormulaHighlights(): void {
+    this.highlightedFormulaCells.forEach(cell => {
+      this.formulaRefPalette.forEach((_, idx) => cell.classList.remove(`formula-ref-highlight--${idx}`));
+      cell.classList.remove('formula-ref-highlight');
+      cell.style.removeProperty('--formula-ref-color');
+    });
+    this.highlightedFormulaCells = [];
   }
 
   // â”€â”€ Copiar fÃ³rmula al portapapeles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

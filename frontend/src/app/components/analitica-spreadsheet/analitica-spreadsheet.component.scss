@@ -17,6 +17,13 @@ $warn: #ffc107;
   overflow: hidden;
 }
 
+body.dark-theme .analitica-container {
+  --app-bg: #07080a;
+  --app-surface: #14171c;
+  --app-border: #2b313a;
+  --app-text: #e8edf5;
+}
+
 // ── Toolbar ───────────────────────────────────────────────────────────
 .analitica-toolbar {
   display: flex;
@@ -122,7 +129,6 @@ $warn: #ffc107;
   border-bottom: 1px solid $border !important;
   box-shadow: none !important;
 
-  ::ng-deep {
     .mat-expansion-panel-header {
       height: 40px !important;
       padding: 0 16px;
@@ -150,7 +156,7 @@ $warn: #ffc107;
     .mat-panel-description,
     .mat-expansion-panel-header-description {
       font-size: 11px;
-      color: rgba(228, 239, 248, 0.45) !important;
+      color: rgba(66, 87, 106, 0.9) !important;
     }
 
     .mat-expansion-panel-body {
@@ -161,7 +167,6 @@ $warn: #ffc107;
     .mat-expansion-indicator::after {
       color: $text !important;
     }
-  }
 }
 
 // ── Parámetros ────────────────────────────────────────────────────────
@@ -175,12 +180,19 @@ $warn: #ffc107;
     flex: 1 1 130px;
     min-width: 120px;
     max-width: 190px;
+    --mdc-outlined-text-field-label-text-color: rgba(56, 79, 99, 0.86);
+    --mdc-outlined-text-field-hover-label-text-color: rgba(42, 67, 89, 0.95);
+    --mdc-outlined-text-field-focus-label-text-color: #225986;
+    --mdc-outlined-text-field-outline-color: #7d9ab1;
+    --mdc-outlined-text-field-hover-outline-color: #5e84a3;
+    --mdc-outlined-text-field-focus-outline-color: #2e6d9f;
+    --mat-select-enabled-trigger-text-color: #1d3347;
+    --mat-select-enabled-arrow-color: #466783;
 
-    ::ng-deep {
       .mat-mdc-form-field-subscript-wrapper { display: none; }
 
       .mat-mdc-text-field-wrapper {
-        background: rgba(255, 255, 255, 0.05) !important;
+        background: rgba(16, 40, 58, 0.03) !important;
       }
 
       .mdc-notched-outline__leading,
@@ -191,7 +203,11 @@ $warn: #ffc107;
 
       .mat-mdc-floating-label,
       .mdc-floating-label {
-        color: rgba(228, 239, 248, 0.6) !important;
+        color: rgba(56, 79, 99, 0.86) !important;
+      }
+
+      .mdc-floating-label--float-above {
+        color: #225986 !important;
       }
 
       input,
@@ -209,7 +225,6 @@ $warn: #ffc107;
       .mdc-notched-outline--upgraded .mdc-notched-outline__notch {
         border-color: $accent !important;
       }
-    }
   }
 }
 
@@ -320,6 +335,31 @@ $warn: #ffc107;
     white-space: nowrap;
   }
 
+  &__editor {
+    position: relative;
+    flex: 1;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  &__preview {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    font-size: 13px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    white-space: pre;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+    color: $text;
+  }
+
   &__input {
     flex: 1;
     height: 100%;
@@ -330,15 +370,48 @@ $warn: #ffc107;
     font-size: 13px;
     font-family: 'Consolas', 'Courier New', monospace;
     padding: 0 12px;
+    position: relative;
+    z-index: 2;
 
     &::placeholder { color: rgba(228, 239, 248, 0.25); }
 
     &:focus {
       background: rgba(91, 155, 213, 0.06);
     }
+
+    &--overlay {
+      color: transparent !important;
+      -webkit-text-fill-color: transparent !important;
+      text-shadow: none;
+      caret-color: $text;
+    }
   }
 
-  // ── Modo fórmula activo (point mode) ──────────────────────────────
+  &__calc-state {
+    min-width: 104px;
+    max-width: 160px;
+    height: 100%;
+    padding: 0 10px;
+    border-left: 1px solid $border;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .2px;
+    color: rgba(228, 239, 248, 0.72);
+    background: rgba(91, 155, 213, 0.05);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__calc-state--idle { color: rgba(228, 239, 248, 0.55); }
+  &__calc-state--editing { color: #7dc5ff; }
+  &__calc-state--calculating { color: #ffd166; }
+  &__calc-state--ready { color: #9be29d; }
+  &__calc-state--error { color: #ff8a8a; }
+
   &--modo-formula {
     border-bottom: 2px solid #4a9ede;
     background: rgba(74, 158, 222, 0.04);
@@ -362,13 +435,26 @@ $warn: #ffc107;
   }
 }
 
+body.light-theme .formula-bar {
+  &__calc-state {
+    color: #3f5b72;
+    background: rgba(34, 89, 134, 0.06);
+  }
+  &__calc-state--idle { color: #6d869a; }
+  &__calc-state--editing { color: #225986; }
+  &__calc-state--calculating { color: #c27f13; }
+  &__calc-state--ready { color: #2a7f47; }
+  &__calc-state--error { color: #bf3a3a; }
+}
+
+
 // ── jSpreadsheet: toolbar dark override ───────────────────────────────
-.analitica-container ::ng-deep {
+.analitica-container {
   .jss_toolbar {
-    background: #0d2235 !important;
-    border: 1px solid $border !important;
+    background: var(--header_background, #1c1f24) !important;
+    border: 1px solid var(--border_color, #2a3443) !important;
     margin: 0 !important;
-    color: $text !important;
+    color: var(--header_color, #f3f8ff) !important;
 
     .jtoolbar,
     .jtoolbar-item,
@@ -376,35 +462,55 @@ $warn: #ffc107;
     .jtoolbar > div > span,
     .jtoolbar > div > i,
     .jtoolbar > div > a {
-      color: $text !important;
+      color: var(--header_color, #f3f8ff) !important;
     }
 
     .jtoolbar-item {
-      color: $text !important;
-      &:hover { background: rgba(91, 155, 213, 0.15) !important; }
+      color: var(--header_color, #f3f8ff) !important;
+      &:hover { background: var(--content_background_highlighted, rgba(91, 155, 213, 0.16)) !important; }
     }
 
     select {
-      background: #0d2235 !important;
-      color: $text !important;
-      border: 1px solid $border !important;
+      background: var(--header_background, #1c1f24) !important;
+      color: var(--header_color, #f3f8ff) !important;
+      border: 1px solid var(--border_color, #2a3443) !important;
     }
 
     i.material-icons,
-    .material-icons { color: $text !important; }
+    .material-icons { color: var(--header_color, #f3f8ff) !important; }
 
     // Color picker / inputs inside toolbar
     input[type="color"],
     input[type="text"] {
-      background: #0d2235 !important;
-      color: $text !important;
-      border-color: $border !important;
+      background: var(--header_background, #1c1f24) !important;
+      color: var(--header_color, #f3f8ff) !important;
+      border-color: var(--border_color, #2a3443) !important;
     }
   }
 }
 
 // ── Spreadsheet ───────────────────────────────────────────────────────
 .spreadsheet-wrapper {
+  // ── DEFAULT: dark (app always starts dark via :root) ─────────────
+  --header_background: #1b1d21;
+  --header_background_highlighted: #262a31;
+  --header_color: #f2f5fb;
+  --header_color_highlighted: #ffffff;
+  --content_background: #090b0f;
+  --content_background_highlighted: #11151d;
+  --content_color: #e4eaf3;
+  --content_color_highlighted: #ffffff;
+  --border_color: #303743;
+  --border_color_highlighted: #4f93d0;
+  --selection: rgba(79, 147, 208, 0.18);
+  --cursor: rgba(79, 147, 208, 0.28);
+  --menu_background: #141920;
+  --menu_background_highlighted: #1e2734;
+  --menu_color: #e4eaf3;
+  --menu_color_highlighted: #ffffff;
+  --menu_box_shadow: 0 14px 30px rgba(0, 0, 0, 0.62);
+  --formula-ref-border: rgba(255, 255, 255, 0.5);
+
   flex: 1;
   overflow: hidden;
   position: relative;
@@ -427,108 +533,172 @@ $warn: #ffc107;
     }
   }
 
+  // ── LIGHT MODE (explicit only when body.light-theme is set) ────────
+  body.light-theme & {
+    --header_background: #f3f5f8;
+    --header_background_highlighted: #e2e8f0;
+    --header_color: #1d3347;
+    --header_color_highlighted: #0f2436;
+    --content_background: #ffffff;
+    --content_background_highlighted: #e8f0f7;
+    --content_color: #1d3347;
+    --content_color_highlighted: #10283a;
+    --border_color: #bfd2e1;
+    --border_color_highlighted: #5b9bd5;
+    --selection: rgba(91, 155, 213, 0.16);
+    --cursor: rgba(91, 155, 213, 0.26);
+    --menu_background: #ffffff;
+    --menu_background_highlighted: #e8f0f7;
+    --menu_color: #1d3347;
+    --menu_color_highlighted: #10283a;
+    --menu_box_shadow: 0 10px 24px rgba(2, 6, 23, 0.22);
+    --formula-ref-border: rgba(0, 0, 0, 0.35);
+  }
+
   // ── jSpreadsheet dark theme ───────────────────────────────────────
-  ::ng-deep {
     // Containers
-    .jss_container, .jss_content, .jss_spreadsheet { background: $bg !important; color: $text !important; }
+    .jss_container, .jss_content, .jss_spreadsheet { background: var(--content_background, #07090d) !important; color: var(--content_color, #e6edf6) !important; }
     .jss_worksheet {
-      background: $bg !important;
-      border-right-color: $border !important;
-      border-bottom-color: $border !important;
+      background: var(--content_background, #07090d) !important;
+      border-right-color: var(--border_color, #2a3443) !important;
+      border-bottom-color: var(--border_color, #2a3443) !important;
     }
 
     // Column-letter headers + row-number column header corner
     .jss_worksheet > thead > tr > td,
     .jss_row_header,
     .jss_header {
-      background: #0d2235 !important;
-      color: rgba(228, 239, 248, 0.85) !important;
-      border-color: $border !important;
+      background: var(--header_background, #1c1f24) !important;
+      color: var(--header_color, #f3f8ff) !important;
+      border-color: var(--border_color, #2a3443) !important;
       font-size: 11px;
       font-weight: 600;
     }
 
     // Row-number cells (first td per body row, no data-x)
     .jss_worksheet > tbody > tr > td:first-child:not([data-x]) {
-      background: #0d2235 !important;
-      color: rgba(228, 239, 248, 0.45) !important;
-      border-color: $border !important;
+      background: var(--header_background, #1c1f24) !important;
+      color: var(--header_color, #f3f8ff) !important;
+      border-color: var(--border_color, #2a3443) !important;
       font-size: 11px;
     }
 
     // ALL data cells: borders + text
     .jss_worksheet > tbody > tr > td {
-      border-color: $border !important;
-      color: $text !important;
+      border-color: var(--border_color, #2a3443) !important;
+      color: var(--content_color, #e6edf6) !important;
       font-size: 12px;
     }
 
     // Cells WITHOUT explicit background-color → force dark
     .jss_worksheet > tbody > tr > td:not([style*="background"]) {
-      background-color: $bg !important;
+      background-color: var(--content_background, #07090d) !important;
     }
 
     // Selection highlight (only for cells without intentional background)
     .jss_worksheet > tbody > tr > td.highlight:not([style*="background"]) {
-      background-color: rgba(91, 155, 213, 0.14) !important;
+      background-color: var(--selection, rgba(91, 155, 213, 0.24)) !important;
     }
 
     // Selection border highlights
-    .jss_worksheet > tbody > tr > td.highlight-left   { border-left-color:   $accent !important; }
-    .jss_worksheet > tbody > tr > td.highlight-right  { border-right-color:  $accent !important; }
-    .jss_worksheet > tbody > tr > td.highlight-top    { border-top-color:    $accent !important; }
-    .jss_worksheet > tbody > tr > td.highlight-bottom { border-bottom-color: $accent !important; }
+    .jss_worksheet > tbody > tr > td.highlight-left   { border-left-color:   var(--border_color_highlighted, #5b9bd5) !important; }
+    .jss_worksheet > tbody > tr > td.highlight-right  { border-right-color:  var(--border_color_highlighted, #5b9bd5) !important; }
+    .jss_worksheet > tbody > tr > td.highlight-top    { border-top-color:    var(--border_color_highlighted, #5b9bd5) !important; }
+    .jss_worksheet > tbody > tr > td.highlight-bottom { border-bottom-color: var(--border_color_highlighted, #5b9bd5) !important; }
 
-    // In-cell edit input
+    // Formula references (Excel-like): same color in FX and referenced cells
+    .jss_worksheet > tbody > tr > td.formula-ref-highlight {
+      box-shadow: inset 0 0 0 2px var(--formula-ref-border) !important;
+      background-color: inherit !important;
+    }
+
+    .jss_worksheet > tbody > tr > td.formula-ref-highlight.highlight {
+      background-color: inherit !important;
+    }
+
+    // In-cell edit input (jss_edition not in v5 CE; jss_editor is)
     .jss_edition input,
-    .jss_input {
-      background: #1a3a54 !important;
-      color: $text !important;
-      border: 1px solid $accent !important;
+    .jss_editor input,
+    .jss_input,
+    td[contenteditable="true"] {
+      background: var(--header_background, #1c1f24) !important;
+      color: var(--content_color, #e6edf6) !important;
+      border: 1px solid var(--border_color_highlighted, #5b9bd5) !important;
       outline: none !important;
-      caret-color: $accent-light;
+      caret-color: #89c0f0;
     }
 
     // Dropdown/autocomplete inside spreadsheet
     .jdropdown,
     .jdropdown-container,
     .jdropdown-content {
-      background: $surface !important;
-      color: $text !important;
-      border-color: $border !important;
+      background: var(--menu_background, #131a26) !important;
+      color: var(--menu_color, #e6edf6) !important;
+      border-color: var(--border_color, #2a3443) !important;
     }
 
     .jdropdown-item:hover,
     .jdropdown-cursor {
-      background: rgba(91, 155, 213, 0.2) !important;
+      background: var(--menu_background_highlighted, #1f2c3f) !important;
     }
 
     // Context menu
     .jcontextmenu {
-      background: #0d2235 !important;
-      border: 1px solid $border !important;
-      color: $text !important;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.6) !important;
+      background: var(--menu_background, #131a26) !important;
+      border: 1px solid var(--border_color, #2a3443) !important;
+      color: var(--menu_color, #e6edf6) !important;
+      box-shadow: var(--menu_box_shadow, 0 12px 28px rgba(0, 0, 0, 0.58)) !important;
 
       > div,
       > div a {
-        color: $text !important;
+        color: var(--menu_color, #e6edf6) !important;
       }
 
-      > div:hover { background: rgba(91, 155, 213, 0.2) !important; }
+      > div:hover { background: var(--menu_background_highlighted, #1f2c3f) !important; }
 
-      .jcontextmenu-disabled a { color: rgba(228, 239, 248, 0.25) !important; }
+      .jcontextmenu-disabled a { color: rgba(230, 237, 246, 0.35) !important; }
     }
 
     // Pagination bar
-    .jss_pagination { background: $surface !important; color: $text !important; border-top: 1px solid $border !important; }
+    .jss_pagination { background: var(--header_background, #1c1f24) !important; color: var(--header_color, #f3f8ff) !important; border-top: 1px solid var(--border_color, #2a3443) !important; }
 
-    .jss_content::-webkit-scrollbar-track { background: #0d2235 !important; }
-    .jss_content::-webkit-scrollbar-thumb { background: $border !important; }
-  }
+    .jss_content::-webkit-scrollbar-track { background: var(--content_background_highlighted, #111722) !important; }
+    .jss_content::-webkit-scrollbar-thumb { background: var(--border_color, #2a3443) !important; }
 }
 
 body.dark-theme .analitica-container {
+  .params-panel,
+  .formulas-ref-panel {
+      .mat-panel-description,
+      .mat-expansion-panel-header-description {
+        color: rgba(228, 239, 248, 0.72) !important;
+      }
+  }
+
+  .params-grid mat-form-field {
+    --mdc-outlined-text-field-label-text-color: rgba(228, 239, 248, 0.8);
+    --mdc-outlined-text-field-hover-label-text-color: rgba(228, 239, 248, 0.92);
+    --mdc-outlined-text-field-focus-label-text-color: #cfe7ff;
+    --mdc-outlined-text-field-outline-color: #1f425d;
+    --mdc-outlined-text-field-hover-outline-color: #5b9bd5;
+    --mdc-outlined-text-field-focus-outline-color: #89c0f0;
+    --mat-select-enabled-trigger-text-color: #e4eff8;
+    --mat-select-enabled-arrow-color: #cfe7ff;
+
+      .mat-mdc-text-field-wrapper {
+        background: rgba(255, 255, 255, 0.05) !important;
+      }
+
+      .mat-mdc-floating-label,
+      .mdc-floating-label {
+        color: rgba(228, 239, 248, 0.82) !important;
+      }
+
+      .mdc-floating-label--float-above {
+        color: #cfe7ff !important;
+      }
+  }
+
   .mat-mdc-input-element,
   .mat-mdc-select-value,
   .mat-mdc-select-min-line,
@@ -560,8 +730,8 @@ body.dark-theme .analitica-container {
 }
 
 // ── Angular Material: select/autocomplete overlay (dark) ─────────────
-::ng-deep .mat-mdc-select-panel,
-::ng-deep .mat-mdc-autocomplete-panel {
+body.dark-theme .mat-mdc-select-panel,
+body.dark-theme .mat-mdc-autocomplete-panel {
   background: $surface !important;
 
   .mat-mdc-option {
@@ -580,7 +750,7 @@ body.dark-theme .analitica-container {
 }
 
 // ── Angular Material: dialog dark mode ────────────────────────────────
-::ng-deep .mat-mdc-dialog-container {
+body.dark-theme .mat-mdc-dialog-container {
   .mdc-dialog__surface {
     background: $surface !important;
     color: $text !important;

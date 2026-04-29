@@ -101,7 +101,7 @@
   <mat-expansion-panel class="formulas-ref-panel">
     <mat-expansion-panel-header>
       <mat-panel-title>
-        <mat-icon>functions</mat-icon> &nbsp; Referencia de Fórmulas OFIMA
+        <mat-icon>functions</mat-icon> &nbsp; DIOS Referencia de Fórmulas OFIMA
       </mat-panel-title>
     </mat-expansion-panel-header>
 
@@ -122,24 +122,32 @@
 
   <!-- ══ BARRA DE FÓRMULAS ══════════════════════════════════════════ -->
   <div class="formula-bar" [class.formula-bar--modo-formula]="modoFormula">
-    <span class="formula-bar__cell">{{ seleccion || 'A1' }}</span>
-    <span class="formula-bar__fx" [class.formula-bar__fx--activo]="modoFormula">ƒx</span>
-    <input
-      #formulaBarInput
-      class="formula-bar__input"
-      [value]="formulaBarValor"
-      (focus)="onFxFocus()"
-      (blur)="onFxBlur(formulaBarInput.value)"
-      (input)="onFxInput(formulaBarInput.value)"
-      (keydown)="onFxKeydown($event, formulaBarInput.value)"
-      [placeholder]="modoFormula ? 'Haz clic en una celda para insertar referencia…' : 'Ingrese un valor o fórmula…'"
-      spellcheck="false"
-      autocomplete="off"
-    />
+    <span class="formula-bar__cell">{{ formulaBarCeldaActiva }}</span>
+    <span class="formula-bar__fx" [class.formula-bar__fx--activo]="modoFormula">fx</span>
+    <div class="formula-bar__editor">
+      <div class="formula-bar__preview" *ngIf="mostrarFormulaPreview" aria-hidden="true">
+        <span *ngFor="let token of formulaBarTokens" [style.color]="token.color || null">{{ token.text }}</span>
+      </div>
+      <input
+        #formulaBarInput
+        class="formula-bar__input"
+        [class.formula-bar__input--overlay]="mostrarFormulaPreview"
+        [value]="formulaBarValor"
+        (focus)="onFxFocus()"
+        (blur)="onFxBlur(formulaBarInput.value)"
+        (input)="onFxInput(formulaBarInput.value)"
+        (keydown)="onFxKeydown($event, formulaBarInput.value)"
+        [placeholder]="modoFormula ? 'Haz clic en una celda para insertar referencia...' : 'Ingrese un valor o formula...'"
+        spellcheck="false"
+        autocomplete="off"
+      />
+    </div>
+    <span class="formula-bar__calc-state" [ngClass]="'formula-bar__calc-state--' + calcState" [title]="calcStateDetalle">{{ calcStateTexto }}</span>
   </div>
 
+
   <!-- ══ SPREADSHEET ══════════════════════════════════════════════════ -->
-  <div class="spreadsheet-wrapper">
+  <div class="spreadsheet-wrapper" [class.jss_dark]="esModoOscuro">
     <div #spreadsheetContainer id="spreadsheet-container"></div>
   </div>
 
