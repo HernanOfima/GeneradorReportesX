@@ -190,7 +190,9 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
         allowDeleteRow: true,
         allowDeleteColumn: true,
         wordWrap: false,
-        style: formato?.style ?? undefined,
+        style: formato?.style
+          ? (this.estaModoOscuro() ? this.normalizarEstilosOscuros(formato.style) : formato.style)
+          : undefined,
         mergeCells: formato?.mergeCells ?? undefined,
         onselection: (instance: any, _x1: any, _y1: any, x2: any, y2: any) => {
           this.spreadsheet = instance ?? this.spreadsheet;
@@ -555,6 +557,36 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     }
 
     return payload;
+  }
+
+  // -- Normaliza estilos de celdas para modo oscuro ---------------------
+  private normalizarEstilosOscuros(style: Record<string, string>): Record<string, string> {
+    const bgDark = '#07151e';
+    const textLight = '#e4eff8';
+    const whiteBg = /(background-color|background)\s*:\s*(#(?:fff|ffffff)|white|rgb\(\s*255\s*,\s*255\s*,\s*255\s*\))/i;
+    const darkText = /color\s*:\s*(#(?:000|000000)|black|rgb\(\s*0\s*,\s*0\s*,\s*0\s*\))/i;
+    const result: Record<string, string> = {};
+
+    for (const [cell, cellStyle] of Object.entries(style)) {
+      if (!cellStyle) {
+        result[cell] = cellStyle;
+        continue;
+      }
+
+      const adjustedBg = whiteBg.test(cellStyle)
+        ? cellStyle.replace(whiteBg, 'background-color: ' + bgDark)
+        : cellStyle;
+
+      result[cell] = darkText.test(adjustedBg)
+        ? adjustedBg.replace(darkText, 'color: ' + textLight)
+        : adjustedBg;
+    }
+
+    return result;
+  }
+
+  private estaModoOscuro(): boolean {
+    return document.body.classList.contains('dark-theme');
   }
 
   private parsearObjetoJson(valor: unknown): Record<string, unknown> | null {

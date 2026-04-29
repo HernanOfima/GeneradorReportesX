@@ -131,9 +131,10 @@ $warn: #ffc107;
       &:hover { background: rgba(91, 155, 213, 0.08) !important; }
     }
 
-    .mat-panel-title {
+    .mat-panel-title,
+    .mat-expansion-panel-header-title {
       font-size: 13px;
-      color: $text;
+      color: $text !important;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -146,9 +147,10 @@ $warn: #ffc107;
       }
     }
 
-    .mat-panel-description {
+    .mat-panel-description,
+    .mat-expansion-panel-header-description {
       font-size: 11px;
-      color: rgba(228, 239, 248, 0.45);
+      color: rgba(228, 239, 248, 0.45) !important;
     }
 
     .mat-expansion-panel-body {
@@ -192,8 +194,13 @@ $warn: #ffc107;
         color: rgba(228, 239, 248, 0.6) !important;
       }
 
-      input, .mat-mdc-select-value-text {
+      input,
+      .mat-mdc-input-element,
+      .mat-mdc-select-value,
+      .mat-mdc-select-value-text,
+      .mat-mdc-select-min-line {
         color: $text !important;
+        -webkit-text-fill-color: $text !important;
         font-size: 13px;
       }
 
@@ -359,11 +366,21 @@ $warn: #ffc107;
 .analitica-container ::ng-deep {
   .jss_toolbar {
     background: #0d2235 !important;
-    border-bottom: 1px solid $border !important;
+    border: 1px solid $border !important;
+    margin: 0 !important;
+    color: $text !important;
 
-    .jss_toolbar_item {
+    .jtoolbar,
+    .jtoolbar-item,
+    .jtoolbar > div,
+    .jtoolbar > div > span,
+    .jtoolbar > div > i,
+    .jtoolbar > div > a {
       color: $text !important;
+    }
 
+    .jtoolbar-item {
+      color: $text !important;
       &:hover { background: rgba(91, 155, 213, 0.15) !important; }
     }
 
@@ -373,7 +390,16 @@ $warn: #ffc107;
       border: 1px solid $border !important;
     }
 
-    i.material-icons { color: $text !important; }
+    i.material-icons,
+    .material-icons { color: $text !important; }
+
+    // Color picker / inputs inside toolbar
+    input[type="color"],
+    input[type="text"] {
+      background: #0d2235 !important;
+      color: $text !important;
+      border-color: $border !important;
+    }
   }
 }
 
@@ -389,66 +415,128 @@ $warn: #ffc107;
     position: absolute;
     inset: 0;
     overflow: auto;
+    scrollbar-width: thin;
+    scrollbar-color: $border transparent;
+
+    &::-webkit-scrollbar { width: 6px; height: 6px; }
+    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar-thumb {
+      background: $border;
+      border-radius: 3px;
+      &:hover { background: $accent; }
+    }
   }
 
-  // jSpreadsheet dark theme overrides
+  // ── jSpreadsheet dark theme ───────────────────────────────────────
   ::ng-deep {
-    .jss_container,
-    .jss_content {
+    // Containers
+    .jss_container, .jss_content, .jss_spreadsheet { background: $bg !important; color: $text !important; }
+    .jss_worksheet {
       background: $bg !important;
-      color: $text !important;
+      border-right-color: $border !important;
+      border-bottom-color: $border !important;
     }
 
-    .jss_spreadsheet,
-    table.jss {
-      background: $bg !important;
-    }
-
-    thead td, thead th,
+    // Column-letter headers + row-number column header corner
+    .jss_worksheet > thead > tr > td,
     .jss_row_header,
     .jss_header {
       background: #0d2235 !important;
-      color: rgba(228, 239, 248, 0.75) !important;
+      color: rgba(228, 239, 248, 0.85) !important;
       border-color: $border !important;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
     }
 
-    tbody td {
-      border-color: $border !important;
-      color: $text !important;
-      background: $bg !important;
-      font-size: 12px;
-
-      &.highlight {
-        background: rgba(91, 155, 213, 0.12) !important;
-      }
-
-      &.highlight-left,
-      &.highlight-right,
-      &.highlight-top,
-      &.highlight-bottom {
-        border-color: $accent !important;
-      }
-    }
-
-    .jss_formula_input,
-    .jss_toolbar {
+    // Row-number cells (first td per body row, no data-x)
+    .jss_worksheet > tbody > tr > td:first-child:not([data-x]) {
       background: #0d2235 !important;
+      color: rgba(228, 239, 248, 0.45) !important;
+      border-color: $border !important;
+      font-size: 11px;
+    }
+
+    // ALL data cells: borders + text
+    .jss_worksheet > tbody > tr > td {
+      border-color: $border !important;
+      color: $text !important;
+      font-size: 12px;
+    }
+
+    // Cells WITHOUT explicit background-color → force dark
+    .jss_worksheet > tbody > tr > td:not([style*="background"]) {
+      background-color: $bg !important;
+    }
+
+    // Selection highlight (only for cells without intentional background)
+    .jss_worksheet > tbody > tr > td.highlight:not([style*="background"]) {
+      background-color: rgba(91, 155, 213, 0.14) !important;
+    }
+
+    // Selection border highlights
+    .jss_worksheet > tbody > tr > td.highlight-left   { border-left-color:   $accent !important; }
+    .jss_worksheet > tbody > tr > td.highlight-right  { border-right-color:  $accent !important; }
+    .jss_worksheet > tbody > tr > td.highlight-top    { border-top-color:    $accent !important; }
+    .jss_worksheet > tbody > tr > td.highlight-bottom { border-bottom-color: $accent !important; }
+
+    // In-cell edit input
+    .jss_edition input,
+    .jss_input {
+      background: #1a3a54 !important;
+      color: $text !important;
+      border: 1px solid $accent !important;
+      outline: none !important;
+      caret-color: $accent-light;
+    }
+
+    // Dropdown/autocomplete inside spreadsheet
+    .jdropdown,
+    .jdropdown-container,
+    .jdropdown-content {
+      background: $surface !important;
       color: $text !important;
       border-color: $border !important;
     }
 
-    .jss_contextmenu {
+    .jdropdown-item:hover,
+    .jdropdown-cursor {
+      background: rgba(91, 155, 213, 0.2) !important;
+    }
+
+    // Context menu
+    .jcontextmenu {
       background: #0d2235 !important;
       border: 1px solid $border !important;
       color: $text !important;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.6) !important;
 
-      li:hover { background: rgba(91, 155, 213, 0.2) !important; }
+      > div,
+      > div a {
+        color: $text !important;
+      }
+
+      > div:hover { background: rgba(91, 155, 213, 0.2) !important; }
+
+      .jcontextmenu-disabled a { color: rgba(228, 239, 248, 0.25) !important; }
     }
 
-    .jss_pagination { background: $surface !important; }
+    // Pagination bar
+    .jss_pagination { background: $surface !important; color: $text !important; border-top: 1px solid $border !important; }
+
+    .jss_content::-webkit-scrollbar-track { background: #0d2235 !important; }
+    .jss_content::-webkit-scrollbar-thumb { background: $border !important; }
+  }
+}
+
+body.dark-theme .analitica-container {
+  .mat-mdc-input-element,
+  .mat-mdc-select-value,
+  .mat-mdc-select-min-line,
+  .mat-mdc-select-value-text,
+  .mat-expansion-panel-header-title,
+  .mat-expansion-panel-header-description {
+    color: $text !important;
+    -webkit-text-fill-color: $text !important;
   }
 }
 
@@ -469,6 +557,64 @@ $warn: #ffc107;
     color: #7ecf8e;
     font-family: 'Consolas', monospace;
   }
+}
+
+// ── Angular Material: select/autocomplete overlay (dark) ─────────────
+::ng-deep .mat-mdc-select-panel,
+::ng-deep .mat-mdc-autocomplete-panel {
+  background: $surface !important;
+
+  .mat-mdc-option {
+    color: $text !important;
+
+    &.mat-mdc-option-active,
+    &:hover:not(.mat-mdc-option-disabled) {
+      background: rgba(91, 155, 213, 0.15) !important;
+    }
+
+    &.mdc-list-item--selected:not(.mat-mdc-option-multiple):not(.mat-mdc-option-disabled) {
+      background: rgba(91, 155, 213, 0.22) !important;
+      .mdc-list-item__primary-text { color: $accent-light !important; }
+    }
+  }
+}
+
+// ── Angular Material: dialog dark mode ────────────────────────────────
+::ng-deep .mat-mdc-dialog-container {
+  .mdc-dialog__surface {
+    background: $surface !important;
+    color: $text !important;
+  }
+
+  [mat-dialog-title],
+  .mat-mdc-dialog-title { color: $text !important; }
+
+  .mat-mdc-dialog-content { color: rgba(228, 239, 248, 0.85) !important; }
+
+  // Form fields inside dialogs
+  .mat-mdc-form-field {
+    .mat-mdc-text-field-wrapper { background: rgba(255,255,255,0.05) !important; }
+
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing { border-color: $border !important; }
+
+    .mat-mdc-floating-label,
+    .mdc-floating-label { color: rgba(228, 239, 248, 0.6) !important; }
+
+    input, textarea { color: $text !important; }
+  }
+
+  // Plantilla list items
+  .mat-mdc-list-item {
+    .mdc-list-item__primary-text   { color: $text !important; }
+    .mdc-list-item__secondary-text { color: rgba(228, 239, 248, 0.45) !important; }
+
+    &:hover { background: rgba(91, 155, 213, 0.08) !important; }
+  }
+
+  // Cancel/close button inside dialog
+  .mat-mdc-dialog-actions button:not([color]) { color: rgba(228, 239, 248, 0.65) !important; }
 }
 
 // ── Diálogos (scoped a mat-dialog para evitar leaks con ViewEncapsulation.None) ──
