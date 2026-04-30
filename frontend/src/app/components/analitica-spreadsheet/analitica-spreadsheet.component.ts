@@ -104,6 +104,9 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
   private readonly formulaRefPalette: string[] = ['#2f7df6', '#e25555', '#8b5cf6', '#2ba84a', '#f59e0b', '#06b6d4'];
   private formulaRefs: FormulaReference[] = [];
   private highlightedFormulaCells: HTMLElement[] = [];
+  private activeCellEditor: HTMLInputElement | HTMLTextAreaElement | null = null;
+  private cellEditorInputHandler: (() => void) | null = null;
+  private formulaModeClickHandler: ((e: MouseEvent) => void) | null = null;
 
   constructor(
     private analiticaService: AnaliticaService,
@@ -124,6 +127,8 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     if (this.containerRef?.nativeElement) {
       try { (jspreadsheet as any).destroy(this.containerRef.nativeElement); } catch { /* ignore */ }
     }
+    this.detachCellEditorListener();
+    this.detachFormulaModeClickHandler();
     this.clearFormulaHighlights();
     OfimaFormulasPlugin.clearContexto();
   }
@@ -242,6 +247,92 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     try {
       hojas = jssAny(contenedor, {
         toolbar: true,
+        // -- Eventos a nivel top-level (v5 CE dispatch los busca aqui) --
+        onbeforeformula: (_ws: any, expression: string, _x: number, _y: number) => {
+          this.runInAngular(() => this.setCalcState('calculating', expression || 'Formula'));
+          return expression;
+        },
+        onbeforechange: (_ws: any, _cell: HTMLElement, _x: number, _y: number, value: any) => value,
+        onchange: (instance: any, _cell: HTMLElement, x: number, y: number, newValue: any) => {
+          this.spreadsheet = instance ?? this.spreadsheet;
+          this.runInAngular(() => {
+            this.syncSelectionFromCoords(x, y, instance);
+            this.formulaBarValor = newValue != null ? String(newValue) : '';
+            this.actualizarFormulaDecoracion();
+          });
+        },
+        onafterchanges: (_ws: any, _records: any[], _origin: string) => {
+          this.runInAngular(() => this.setCalcState('ready', 'Cambios aplicados'));
+        },
+        onselection: (instance: any, _x1: any, _y1: any, x2: any, y2: any) => {
+          this.spreadsheet = instance ?? this.spreadsheet;
+          this.runInAngular(() => {
+            this.syncSelectionFromCoords(x2, y2, instance);
+            if (this.modoFormula && this.fxEditX >= 0) {
+              this.insertarReferencia(this.seleccion);
+            }
+          });
+        },
+        oneditionstart: (instance: any, td: any, x: any, y: any) => {
+          this.spreadsheet = instance ?? this.spreadsheet;
+          this.runInAngular(() => {
+            this.syncSelectionFromCoords(x, y, instance);
+            if (this.formulaBarValor.startsWith('=')) {
+              this.modoFormula = true;
+              this.fxEditX = x;
+              this.fxEditY = y;
+              this.setCalcState('editing', 'Editando formula');
+              this.actualizarFormulaDecoracion();
+            }
+          });
+          // Esperar a que jspreadsheet cree el editor input dentro del td
+          setTimeout(() => {
+            const editorEl = (td as HTMLElement)?.querySelector('input, textarea') as HTMLInputElement | HTMLTextAreaElement | null;
+            if (editorEl) {
+              this.activeCellEditor = editorEl;
+              const handler = () => {
+                this.runInAngular(() => {
+                  const val = editorEl.value || '';
+                  this.formulaBarValor = val;
+                  if (this.formulaBarInputRef?.nativeElement) {
+                    this.formulaBarInputRef.nativeElement.value = val;
+                  }
+                  if (val.startsWith('=')) {
+                    if (!this.modoFormula) {
+                      this.modoFormula = true;
+                      this.fxEditX = x;
+                      this.fxEditY = y;
+                      this.setCalcState('editing', 'Editando formula');
+                    }
+                  } else {
+                    this.modoFormula = false;
+                    this.fxEditX = -1;
+                    this.fxEditY = -1;
+                  }
+                  this.actualizarFormulaDecoracion();
+                });
+              };
+              editorEl.addEventListener('input', handler);
+              this.cellEditorInputHandler = handler;
+            }
+          }, 0);
+        },
+        oneditionend: (instance: any, _td: any, _x: any, _y: any, value: any) => {
+          this.detachCellEditorListener();
+          this.spreadsheet = instance ?? this.spreadsheet;
+          this.runInAngular(() => {
+            this.formulaBarValor = value != null ? String(value) : '';
+            this.formulaActiva = this.formulaBarValor.startsWith('=') ? this.formulaBarValor : '';
+            if (this.formulaBarInputRef?.nativeElement) {
+              this.formulaBarInputRef.nativeElement.value = this.formulaBarValor;
+            }
+            this.modoFormula = false;
+            this.fxEditX = -1;
+            this.fxEditY = -1;
+            this.actualizarFormulaDecoracion();
+            this.setCalcState('ready', 'Edicion finalizada');
+          });
+        },
         worksheets: [{
           data: datos,
           columns: this.columnasPorDefecto(formato?.colWidths),
@@ -263,59 +354,6 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
             ? (this.estaModoOscuro() ? this.normalizarEstilosOscuros(formato.style) : formato.style)
             : undefined,
           mergeCells: formato?.mergeCells ?? undefined,
-          onbeforeformula: (_ws: any, expression: string, _x: number, _y: number) => {
-            this.runInAngular(() => this.setCalcState('calculating', expression || 'Formula'));
-            return expression;
-          },
-          onbeforechange: (_ws: any, _cell: HTMLElement, _x: number, _y: number, value: any) => value,
-          onchange: (instance: any, _cell: HTMLElement, x: number, y: number, newValue: any) => {
-            this.spreadsheet = instance ?? this.spreadsheet;
-            this.runInAngular(() => {
-              this.syncSelectionFromCoords(x, y, instance);
-              this.formulaBarValor = newValue != null ? String(newValue) : '';
-              this.actualizarFormulaDecoracion();
-            });
-          },
-          onafterchanges: (_ws: any, _records: any[], _origin: string) => {
-            this.runInAngular(() => this.setCalcState('ready', 'Cambios aplicados'));
-          },
-          onselection: (instance: any, _x1: any, _y1: any, x2: any, y2: any) => {
-            this.spreadsheet = instance ?? this.spreadsheet;
-            this.runInAngular(() => {
-              this.syncSelectionFromCoords(x2, y2, instance);
-              if (this.modoFormula && this.fxEditX >= 0) {
-                this.insertarReferencia(this.seleccion);
-              }
-            });
-          },
-          oneditionstart: (instance: any, _td: any, x: any, y: any) => {
-            this.spreadsheet = instance ?? this.spreadsheet;
-            this.runInAngular(() => {
-              this.syncSelectionFromCoords(x, y, instance);
-              if (this.formulaBarValor.startsWith('=')) {
-                this.modoFormula = true;
-                this.fxEditX = x;
-                this.fxEditY = y;
-                this.setCalcState('editing', 'Editando formula');
-                this.actualizarFormulaDecoracion();
-              }
-            });
-          },
-          oneditionend: (instance: any, _td: any, _x: any, _y: any, value: any) => {
-            this.spreadsheet = instance ?? this.spreadsheet;
-            this.runInAngular(() => {
-              this.formulaBarValor = value != null ? String(value) : '';
-              this.formulaActiva = this.formulaBarValor.startsWith('=') ? this.formulaBarValor : '';
-              if (this.formulaBarInputRef?.nativeElement) {
-                this.formulaBarInputRef.nativeElement.value = this.formulaBarValor;
-              }
-              this.modoFormula = false;
-              this.fxEditX = -1;
-              this.fxEditY = -1;
-              this.actualizarFormulaDecoracion();
-              this.setCalcState('ready', 'Edicion finalizada');
-            });
-          }
         }]
       });
     } finally {
@@ -328,6 +366,7 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     this.setCalcState('ready', 'Motor listo');
     this.actualizarFormulaDecoracion();
     this.inicializarBarraFormulaDesdeSeleccion();
+    this.attachFormulaModeClickHandler();
   }
 
   private obtenerHojaActiva(): any | null {
@@ -858,26 +897,89 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
 
   // â”€â”€ Insertar referencia de celda en la posiciÃ³n del cursor del input â”€â”€
   private insertarReferencia(ref: string): void {
-    const input = this.formulaBarInputRef?.nativeElement;
-    if (input) {
-      const start = input.selectionStart ?? this.formulaBarValor.length;
-      const end   = input.selectionEnd   ?? this.formulaBarValor.length;
-      this.formulaBarValor =
-        this.formulaBarValor.substring(0, start) +
-        ref +
-        this.formulaBarValor.substring(end);
-      input.value = this.formulaBarValor;
-      this.actualizarFormulaDecoracion();
-      // Refocalizar el input y posicionar el cursor tras la referencia insertada
-      setTimeout(() => {
-        input.focus();
-        const pos = start + ref.length;
-        input.setSelectionRange(pos, pos);
-      }, 10);
-    } else {
-      this.formulaBarValor += ref;
-      this.actualizarFormulaDecoracion();
+    // Determinar fuente de posicion: editor de celda activo o barra de formulas
+    const cellEd = this.activeCellEditor;
+    const fxInput = this.formulaBarInputRef?.nativeElement;
+    const source = cellEd || fxInput;
+    const start = source?.selectionStart ?? this.formulaBarValor.length;
+    const end   = source?.selectionEnd   ?? this.formulaBarValor.length;
+
+    this.formulaBarValor =
+      this.formulaBarValor.substring(0, start) +
+      ref +
+      this.formulaBarValor.substring(end);
+
+    // Sincronizar barra de formulas
+    if (fxInput) {
+      fxInput.value = this.formulaBarValor;
     }
+    // Sincronizar editor in-cell
+    if (cellEd) {
+      cellEd.value = this.formulaBarValor;
+    }
+
+    this.actualizarFormulaDecoracion();
+
+    // Re-enfocar el editor de celda y posicionar cursor
+    setTimeout(() => {
+      const pos = start + ref.length;
+      if (cellEd) {
+        cellEd.focus();
+        cellEd.setSelectionRange(pos, pos);
+      } else if (fxInput) {
+        fxInput.focus();
+        fxInput.setSelectionRange(pos, pos);
+      }
+    }, 10);
+  }
+
+  private detachCellEditorListener(): void {
+    if (this.activeCellEditor && this.cellEditorInputHandler) {
+      this.activeCellEditor.removeEventListener('input', this.cellEditorInputHandler);
+    }
+    this.activeCellEditor = null;
+    this.cellEditorInputHandler = null;
+  }
+
+  // -- Interceptor de clics en modo formula (captura antes que jspreadsheet) --
+  private attachFormulaModeClickHandler(): void {
+    if (this.formulaModeClickHandler) return;
+    const container = this.containerRef?.nativeElement;
+    if (!container) return;
+
+    this.formulaModeClickHandler = (e: MouseEvent) => {
+      if (!this.modoFormula || this.fxEditX < 0) return;
+
+      const target = e.target as HTMLElement;
+      // Solo interceptar clics en celdas de datos (td con data-x y data-y)
+      const td = target.closest('td[data-x][data-y]') as HTMLElement;
+      if (!td) return;
+
+      const x = parseInt(td.getAttribute('data-x') || '-1', 10);
+      const y = parseInt(td.getAttribute('data-y') || '-1', 10);
+      if (x < 0 || y < 0) return;
+
+      // No insertar referencia a la propia celda en edicion
+      if (x === this.fxEditX && y === this.fxEditY) return;
+
+      // Prevenir que jspreadsheet cierre el editor y maneje la seleccion
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      const ref = `${this.colIndexToLetter(x + 1)}${y + 1}`;
+      this.runInAngular(() => this.insertarReferencia(ref));
+    };
+
+    // Fase de captura para interceptar antes que jspreadsheet
+    container.addEventListener('mousedown', this.formulaModeClickHandler, true);
+  }
+
+  private detachFormulaModeClickHandler(): void {
+    if (this.formulaModeClickHandler && this.containerRef?.nativeElement) {
+      this.containerRef.nativeElement.removeEventListener('mousedown', this.formulaModeClickHandler, true);
+    }
+    this.formulaModeClickHandler = null;
   }
 
   private setCalcState(state: FormulaCalcState, detalle: string): void {

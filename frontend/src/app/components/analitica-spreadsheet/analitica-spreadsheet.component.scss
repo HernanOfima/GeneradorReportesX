@@ -606,14 +606,15 @@ body.light-theme .formula-bar {
     .jss_worksheet > tbody > tr > td.highlight-top    { border-top-color:    var(--border_color_highlighted, #5b9bd5) !important; }
     .jss_worksheet > tbody > tr > td.highlight-bottom { border-bottom-color: var(--border_color_highlighted, #5b9bd5) !important; }
 
-    // Formula references (Excel-like): same color in FX and referenced cells
+    // Formula references (Excel-like): per-reference colored border + subtle tint
     .jss_worksheet > tbody > tr > td.formula-ref-highlight {
-      box-shadow: inset 0 0 0 2px var(--formula-ref-border) !important;
-      background-color: inherit !important;
+      box-shadow: inset 0 0 0 2px var(--formula-ref-color, var(--formula-ref-border)) !important;
+      background-color: color-mix(in srgb, var(--formula-ref-color, transparent) 12%, transparent) !important;
+      position: relative;
     }
 
     .jss_worksheet > tbody > tr > td.formula-ref-highlight.highlight {
-      background-color: inherit !important;
+      background-color: color-mix(in srgb, var(--formula-ref-color, transparent) 12%, transparent) !important;
     }
 
     // In-cell edit input (jss_edition not in v5 CE; jss_editor is)
