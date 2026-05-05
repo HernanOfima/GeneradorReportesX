@@ -30,8 +30,8 @@ public class AnaliticaController : ControllerBase
         if (!Guid.TryParse(request.IdEmpresa, out _))
             return BadRequest("El campo IdEmpresa debe ser un GUID valido.");
 
-        if (!request.Cuentas.Any())
-            return BadRequest("Debe especificar al menos una cuenta.");
+        if (!request.Cuentas.Any() && !request.Cadenas.Any())
+            return BadRequest("Debe especificar al menos una cuenta o cadena de cuentas.");
 
         var contexto = await _repo.CargarContextoAsync(request);
         return Ok(contexto);
@@ -93,6 +93,38 @@ public class AnaliticaController : ControllerBase
         [FromQuery] int año)
     {
         var saldo = await _repo.SaldoCuentaCadenaAsync(cuentas, periodo, acumulado, empresa, año);
+        return Ok(saldo);
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // GET /api/Analitica/SaldoCuentaContable?cuentas=11,13-15,22&periodo=4&acumulado=A&empresa=...&año=2023
+    // Equivalente a: VBS SaldoCuentaContable (soporta comas y rangos con guión)
+    // ─────────────────────────────────────────────────────────────────
+    [HttpGet("SaldoCuentaContable")]
+    public async Task<ActionResult<decimal>> SaldoCuentaContable(
+        [FromQuery] string cuentas,
+        [FromQuery] int periodo,
+        [FromQuery] string acumulado,
+        [FromQuery] string empresa,
+        [FromQuery] int año)
+    {
+        var saldo = await _repo.SaldoCuentaContableAsync(cuentas, periodo, acumulado, empresa, año);
+        return Ok(saldo);
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // GET /api/Analitica/SaldoCuentaContableDBCR?cuenta=11&periodo=4&tipo=DB&empresa=...&año=2023
+    // Equivalente a: VBS SaldoCuentaContableDBCR (siempre mensual, DB o CR)
+    // ─────────────────────────────────────────────────────────────────
+    [HttpGet("SaldoCuentaContableDBCR")]
+    public async Task<ActionResult<decimal>> SaldoCuentaContableDBCR(
+        [FromQuery] string cuenta,
+        [FromQuery] int periodo,
+        [FromQuery] string tipo,
+        [FromQuery] string empresa,
+        [FromQuery] int año)
+    {
+        var saldo = await _repo.SaldoCuentaContableDBCRAsync(cuenta, periodo, tipo, empresa, año);
         return Ok(saldo);
     }
 

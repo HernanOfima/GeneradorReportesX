@@ -19,7 +19,10 @@ export class OfimaFormulasPlugin {
       SALDOCADENA: (cuentas: unknown) => OfimaFormulasPlugin.saldoCadena(cuentas),
       SALDOCONTABLECUENTA: (cuenta: unknown) => OfimaFormulasPlugin.saldoFinal(cuenta),
       SALDODBCR: (cuenta: unknown, _periodo: unknown, naturaleza: unknown) =>
-        OfimaFormulasPlugin.saldoDbCr(cuenta, naturaleza)
+        OfimaFormulasPlugin.saldoDbCr(cuenta, naturaleza),
+      SALDOCUENTACONTABLE: (cuentas: unknown, periodo?: unknown) => OfimaFormulasPlugin.saldoCuentaContable(cuentas, periodo),
+      SALDOCUENTACONTABLEDBCR: (cuenta: unknown, _periodo: unknown, tipo: unknown) =>
+        OfimaFormulasPlugin.saldoDbCr(cuenta, tipo)
     });
 
     OfimaFormulasPlugin.registrado = true;
@@ -91,6 +94,34 @@ export class OfimaFormulasPlugin {
     }
 
     return lista.reduce((total, cuenta) => total + (ctx.saldosFinales[cuenta] ?? 0), 0);
+  }
+
+  private static saldoCuentaContable(cuentas: unknown, periodo?: unknown): number {
+    const arg = String(cuentas ?? '').trim();
+    if (!arg) return 0;
+
+    const ctx = OfimaFormulasPlugin.contexto;
+    if (!ctx) return 0;
+
+    // Con período: lookup mensual "{cuenta}:{periodo}" para plantillas ISR mensuales
+    const per = periodo !== undefined && periodo !== null && periodo !== ''
+      ? Number(periodo)
+      : NaN;
+    if (!isNaN(per) && per >= 1 && per <= 12) {
+      const key = `${arg}:${Math.round(per)}`;
+      if (ctx.saldosMensuales && key in ctx.saldosMensuales) {
+        return ctx.saldosMensuales[key];
+      }
+      return 0;
+    }
+
+    // Sin período: resultado pre-computado por backend (soporta rangos "1-3", "11-34")
+    if (ctx.saldosCadenaFinal && arg in ctx.saldosCadenaFinal) {
+      return ctx.saldosCadenaFinal[arg];
+    }
+
+    // Fallback: suma per-cuenta (para listas simples "10101,10201")
+    return OfimaFormulasPlugin.saldoCadena(cuentas);
   }
 
   private static normalizarCuenta(cuenta: unknown): string {

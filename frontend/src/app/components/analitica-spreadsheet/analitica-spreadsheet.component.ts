@@ -252,7 +252,8 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
           this.runInAngular(() => this.setCalcState('calculating', expression || 'Formula'));
           return expression;
         },
-        onbeforechange: (_ws: any, _cell: HTMLElement, _x: number, _y: number, value: any) => value,
+        onbeforechange: (_ws: any, _cell: HTMLElement, _x: number, _y: number, value: any) =>
+          this.normalizarValorFechaParaCelda(value),
         onchange: (instance: any, _cell: HTMLElement, x: number, y: number, newValue: any) => {
           this.spreadsheet = instance ?? this.spreadsheet;
           this.runInAngular(() => {
@@ -391,6 +392,46 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     this.ngZone.run(fn);
   }
 
+  private normalizarValorFechaParaCelda(value: any): any {
+    const fecha = this.extraerFechaNormalizable(value);
+    if (!fecha) {
+      return value;
+    }
+    return this.formatearFechaDdMmYyyy(fecha);
+  }
+
+  private extraerFechaNormalizable(value: any): Date | null {
+    if (value instanceof Date) {
+      return Number.isFinite(value.getTime()) ? value : null;
+    }
+
+    if (typeof value !== 'string') {
+      return null;
+    }
+
+    const txt = value.trim();
+    if (!txt) {
+      return null;
+    }
+
+    const pareceFechaTextoLargo = /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s/i.test(txt) && txt.includes('GMT');
+    const pareceIso = /^\d{4}-\d{2}-\d{2}(T.*)?$/.test(txt);
+
+    if (!pareceFechaTextoLargo && !pareceIso) {
+      return null;
+    }
+
+    const parsed = new Date(txt);
+    return Number.isFinite(parsed.getTime()) ? parsed : null;
+  }
+
+  private formatearFechaDdMmYyyy(fecha: Date): string {
+    const dd = String(fecha.getDate()).padStart(2, '0');
+    const mm = String(fecha.getMonth() + 1).padStart(2, '0');
+    const yyyy = fecha.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+  }
+
   private syncSelectionFromCoords(x: number, y: number, worksheet?: any): void {
     this.selX = x;
     this.selY = y;
@@ -489,18 +530,18 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
       return;
     }
 
-    // Extraer cuentas unicas de la columna A del spreadsheet
-    const cuentas = this.extraerCuentasDelSpreadsheet();
+    // Extraer cuentas individuales y cadenas/rangos del spreadsheet
+    const { cuentas, cadenas } = this.extraerCuentasDelSpreadsheet();
 
-    if (cuentas.length === 0) {
-      this.snackBar.open('No se encontraron codigos de cuenta en la columna A.', 'OK', { duration: 3000 });
-      return;
+    // Si no hay nada detectable, avisar pero continuar con contexto vacío
+    if (cuentas.length === 0 && cadenas.length === 0) {
+      this.snackBar.open('No se detectaron cuentas. Las formulas OFIMA devolverian 0.', '', { duration: 3000 });
     }
 
     this.calculando = true;
     this.contextoOk = false;
 
-    const request = this.construirRequestContexto(cuentas);
+    const request = this.construirRequestContexto(cuentas, cadenas);
 
     this.analiticaService.cargarContexto(request).subscribe({
       next: (contexto: ContextoDatos) => {
@@ -554,8 +595,8 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     return null;
   }
 
-  private construirRequestContexto(cuentas: string[]): CargarContextoRequest {
-    const request: CargarContextoRequest = { cuentas };
+  private construirRequestContexto(cuentas: string[], cadenas: string[] = []): CargarContextoRequest {
+    const request: CargarContextoRequest = { cuentas, cadenas };
 
     if (this.mostrarCampo('idEmpresa') && this.params.idEmpresa != null) {
       request.idEmpresa = this.params.idEmpresa.trim();
@@ -746,26 +787,55 @@ export class AnaliticaSpreadsheetComponent implements OnInit, AfterViewInit, OnD
     if (typeof valor === 'object' && !Array.isArray(valor)) {
       return valor as Record<string, unknown>;
     }
-
     return null;
   }
 
-  // â”€â”€ Extrae cÃ³digos de cuenta de la columna A (Ã­ndice 0) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  private extraerCuentasDelSpreadsheet(): string[] {
+  private extraerCuentasDelSpreadsheet(): { cuentas: string[], cadenas: string[] } {
     const hoja = this.obtenerHojaActiva();
-    if (!hoja) return [];
+    if (!hoja) return { cuentas: [], cadenas: [] };
 
     const datos: any[][] = hoja.getData();
     const cuentasSet = new Set<string>();
+    const cadenasSet = new Set<string>();
+
+    // SALDOCUENTACONTABLE → siempre va a cadenas (backend lo resuelve con rangos y comas)
+    const REGEX_CADENA = /SALDOCUENTACONTABLE\s*\(\s*"([^"]+)"/gi;
+    // Resto de funciones OFIMA → extraen códigos individuales
+    const REGEX_CUENTA = /(?:SALDOCADENA|SALDOCONTABLECUENTA|NOMBRECTA|SALDOINICIAL|SALDOFINAL|DEBITO|CREDITO|SALDODBCR|SALDOCUENTACONTABLEDBCR)\s*\(\s*"([^"]+)"/gi;
 
     datos.forEach((fila: any[]) => {
-      const val = fila[0];
-      if (val && typeof val === 'string' && /^\d+$/.test(val.trim())) {
-        cuentasSet.add(val.trim());
-      }
+      fila.forEach((celda: any, colIdx: number) => {
+        if (!celda || typeof celda !== 'string') return;
+        const val = celda.trim();
+
+        // Columna A: código numérico directo (compatibilidad Balance Mensual)
+        if (colIdx === 0 && /^\d+$/.test(val)) {
+          cuentasSet.add(val);
+          return;
+        }
+
+        if (!val.startsWith('=')) return;
+
+        // SALDOCUENTACONTABLE → cadenas (soporta rangos con guión)
+        REGEX_CADENA.lastIndex = 0;
+        let m: RegExpExecArray | null;
+        while ((m = REGEX_CADENA.exec(val)) !== null) {
+          const arg = m[1].trim();
+          if (arg) cadenasSet.add(arg);
+        }
+
+        // Otras funciones OFIMA → cuentas individuales
+        REGEX_CUENTA.lastIndex = 0;
+        while ((m = REGEX_CUENTA.exec(val)) !== null) {
+          m[1].split(',').forEach(c => {
+            const code = c.trim();
+            if (code && /^\d+$/.test(code)) cuentasSet.add(code);
+          });
+        }
+      });
     });
 
-    return Array.from(cuentasSet);
+    return { cuentas: Array.from(cuentasSet), cadenas: Array.from(cadenasSet) };
   }
 
   // â”€â”€ Forzar recÃ¡lculo en jSpreadsheet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

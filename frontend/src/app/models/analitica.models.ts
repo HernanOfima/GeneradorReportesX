@@ -6,6 +6,7 @@ export interface CargarContextoRequest {
   mesFinal?: number;    // opcional — si ausente el backend usa mesInicial
   acumulado?: string;
   cuentas: string[];
+  cadenas?: string[];
 }
 
 export interface ContextoDatos {
@@ -16,6 +17,7 @@ export interface ContextoDatos {
   creditos: { [cuenta: string]: number };
   saldosCadenaInicial: { [key: string]: number };
   saldosCadenaFinal: { [key: string]: number };
+  saldosMensuales: { [key: string]: number };
 }
 
 export interface PlantillaAnalitica {

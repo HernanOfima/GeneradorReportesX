@@ -9,6 +9,8 @@ public interface IAnaliticaRepository
     Task<decimal> SaldoCuentaAsync(string cuenta, int periodo, string acumulado, string empresa, int año);
     Task<decimal> SaldoDBCRAsync(string cuenta, int periodo, string naturaleza, string empresa, int año);
     Task<decimal> SaldoCuentaCadenaAsync(string cuentas, int periodo, string acumulado, string empresa, int año);
+    Task<decimal> SaldoCuentaContableAsync(string cuentas, int periodo, string acumulado, string empresa, int año);
+    Task<decimal> SaldoCuentaContableDBCRAsync(string cuenta, int periodo, string tipo, string empresa, int año);
     Task<List<PlantillaAnaliticaDto>> GetPlantillasAsync();
     Task<PlantillaAnaliticaDto?> GetPlantillaByIdAsync(string id);
     Task<PlantillaAnaliticaDto> GuardarPlantillaAsync(GuardarPlantillaRequest request);

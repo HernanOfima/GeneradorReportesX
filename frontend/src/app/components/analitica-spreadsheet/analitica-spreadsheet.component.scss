@@ -586,7 +586,8 @@ body.light-theme .formula-bar {
     // ALL data cells: borders + text
     .jss_worksheet > tbody > tr > td {
       border-color: var(--border_color, #2a3443) !important;
-      color: var(--content_color, #e6edf6) !important;
+      // Keep dark-theme default text color, but allow inline ForeColor from toolbar to override.
+      color: var(--content_color, #e6edf6);
       font-size: 12px;
     }
 

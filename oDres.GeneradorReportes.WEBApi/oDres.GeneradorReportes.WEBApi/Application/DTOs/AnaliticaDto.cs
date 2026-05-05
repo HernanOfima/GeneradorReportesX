@@ -9,6 +9,7 @@ public class CargarContextoRequest
     public int? MesFinal { get; set; }    // opcional — si null se usa MesInicial
     public string? Acumulado { get; set; }
     public List<string> Cuentas { get; set; } = new();
+    public List<string> Cadenas { get; set; } = new();
 }
 
 public class ContextoDatosDto
@@ -20,6 +21,7 @@ public class ContextoDatosDto
     public Dictionary<string, decimal> Creditos { get; set; } = new();
     public Dictionary<string, decimal> SaldosCadenaInicial { get; set; } = new();
     public Dictionary<string, decimal> SaldosCadenaFinal { get; set; } = new();
+    public Dictionary<string, decimal> SaldosMensuales { get; set; } = new();
 }
 
 public class GuardarPlantillaRequest

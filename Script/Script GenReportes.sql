@@ -379,3 +379,41 @@ EXEC [Empresa].[SP_BalanceCuentaContable]
         SC.MovimientoDiario
     FROM [Empresa].[FN_BalanceCuentaContable_V2]('B2995E4B-5CBF-4F74-8E4E-5AC3981ECBB3',2026, 3, 6) SC
 		Where SC.CodigoCuenta = '1101020101'
+
+
+
+
+
+            SELECT ISNULL(SUM(m.Cargo - m.Abono), 0)
+            FROM [Empresa].[MovimientoContable] m
+            INNER JOIN [Empresa].[CuentaContable] c ON c.IdCuentaContable = m.IdCuentaContable
+            WHERE  (c.CodigoCuenta BETWEEN '1' AND '2' OR c.CodigoCuenta LIKE '1' + '%') --c.CodigoCuenta Like '13%' Or  c.CodigoCuenta Like '340%'
+              AND ('B2995E4B-5CBF-4F74-8E4E-5AC3981ECBB3' IS NULL OR m.IdEmpresa ='B2995E4B-5CBF-4F74-8E4E-5AC3981ECBB3')
+   
+   Select c.codigoCuenta,m.Cargo , m.Abono, m.*
+            FROM [Empresa].[MovimientoContable] m
+            INNER JOIN [Empresa].[CuentaContable] c ON c.IdCuentaContable = m.IdCuentaContable
+			Where (c.CodigoCuenta BETWEEN '1' AND '2' OR c.CodigoCuenta LIKE '2' + '%')
+order by c.codigoCuenta
+
+
+            SELECT ISNULL(SUM(m.Cargo - m.Abono), 0)
+            FROM [Empresa].[MovimientoContable] m
+            INNER JOIN [Empresa].[CuentaContable] c ON c.IdCuentaContable = m.IdCuentaContable
+            WHERE ((c.CodigoCuenta BETWEEN @rs0 AND @re0 OR c.CodigoCuenta LIKE @re0 + '%'))
+              AND (@idEmpresa IS NULL OR m.IdEmpresa = @idEmpresa)
+              AND ((YEAR(m.FechaMovimiento) = @año AND MONTH(m.FechaMovimiento) <= @periodo)
+                OR YEAR(m.FechaMovimiento) < @año)
+
+
+            SELECT ISNULL(SUM(m.Cargo - m.Abono), 0)
+            FROM [Empresa].[MovimientoContable] m
+            INNER JOIN [Empresa].[CuentaContable] c ON c.IdCuentaContable = m.IdCuentaContable
+            WHERE ((c.CodigoCuenta BETWEEN @rs0 AND @re0 OR c.CodigoCuenta LIKE @re0 + '%'))
+              AND (@idEmpresa IS NULL OR m.IdEmpresa = @idEmpresa)
+              AND ((YEAR(m.FechaMovimiento) = @año AND MONTH(m.FechaMovimiento) <= @periodo)
+                OR YEAR(m.FechaMovimiento) < @año)
+
+(c.CodigoCuenta BETWEEN @rs0 AND @re0 OR c.CodigoCuenta LIKE @re0 + '%')
+            
+                        
